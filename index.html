@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="id">
 <head>
 <meta charset="UTF-8">
@@ -7,58 +8,219 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+
 :root {
-  --bg: #F2F2F7; --tx: #1C1C1E; --txm: #8E8E93; 
-  --gl: rgba(255,255,255,0.55); --gb: rgba(255,255,255,0.8);
-  --blue: #0A84FF; --red: #FF453A; --purple: #BF5AF2; 
-  --green: #32D74B; --orange: #FF9F0A; --teal: #30B0C7; --indigo: #5856D6;
+–glass-bg: rgba(255,255,255,0.42);
+–glass-border: rgba(255,255,255,0.55);
+–glass-highlight: rgba(255,255,255,0.85);
+–glass-shadow: rgba(0,0,0,0.04);
+–glass-blur: 40px;
+–blue: #0A84FF; –red: #FF453A; –purple: #AF52DE;
+–green: #34C759; –orange: #FF9F0A; –indigo: #5856D6;
+–teal: #30B0C7; –pink: #FF2D55;
+–tx: #1C1C1E; –tx2: #3A3A3C; –tx3: #8E8E93; –tx4: #AEAEB2;
+–radius-xl: 26px; –radius-lg: 20px; –radius-md: 14px; –radius-sm: 10px;
 }
-* { margin:0; padding:0; box-sizing:border-box; }
+
+- { margin:0; padding:0; box-sizing:border-box; }
+
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
-  min-height: 100vh; background: #E8E8ED; color: var(--tx);
-  -webkit-font-smoothing: antialiased; padding-bottom: 90px; overflow-x: hidden;
+font-family: ‘Plus Jakarta Sans’, -apple-system, BlinkMacSystemFont, ‘SF Pro Display’, sans-serif;
+min-height: 100dvh; background: #F0EFF5; color: var(–tx);
+-webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+padding-bottom: 100px; overflow-x: hidden;
 }
+
+/* ══ MESH BACKGROUND ══ */
 .mesh-bg {
-  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;
-  background-image: 
-    radial-gradient(at 10% 0%, rgba(88,86,214,0.12) 0, transparent 40%), 
-    radial-gradient(at 90% 10%, rgba(48,176,199,0.1) 0, transparent 40%),
-    radial-gradient(at 50% 90%, rgba(191,90,242,0.08) 0, transparent 50%);
-  filter: blur(40px);
+position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;
+background:
+radial-gradient(ellipse 80% 60% at 10% 0%, rgba(88,86,214,0.08) 0%, transparent 50%),
+radial-gradient(ellipse 60% 80% at 95% 20%, rgba(48,176,199,0.06) 0%, transparent 50%),
+radial-gradient(ellipse 70% 50% at 50% 100%, rgba(175,82,222,0.06) 0%, transparent 50%),
+radial-gradient(ellipse 40% 40% at 70% 60%, rgba(255,159,10,0.04) 0%, transparent 50%);
 }
-@keyframes slideUp { from{opacity:0;transform:translateY(24px) scale(0.98)} to{opacity:1;transform:translateY(0) scale(1)} }
+
+/* ══ LIQUID GLASS MATERIAL ══ */
+.liquid-glass {
+background: var(–glass-bg);
+-webkit-backdrop-filter: blur(var(–glass-blur)) saturate(180%);
+backdrop-filter: blur(var(–glass-blur)) saturate(180%);
+border: 0.5px solid var(–glass-border);
+border-radius: var(–radius-xl);
+box-shadow:
+0 0.5px 0 0 var(–glass-highlight) inset,
+0 8px 32px var(–glass-shadow),
+0 2px 8px rgba(0,0,0,0.02);
+position: relative;
+overflow: hidden;
+}
+.liquid-glass::before {
+content: ‘’; position: absolute; top: 0; left: 0; right: 0; height: 50%;
+background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 100%);
+pointer-events: none; border-radius: var(–radius-xl) var(–radius-xl) 0 0;
+}
+
+.glass-card {
+background: rgba(255,255,255,0.55);
+-webkit-backdrop-filter: blur(20px) saturate(160%);
+backdrop-filter: blur(20px) saturate(160%);
+border: 0.5px solid rgba(255,255,255,0.6);
+border-radius: var(–radius-lg);
+box-shadow: 0 1px 0 0 rgba(255,255,255,0.7) inset, 0 4px 16px rgba(0,0,0,0.03);
+position: relative;
+}
+
+/* ══ ANIMATIONS ══ */
+@keyframes slideUp {
+from { opacity:0; transform: translateY(20px) scale(0.97); }
+to { opacity:1; transform: translateY(0) scale(1); }
+}
 @keyframes fadeIn { from{opacity:0} to{opacity:1} }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
-@keyframes ripple { 0%{box-shadow:0 0 0 0 rgba(255,69,58,0.2)} 70%{box-shadow:0 0 0 20px rgba(255,69,58,0)} 100%{box-shadow:0 0 0 0 rgba(255,69,58,0)} }
-.gl {
-  background: var(--gl); -webkit-backdrop-filter: blur(60px) saturate(220%); backdrop-filter: blur(60px) saturate(220%);
-  border: 1px solid rgba(255,255,255,0.6); border-radius: 28px;
-  box-shadow: 0 10px 40px rgba(0,0,0,.03), inset 0 1px 1px rgba(255,255,255,.9);
+@keyframes breathe { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.08);opacity:0.7} }
+@keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:.3} }
+@keyframes ripple-ring {
+0% { box-shadow: 0 0 0 0 rgba(255,69,58,0.25); }
+70% { box-shadow: 0 0 0 24px rgba(255,69,58,0); }
+100% { box-shadow: 0 0 0 0 rgba(255,69,58,0); }
 }
-.pill { border-radius: 100px; padding: 4px 12px; display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; }
-button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; transition: all .15s cubic-bezier(0.4, 0, 0.2, 1); font-family: inherit; cursor: pointer; }
-button:active { transform: scale(.95); opacity: 0.8; }
-button:disabled { opacity: .5; cursor: not-allowed; transform: none; }
-.btab-container { position: fixed; bottom: env(safe-area-inset-bottom, 16px); left: 16px; right: 16px; z-index: 100; display: flex; justify-content: center; }
-.btab {
-  display: flex; background: rgba(255,255,255,0.75); -webkit-backdrop-filter: blur(40px) saturate(200%); backdrop-filter: blur(40px) saturate(200%);
-  border: 1px solid rgba(255,255,255,0.5); padding: 6px; border-radius: 100px; box-shadow: 0 8px 32px rgba(0,0,0,0.08); gap: 4px;
+@keyframes spin { to{transform:rotate(360deg)} }
+@keyframes shimmer {
+0% { background-position: -200% 0; }
+100% { background-position: 200% 0; }
 }
-.btab button {
-  flex: 1; min-width: 80px; border: none; background: transparent; display: flex; flex-direction: column; align-items: center; gap: 4px;
-  padding: 8px 16px; font-size: 10px; font-weight: 600; color: #8E8E93; border-radius: 100px; transition: 0.3s;
+@keyframes float-in {
+from { opacity: 0; transform: translateY(12px) scale(0.95); }
+to { opacity: 1; transform: translateY(0) scale(1); }
 }
-.btab button.on { background: #FFF; color: #1C1C1E; box-shadow: 0 4px 12px rgba(0,0,0,0.05); transform: scale(1.02); }
-.fi { font-family: inherit; font-size: 15px; padding: 14px 16px; border-radius: 16px; border: 1px solid rgba(0,0,0,0.06); background: rgba(255,255,255,0.5); outline: none; width: 100%; transition: 0.2s; }
-.fi:focus { border-color: rgba(88,86,214,0.4); background: #FFF; box-shadow: 0 0 0 4px rgba(88,86,214,0.1); }
-.card-note { background: #FFF; border-radius: 20px; padding: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.02); margin-bottom: 12px; animation: slideUp .4s cubic-bezier(0.16, 1, 0.3, 1); border: 1px solid rgba(0,0,0,0.03); }
-.spinner { border: 3px solid rgba(88,86,214,0.2); border-top: 3px solid #5856D6; border-radius: 50%; width: 16px; height: 16px; animation: spin 1s linear infinite; display: inline-block; }
-.exec-card { background: linear-gradient(135deg, rgba(191,90,242,0.05), rgba(88,86,214,0.05)); border: 1px solid rgba(191,90,242,0.2); }
+
+/* ══ TYPOGRAPHY ══ */
+.heading-xl { font-size: 28px; font-weight: 800; letter-spacing: -0.8px; line-height: 1.15; }
+.heading-lg { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+.heading-md { font-size: 16px; font-weight: 700; letter-spacing: -0.2px; }
+.label-sm { font-size: 12px; font-weight: 700; letter-spacing: 0.3px; text-transform: uppercase; }
+.body { font-size: 15px; line-height: 1.55; font-weight: 500; }
+.caption { font-size: 13px; color: var(–tx3); font-weight: 500; }
+
+/* ══ PILL BADGE ══ */
+.pill {
+border-radius: 100px; padding: 5px 12px; display: inline-flex; align-items: center; gap: 5px;
+font-size: 11px; font-weight: 700; letter-spacing: 0.2px;
+}
+
+/* ══ BUTTONS ══ */
+button {
+-webkit-tap-highlight-color: transparent; touch-action: manipulation;
+transition: all .2s cubic-bezier(0.25, 0.46, 0.45, 0.94); font-family: inherit; cursor: pointer;
+}
+button:active { transform: scale(0.95); }
+button:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+/* ══ BOTTOM TAB BAR — iOS 26 FLOATING ══ */
+.tab-bar-wrap {
+position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+padding: 8px 20px calc(env(safe-area-inset-bottom, 12px) + 8px);
+display: flex; justify-content: center;
+}
+.tab-bar {
+display: flex; gap: 2px; padding: 5px;
+background: rgba(255,255,255,0.65);
+-webkit-backdrop-filter: blur(50px) saturate(200%);
+backdrop-filter: blur(50px) saturate(200%);
+border: 0.5px solid rgba(255,255,255,0.6);
+border-radius: 100px;
+box-shadow:
+0 0.5px 0 0 rgba(255,255,255,0.8) inset,
+0 8px 40px rgba(0,0,0,0.08),
+0 2px 6px rgba(0,0,0,0.03);
+}
+.tab-bar button {
+flex: 1; min-width: 88px; border: none; background: transparent;
+display: flex; flex-direction: column; align-items: center; gap: 3px;
+padding: 8px 18px; font-size: 10px; font-weight: 600; color: var(–tx3);
+border-radius: 100px; transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+letter-spacing: 0.1px;
+}
+.tab-bar button.active {
+background: rgba(255,255,255,0.85); color: var(–tx);
+box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 0.5px 0 rgba(255,255,255,0.9) inset;
+}
+
+/* ══ INPUT FIELDS ══ */
+.field {
+font-family: inherit; font-size: 15px; padding: 13px 16px; border-radius: var(–radius-md);
+border: 0.5px solid rgba(0,0,0,0.06); background: rgba(255,255,255,0.6);
+outline: none; width: 100%; transition: 0.25s; font-weight: 500; color: var(–tx);
+-webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+}
+.field:focus {
+border-color: rgba(88,86,214,0.35); background: rgba(255,255,255,0.85);
+box-shadow: 0 0 0 4px rgba(88,86,214,0.08);
+}
+.field::placeholder { color: var(–tx4); }
+
+/* ══ NOTE CARDS ══ */
+.note-card {
+background: rgba(255,255,255,0.7); border-radius: var(–radius-lg);
+padding: 16px; margin-bottom: 10px;
+animation: float-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+border: 0.5px solid rgba(255,255,255,0.5);
+box-shadow: 0 2px 12px rgba(0,0,0,0.02);
+}
+
+/* ══ SPINNER ══ */
+.spinner {
+border: 2.5px solid rgba(175,82,222,0.15); border-top: 2.5px solid var(–purple);
+border-radius: 50%; width: 14px; height: 14px; animation: spin 0.8s linear infinite;
+display: inline-block;
+}
+
+/* ══ SEGMENT CONTROL ══ */
+.segment-wrap {
+display: flex; gap: 3px; background: rgba(0,0,0,0.04); padding: 3px; border-radius: var(–radius-sm);
+}
+.segment-btn {
+flex: 1; padding: 9px 0; border-radius: 8px; border: none; background: transparent;
+font-size: 13px; font-weight: 700; color: var(–tx3); transition: 0.25s;
+}
+.segment-btn.on {
+background: #FFF; color: var(–tx);
+box-shadow: 0 1px 6px rgba(0,0,0,0.06), 0 0.5px 0 rgba(255,255,255,0.9) inset;
+}
+
+/* ══ EXECUTIVE CARD ══ */
+.exec-card {
+background: linear-gradient(135deg, rgba(175,82,222,0.06), rgba(88,86,214,0.04));
+border: 0.5px solid rgba(175,82,222,0.15);
+}
+
+/* ══ SECTION HEADER ══ */
+.section-header {
+display: flex; align-items: center; gap: 6px; margin-bottom: 12px;
+font-size: 12px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase;
+}
+
+/* ══ DIVIDER ══ */
+.divider { height: 0.5px; background: rgba(0,0,0,0.06); margin: 0 -20px; }
+
+/* ══ SCROLLBAR ══ */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 4px; }
+
+/* ══ SAFE AREA ══ */
+@supports (padding: env(safe-area-inset-bottom)) {
+body { padding-bottom: calc(100px + env(safe-area-inset-bottom)); }
+}
 </style>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+
 <script src="https://unpkg.com/htm@3.1.1/dist/htm.js"></script>
+
 </head>
 <body>
 <div class="mesh-bg"></div>
@@ -66,519 +228,578 @@ button:disabled { opacity: .5; cursor: not-allowed; transform: none; }
 <script>
 var h=htm.bind(React.createElement),us=React.useState,ur=React.useRef,ue=React.useEffect;
 
-/* ═══ STORAGE (v8) ═══ */
+/* ═══ STORAGE (v9) ═══ */
 var DB={
-  get:function(){try{return JSON.parse(localStorage.getItem("notulen_v8")||"null")||this.def()}catch(e){return this.def()}},
-  def:function(){return{history:[],set:{lang:"id-ID",key:"",provider:"groq", chunk: 30}}},
-  save:function(d){localStorage.setItem("notulen_v8",JSON.stringify(d))},
-  addHist:function(r){var d=this.get();d.history.unshift(r);if(d.history.length>50)d.history.length=50;this.save(d)},
-  delHist:function(id){var d=this.get();d.history=d.history.filter(function(x){return x.id!==id});this.save(d)},
-  getSet:function(){return this.get().set},
-  updSet:function(k,v){var d=this.get();d.set[k]=v;this.save(d);window.__AK=d.set.key}
-};
-
-/* ═══ CLEANER (Menghapus bintang markdown dari AI) ═══ */
-function cleanMD(str) {
-  if(!str) return "";
-  return str.replace(/\*\*/g, '').replace(/^\*/gm, '•').replace(/ \*/g, ' •');
+get:function(){try{return JSON.parse(localStorage.getItem(“notulen_v9”)||“null”)||this.def()}catch(e){return this.def()}},
+def:function(){return{history:[],set:{lang:“id-ID”,key:””,provider:“groq”,chunk:30}}},
+save:function(d){localStorage.setItem(“notulen_v9”,JSON.stringify(d))},
+addHist:function(r){var d=this.get();d.history.unshift(r);if(d.history.length>50)d.history.length=50;this.save(d)},
+delHist:function(id){var d=this.get();d.history=d.history.filter(function(x){return x.id!==id});this.save(d)},
+getSet:function(){return this.get().set},
+updSet:function(k,v){var d=this.get();d.set[k]=v;this.save(d);window.__AK=d.set.key},
+migrate:function(){
+try{
+var old=JSON.parse(localStorage.getItem(“notulen_v8”)||“null”);
+if(old && !localStorage.getItem(“notulen_v9”)){localStorage.setItem(“notulen_v9”,JSON.stringify(old))}
+}catch(e){}
 }
+};
+DB.migrate();
+
+function cleanMD(str){if(!str)return””;return str.replace(/**/g,’’).replace(/^*/gm,’•’).replace(/ */g,’ •’)}
 
 /* ═══ ICON ═══ */
 function Ic(p){
-  var s=p.size||20,c=p.color||"currentColor",paths={
-    mic:"M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z M19 10v2a7 7 0 0 1-14 0v-2 M12 19v4 M8 23h8",
-    stop:"M6 6h12v12H6z", play:"M5 3l14 9-14 9V3z", check:"M20 6L9 17l-5-5",
-    file:"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M14 2v6h6 M16 13H8 M16 17H8 M10 9H8",
-    settings:"M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z",
-    trash:"M3 6h18 M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2 M10 11v6 M14 11v6",
-    key:"M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4",
-    sparkle:"M12 2l3 6 6 3-6 3-3 6-3-6-6-3 6-3z",
-    copy:"M20 9h-9a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2z M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1",
-    alert:"M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z M12 9v4 M12 17h.01",
-    globe:"M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z M2 12h20 M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z",
-    eye:"M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z",
-    text:"M4 7V4h16v3 M9 20h6 M12 4v16", bot:"M12 8V4 M8 4h8 M2 14h2 M20 14h2 M15 13v2 M9 13v2 M4 8h16v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z",
-    clock:"M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z M12 6v6l4 2",
-    layers:"M12 2L2 7l10 5 10-5-10-5z M2 12l10 5 10-5 M2 17l10 5 10-5"
-  };
-  return h`<svg width=${s} height=${s} viewBox="0 0 24 24" fill="none" stroke=${c} strokeWidth=${p.sw||2.5} strokeLinecap="round" strokeLinejoin="round"><path d=${paths[p.name]||"M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z"}/></svg>`;
+var s=p.size||20,c=p.color||“currentColor”,paths={
+mic:“M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z M19 10v2a7 7 0 0 1-14 0v-2 M12 19v4 M8 23h8”,
+stop:“M6 6h12v12H6z”,play:“M5 3l14 9-14 9V3z”,check:“M20 6L9 17l-5-5”,
+file:“M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M14 2v6h6 M16 13H8 M16 17H8 M10 9H8”,
+settings:“M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z”,
+trash:“M3 6h18 M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2 M10 11v6 M14 11v6”,
+key:“M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4”,
+sparkle:“M12 2l3 6 6 3-6 3-3 6-3-6-6-3 6-3z”,
+copy:“M20 9h-9a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2z M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1”,
+eye:“M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z”,
+text:“M4 7V4h16v3 M9 20h6 M12 4v16”,
+bot:“M12 8V4 M8 4h8 M2 14h2 M20 14h2 M15 13v2 M9 13v2 M4 8h16v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z”,
+clock:“M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z M12 6v6l4 2”,
+layers:“M12 2L2 7l10 5 10-5-10-5z M2 12l10 5 10-5 M2 17l10 5 10-5”,
+chevron:“M9 18l6-6-6-6”,
+waveform:“M2 12h2 M6 8v8 M10 4v16 M14 6v12 M18 9v6 M22 12h0”
+};
+return h`<svg width=${s} height=${s} viewBox="0 0 24 24" fill="none" stroke=${c} strokeWidth=${p.sw||2} strokeLinecap="round" strokeLinejoin="round"><path d=${paths[p.name]||""}/></svg>`;
 }
 
 /* ═══ API CALLS ═══ */
-function transcribeAudio(audioBlob, lang, key){
-  return new Promise(function(resolve, reject){
-    var fd = new FormData();
-    fd.append("file", audioBlob, "chunk.webm");
-    fd.append("model", "whisper-large-v3-turbo");
-    fd.append("response_format", "json");
-    fd.append("language", lang === "id-ID" ? "id" : "en");
+function transcribeAudio(audioBlob,lang,key){
+return new Promise(function(resolve,reject){
+var fd=new FormData();fd.append(“file”,audioBlob,“chunk.webm”);fd.append(“model”,“whisper-large-v3-turbo”);
+fd.append(“response_format”,“json”);fd.append(“language”,lang===“id-ID”?“id”:“en”);
+fetch(“https://api.groq.com/openai/v1/audio/transcriptions”,{method:“POST”,headers:{“Authorization”:“Bearer “+key},body:fd})
+.then(function(r){return r.json()}).then(function(d){if(d.error)throw new Error(d.error.message);resolve(d.text)})
+.catch(function(e){reject(e.message||e)});
+});
+}
+function aiSummarizeChunk(text,lang,key){
+return new Promise(function(resolve,reject){
+var prompt=lang===“id-ID”?“Buat ringkasan singkat (1-3 poin) dari transkrip 30 detik ini. Jangan gunakan format markdown. Berikan poin langsung.\n\nTranskrip:\n”+text
+:“Extract key bullet points from this short meeting chunk. Plain text only, NO markdown.\n\nTranscript:\n”+text;
+fetch(“https://api.groq.com/openai/v1/chat/completions”,{method:“POST”,headers:{“Content-Type”:“application/json”,“Authorization”:“Bearer “+key},
+body:JSON.stringify({model:“llama-3.3-70b-versatile”,messages:[{role:“system”,content:“You are a concise meeting assistant. Plain text, no markdown.”},{role:“user”,content:prompt}],temperature:0.3,max_tokens:300})
+}).then(function(r){return r.json()}).then(function(d){if(d.error)throw new Error(d.error.message);resolve(d.choices[0].message.content)})
+.catch(function(e){reject(e.message||e)});
+});
+}
+function aiSummarizeOverall(text,lang,key){
+return new Promise(function(resolve,reject){
+var prompt=lang===“id-ID”?“Buat Ringkasan Eksekutif komprehensif. Sertakan: Topik Utama, Keputusan, Tindak Lanjut. PENTING: Jangan gunakan markdown.\n\nTranskrip:\n”+text
+:“Create a comprehensive Executive Summary. Include: Main Topics, Decisions, Action Items. No markdown.\n\nTranscript:\n”+text;
+fetch(“https://api.groq.com/openai/v1/chat/completions”,{method:“POST”,headers:{“Content-Type”:“application/json”,“Authorization”:“Bearer “+key},
+body:JSON.stringify({model:“llama-3.3-70b-versatile”,messages:[{role:“system”,content:“Expert executive secretary. No markdown.”},{role:“user”,content:prompt}],temperature:0.4,max_tokens:1500})
+}).then(function(r){return r.json()}).then(function(d){if(d.error)throw new Error(d.error.message);resolve(d.choices[0].message.content)})
+.catch(function(e){reject(e.message||e)});
+});
+}
+function fmt(s){return String(Math.floor(s/60)).padStart(2,“0”)+”:”+String(s%60).padStart(2,“0”)}
 
-    fetch("https://api.groq.com/openai/v1/audio/transcriptions", { method: "POST", headers: {"Authorization": "Bearer " + key}, body: fd })
-      .then(function(r){return r.json()}).then(function(d){ if(d.error) throw new Error(d.error.message); resolve(d.text); })
-      .catch(function(e){reject(e.message||e)});
-  });
+/* ═══ WAVEFORM VISUALIZER ═══ */
+function WaveVis(p){
+var cv=ur(null),rf=ur(null);
+ue(function(){
+if(!p.an||!cv.current)return;
+var c=cv.current,x=c.getContext(“2d”),da=new Uint8Array(p.an.frequencyBinCount);
+function draw(){
+rf.current=requestAnimationFrame(draw);
+p.an.getByteFrequencyData(da);
+var dp=devicePixelRatio||1,rc=c.getBoundingClientRect();
+c.width=rc.width*dp;c.height=rc.height*dp;x.scale(dp,dp);
+var W=rc.width,H=rc.height;x.clearRect(0,0,W,H);
+var sm=0;for(var i=0;i<da.length;i++)sm+=da[i];
+var av=sm/da.length/255;
+var bars=40,gap=3,bw=(W-(bars-1)*gap)/bars;
+for(var i=0;i<bars;i++){
+var dist=Math.abs(i-bars/2)/(bars/2);
+var baseH=H*0.15;
+var activeH=H*0.85*av*(1-dist*0.5);
+var bh=Math.max(baseH,activeH);
+var yy=(H-bh)/2,xx=i*(bw+gap);
+var ratio=i/bars;
+if(av>0.1){
+var r=Math.round(88+(175-88)*ratio);
+var g=Math.round(86+(82-86)*ratio);
+var b=Math.round(214+(222-214)*ratio);
+var alpha=0.35+av*0.65;
+x.fillStyle=“rgba(”+r+”,”+g+”,”+b+”,”+alpha+”)”;
+} else {
+x.fillStyle=“rgba(142,142,147,0.15)”;
+}
+x.beginPath();x.roundRect(xx,yy,bw,bh,bw/2);x.fill();
+}
+}
+draw();return function(){cancelAnimationFrame(rf.current)};
+},[p.an]);
+return h`<canvas ref=${cv} style=${{width:"100%",height:48,display:"block",borderRadius:14}}/>`;
 }
 
-function aiSummarizeChunk(text, lang, key){
-  return new Promise(function(resolve, reject){
-    var prompt = lang==="id-ID"
-      ? "Buat ringkasan singkat (1-3 poin) dari transkrip 30 detik ini. Jangan gunakan format markdown (seperti bintang/bold). Berikan poin langsung.\n\nTranskrip:\n" + text
-      : "Extract key bullet points from this short meeting chunk. Plain text only, NO markdown formatting.\n\nTranscript:\n" + text;
-    fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST", headers: {"Content-Type":"application/json","Authorization":"Bearer "+key},
-      body: JSON.stringify({ model: "llama-3.3-70b-versatile", messages: [{role:"system",content:"You are a concise meeting assistant. You output plain text without formatting."},{role:"user",content:prompt}], temperature: 0.3, max_tokens: 300 })
-    }).then(function(r){return r.json()}).then(function(d){ if(d.error) throw new Error(d.error.message); resolve(d.choices[0].message.content); })
-      .catch(function(e){reject(e.message||e)});
-  });
+/* ═══ STATUS ICON (animated mic circle) ═══ */
+function StatusOrb(p){
+var isRec=p.isRec;
+return h`<div style=${{ display:"flex",alignItems:"center",justifyContent:"center", width:96,height:96,borderRadius:48,position:"relative", background:isRec?"rgba(255,69,58,0.08)":"rgba(88,86,214,0.06)", transition:"all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)" }}> ${isRec && h`<div style=${{position:“absolute”,inset:0,borderRadius:48,animation:“ripple-ring 2s ease-out infinite”}}/>`} ${isRec && h`<div style=${{position:“absolute”,inset:6,borderRadius:42,border:“2px solid rgba(255,69,58,0.15)”,animation:“breathe 2s ease-in-out infinite”}}/>`}
+<div style=${{
+width:64,height:64,borderRadius:32,display:“flex”,alignItems:“center”,justifyContent:“center”,
+background:isRec?“linear-gradient(135deg,#FF453A,#FF6961)”:“linear-gradient(135deg,#5856D6,#7B79E8)”,
+boxShadow:isRec?“0 8px 28px rgba(255,69,58,0.3)”:“0 8px 28px rgba(88,86,214,0.25)”,
+transition:“all 0.5s”
+}}>
+<${Ic} name=${isRec?“waveform”:“mic”} size=${28} color=”#FFF” sw=${2.5}/>
+</div>
+
+  </div>`;
 }
 
-function aiSummarizeOverall(text, lang, key){
-  return new Promise(function(resolve, reject){
-    var prompt = lang==="id-ID"
-      ? "Buat Ringkasan Eksekutif komprehensif dari transkrip ini. Sertakan bagian: Topik Utama, Keputusan, Tindak Lanjut. PENTING: Jangan gunakan format markdown (bold/bintang). Gunakan list biasa.\n\nTranskrip:\n" + text
-      : "Create a comprehensive Executive Summary. Include: Main Topics, Decisions, Action Items. IMPORTANT: Use plain text only, NO markdown asterisks.\n\nTranscript:\n" + text;
-    fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST", headers: {"Content-Type":"application/json","Authorization":"Bearer "+key},
-      body: JSON.stringify({ model: "llama-3.3-70b-versatile", messages: [{role:"system",content:"You are an expert executive secretary. No markdown."},{role:"user",content:prompt}], temperature: 0.4, max_tokens: 1500 })
-    }).then(function(r){return r.json()}).then(function(d){ if(d.error) throw new Error(d.error.message); resolve(d.choices[0].message.content); })
-      .catch(function(e){reject(e.message||e)});
-  });
-}
-
-function fmt(s){return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")}
-
-/* ═══ LEVEL METER ═══ */
-function LevelMeter(p){
-  var cv=ur(null),rf=ur(null);
-  ue(function(){
-    if(!p.an||!cv.current) return;
-    var c=cv.current,x=c.getContext("2d"),da=new Uint8Array(p.an.frequencyBinCount);
-    function draw(){
-      rf.current=requestAnimationFrame(draw);
-      p.an.getByteFrequencyData(da);
-      var dp=devicePixelRatio||1,rc=c.getBoundingClientRect();
-      c.width=rc.width*dp;c.height=rc.height*dp;x.scale(dp,dp);
-      var W=rc.width,H=rc.height;x.clearRect(0,0,W,H);
-      var sm=0;for(var i=0;i<da.length;i++)sm+=da[i];
-      var av=sm/da.length/255,bs=32,gp=4,bw=(W-(bs-1)*gp)/bs;
-      for(var i=0;i<bs;i++){
-        var th=(i+1)/bs,on=av>=th*0.6;
-        var bh=H*0.75,yy=(H-bh)/2,xx=i*(bw+gp);
-        if(on){var it=Math.min(1,(av-th*0.4)*3); x.fillStyle=i/bs>0.75?"rgba(255,69,58,"+(0.6+it*0.4)+")":i/bs>0.45?"rgba(255,159,10,"+(0.5+it*0.5)+")":"rgba(88,86,214,"+(0.4+it*0.6)+")";
-        }else{x.fillStyle="rgba(0,0,0,0.06)";}
-        x.beginPath(); x.roundRect(xx,yy,bw,bh,bw/2); x.fill();
-      }
-    }
-    draw(); return function(){cancelAnimationFrame(rf.current)};
-  },[p.an]);
-  return h`<canvas ref=${cv} style=${{width:"100%",height:44,borderRadius:16,background:"rgba(255,255,255,0.4)",display:"block",border:"1px solid rgba(255,255,255,0.6)"}}/>`;
-}
-
-/* ═══════════════════════════════════════
-   TAB: REKAM 
-   ═══════════════════════════════════════ */
+/* ═══════════════════════
+TAB: REKAM
+═══════════════════════ */
 function RecTab(p){
-  var set = p.set, updSet = p.updSet, onSaveComplete = p.onSaveComplete;
-  var _isRec=us(false), isRec=_isRec[0], setRec=_isRec[1];
-  var _time=us(0), time=_time[0], setTime=_time[1];
-  var _title=us(""), title=_title[0], setTitle=_title[1];
-  var _an=us(null), analyser=_an[0], setAn=_an[1];
+var set=p.set,updSet=p.updSet,onSaveComplete=p.onSaveComplete;
+var _isRec=us(false),isRec=_isRec[0],setRec=_isRec[1];
+var _time=us(0),time=_time[0],setTime=_time[1];
+var _title=us(””),title=_title[0],setTitle=_title[1];
+var _an=us(null),analyser=_an[0],setAn=_an[1];
+var _fin=us([]),fin=_fin[0],setFin=_fin[1];
+var _notes=us([]),notes=_notes[0],setNotes=_notes[1];
+var _saving=us(false),saving=_saving[0],setSaving=_saving[1];
+var _status=us(””),statusMsg=_status[0],setStatusMsg=_status[1];
+
+var isRecRef=ur(false),isFinalizingRef=ur(false);
+var timeRef=ur(0),pendingReqs=ur(0);
+var streamRef=ur(null),acRef=ur(null),mrRef=ur(null);
+var loopIntervalRef=ur(null),clockIntervalRef=ur(null);
+var finRef=ur([]),notesRef=ur([]),titleRef=ur(””);
+
+function addFin(data){setFin(function(p){var n=p.concat([data]);finRef.current=n;return n})}
+function addNote(data){setNotes(function(p){var n=p.concat([data]);notesRef.current=n;return n})}
+
+function autoSaveIfDone(){
+if(!isRecRef.current&&pendingReqs.current===0&&!isFinalizingRef.current){
+if(finRef.current.length===0){setSaving(false);return}
+isFinalizingRef.current=true;setStatusMsg(“Menganalisis keseluruhan…”);
+var finalRaw=finRef.current.map(function(x){return”[”+fmt(x.time)+”] “+x.text}).join(”\n\n”);
+var finalSumChunk=notesRef.current.map(function(x){return”[”+fmt(x.time)+”]\n”+x.text}).join(”\n\n”);
+aiSummarizeOverall(finalRaw,set.lang,window.__AK)
+.then(function(overallSum){
+DB.addHist({id:Date.now().toString(),date:new Date().toISOString(),duration:timeRef.current,
+title:titleRef.current||(“Rapat “+new Date().toLocaleDateString(“id-ID”,{day:“numeric”,month:“short”,hour:“2-digit”,minute:“2-digit”})),
+transcript:finalRaw,notes:cleanMD(finalSumChunk),overall:cleanMD(overallSum)});
+setSaving(false);onSaveComplete();resetAll()})
+.catch(function(err){
+DB.addHist({id:Date.now().toString(),date:new Date().toISOString(),duration:timeRef.current,title:titleRef.current,transcript:finalRaw,notes:cleanMD(finalSumChunk),overall:“Gagal memproses.”});
+setSaving(false);onSaveComplete();resetAll()});
+}
+}
+
+function processChunk(blob,startTime){
+pendingReqs.current++;
+transcribeAudio(blob,set.lang,window.__AK)
+.then(function(text){
+if(!text||text.trim().length<5)return;
+var ct=text.trim();addFin({time:startTime,text:ct,id:Date.now()});
+pendingReqs.current++;
+aiSummarizeChunk(ct,set.lang,window.__AK)
+.then(function(s){addNote({time:startTime,text:cleanMD(s),id:Date.now()})})
+.catch(function(){}).finally(function(){pendingReqs.current–;autoSaveIfDone()});
+}).catch(function(){}).finally(function(){pendingReqs.current–;autoSaveIfDone()});
+}
+
+function startRecordingCycle(stream){
+if(!isRecRef.current)return;
+var mr=new MediaRecorder(stream);var lc=[];var st=timeRef.current;
+mr.ondataavailable=function(e){if(e.data.size>0)lc.push(e.data)};
+mr.onstop=function(){if(lc.length>0)processChunk(new Blob(lc,{type:‘audio/webm’}),st)};
+mr.start();mrRef.current=mr;
+}
+
+function startRec(){
+if(!window.__AK){alert(“Isi API Key Groq di Pengaturan.”);return}
+if(!navigator.mediaDevices){alert(“Browser tidak mendukung mic.”);return}
+resetAll();isRecRef.current=true;setRec(true);titleRef.current=title;
+navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
+streamRef.current=stream;
+var ac=new(window.AudioContext||window.webkitAudioContext)();acRef.current=ac;
+var src=ac.createMediaStreamSource(stream);var an=ac.createAnalyser();
+an.fftSize=2048;an.smoothingTimeConstant=0.8;src.connect(an);setAn(an);
+startRecordingCycle(stream);
+clockIntervalRef.current=setInterval(function(){timeRef.current++;setTime(timeRef.current)},1000);
+var cDur=(set.chunk||30)*1000;
+loopIntervalRef.current=setInterval(function(){
+if(isRecRef.current&&mrRef.current&&mrRef.current.state===“recording”){
+mrRef.current.stop();setTimeout(function(){startRecordingCycle(streamRef.current)},50)}
+},cDur);
+}).catch(function(e){alert(“Gagal mic: “+e.message);resetAll()});
+}
+
+function stopRec(){
+isRecRef.current=false;setRec(false);setSaving(true);setStatusMsg(“Menyatukan transkrip…”);
+clearInterval(clockIntervalRef.current);clearInterval(loopIntervalRef.current);
+if(mrRef.current&&mrRef.current.state===“recording”)mrRef.current.stop();
+if(streamRef.current){streamRef.current.getTracks().forEach(function(t){t.stop()});streamRef.current=null}
+if(acRef.current&&acRef.current.state!==“closed”)acRef.current.close();setAn(null);
+setTimeout(autoSaveIfDone,500);
+}
+
+function resetAll(){
+setFin([]);setNotes([]);setTime(0);setTitle(””);setSaving(false);setStatusMsg(””);
+finRef.current=[];notesRef.current=[];timeRef.current=0;titleRef.current=””;
+pendingReqs.current=0;isRecRef.current=false;isFinalizingRef.current=false;setRec(false);
+}
+
+var hasLive=notes.length>0||fin.length>0;
+
+return h`<div style=${{maxWidth:520,margin:“0 auto”,padding:“0 16px”}}>
+
+```
+<!-- HEADER -->
+<div style=${{textAlign:"center",padding:"52px 0 20px"}}>
+  <div className="pill" style=${{background:"rgba(88,86,214,0.1)",color:"var(--indigo)",marginBottom:14}}>
+    <${Ic} name="bot" size=${12} color="var(--indigo)"/> SMART PIPELINE
+  </div>
+  <h1 className="heading-xl" style=${{color:"var(--tx)"}}>Notulen AI</h1>
+  <p className="caption" style=${{marginTop:6}}>Transkripsi Real-time & Executive Summary</p>
+</div>
+
+<!-- MAIN RECORDING CARD -->
+<div className="liquid-glass" style=${{padding:28,textAlign:"center",marginBottom:16}}>
   
-  var _fin=us([]), fin=_fin[0], setFin=_fin[1];
-  var _notes=us([]), notes=_notes[0], setNotes=_notes[1];
-  var _saving=us(false), saving=_saving[0], setSaving=_saving[1];
-  var _status=us(""), statusMsg=_status[0], setStatusMsg=_status[1];
+  <${StatusOrb} isRec=${isRec}/>
 
-  var isRecRef = ur(false), isFinalizingRef = ur(false);
-  var timeRef = ur(0), pendingReqs = ur(0);
-  var streamRef = ur(null), acRef = ur(null), mrRef = ur(null);
-  var loopIntervalRef = ur(null), clockIntervalRef = ur(null);
-  var finRef = ur([]), notesRef = ur([]), titleRef = ur("");
+  <!-- TIMER -->
+  <div style=${{
+    fontSize:42,fontWeight:800,fontFamily:"'Plus Jakarta Sans','SF Mono',monospace",
+    letterSpacing:"-2px",marginTop:20,marginBottom:8,
+    color:isRec?"var(--red)":"var(--tx)",transition:"color 0.3s"
+  }}>${fmt(time)}</div>
 
-  function addFin(data){ setFin(function(p){ var n=p.concat([data]); finRef.current=n; return n; }); }
-  function addNote(data){ setNotes(function(p){ var n=p.concat([data]); notesRef.current=n; return n; }); }
+  <!-- STATUS BADGES -->
+  ${isRec && h`<div className="pill" style=${{background:"rgba(52,199,89,0.1)",color:"var(--green)",marginBottom:14}}>
+    <div style=${{width:6,height:6,borderRadius:3,background:"var(--green)",animation:"pulse-dot 1.2s infinite"}}/>
+    Sedang Merekam
+  </div>`}
 
-  function autoSaveIfDone() {
-    if (!isRecRef.current && pendingReqs.current === 0 && !isFinalizingRef.current) {
-      if (finRef.current.length === 0) { setSaving(false); return; }
-      
-      isFinalizingRef.current = true;
-      setStatusMsg("Menganalisis Rapat Keseluruhan...");
-      
-      var finalRaw = finRef.current.map(function(x){return "[Menit "+fmt(x.time)+"] "+x.text}).join("\n\n");
-      var finalSumChunk = notesRef.current.map(function(x){return "[Menit "+fmt(x.time)+"]\n"+x.text}).join("\n\n");
+  ${saving && h`<div className="pill" style=${{background:"rgba(175,82,222,0.1)",color:"var(--purple)",marginBottom:14}}>
+    <div className="spinner"/> ${statusMsg}
+  </div>`}
 
-      aiSummarizeOverall(finalRaw, set.lang, window.__AK)
-        .then(function(overallSum){
-          DB.addHist({
-            id: Date.now().toString(), date: new Date().toISOString(), duration: timeRef.current,
-            title: titleRef.current || ("Rapat " + new Date().toLocaleDateString("id-ID",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})),
-            transcript: finalRaw, notes: cleanMD(finalSumChunk), overall: cleanMD(overallSum)
-          });
-          setSaving(false); onSaveComplete(); resetAll();
-        })
-        .catch(function(err){
-          alert("Gagal AI: " + err.message + "\n(Menyimpan parsial)");
-          DB.addHist({ id: Date.now().toString(), date: new Date().toISOString(), duration: timeRef.current, title: titleRef.current, transcript: finalRaw, notes: cleanMD(finalSumChunk), overall: "Gagal memproses." });
-          setSaving(false); onSaveComplete(); resetAll();
-        });
-    }
-  }
+  <!-- WAVEFORM -->
+  ${isRec&&analyser ? h`<div style=${{margin:"8px 0 20px",padding:"8px",background:"rgba(0,0,0,0.02)",borderRadius:16}}>
+    <${WaveVis} an=${analyser}/>
+  </div>` : null}
 
-  function processChunk(blob, startTime){
-    pendingReqs.current++;
-    transcribeAudio(blob, set.lang, window.__AK)
-      .then(function(text){
-        if(!text || text.trim().length < 5) return;
-        var cleanedText = text.trim();
-        addFin({time: startTime, text: cleanedText, id: Date.now()});
-        
-        pendingReqs.current++;
-        aiSummarizeChunk(cleanedText, set.lang, window.__AK)
-          .then(function(summary){ addNote({time: startTime, text: cleanMD(summary), id: Date.now()}); })
-          .catch(function(err){ console.log("AI Chunk Err:", err); })
-          .finally(function(){ pendingReqs.current--; autoSaveIfDone(); });
-      })
-      .catch(function(err){ console.log("Whisper Err:", err); })
-      .finally(function(){ pendingReqs.current--; autoSaveIfDone(); });
-  }
+  <!-- TITLE INPUT -->
+  ${!isRec&&time===0&&!saving && h`<div style=${{marginBottom:20}}>
+    <input className="field" value=${title} onInput=${function(e){setTitle(e.target.value)}}
+      placeholder="Judul rapat (opsional)" style=${{textAlign:"center",fontWeight:600}}/>
+  </div>`}
 
-  function startRecordingCycle(stream) {
-    if(!isRecRef.current) return;
-    var mr = new MediaRecorder(stream);
-    var localChunks = [];
-    var startTime = timeRef.current;
-    mr.ondataavailable = function(e){ if(e.data.size > 0) localChunks.push(e.data); };
-    mr.onstop = function(){ if(localChunks.length > 0) processChunk(new Blob(localChunks, {type: 'audio/webm'}), startTime); };
-    mr.start(); mrRef.current = mr;
-  }
+  <!-- ACTION BUTTONS -->
+  <div style=${{display:"flex",gap:10}}>
+    ${!isRec&&time===0&&!saving ? h`<button onClick=${startRec} style=${{
+      flex:1,padding:"16px",borderRadius:var(--radius-lg),border:"none",fontSize:16,fontWeight:700,
+      background:"linear-gradient(135deg,#5856D6,#7B79E8)",color:"#FFF",
+      boxShadow:"0 8px 28px rgba(88,86,214,0.28)"
+    }}>
+      <span style=${{display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+        <${Ic} name="mic" size=${20} color="#FFF" sw=${2.5}/> Mulai Rapat
+      </span>
+    </button>` : null}
 
-  function startRec(){
-    if(!window.__AK){ alert("Isi API Key Groq di Pengaturan."); return; }
-    if(!navigator.mediaDevices){ alert("Browser tidak mendukung mic."); return; }
-    resetAll(); isRecRef.current = true; setRec(true); titleRef.current = title;
+    ${isRec ? h`<button onClick=${stopRec} style=${{
+      flex:1,padding:"16px",borderRadius:var(--radius-lg),border:"none",fontSize:16,fontWeight:700,
+      background:"linear-gradient(135deg,#FF453A,#FF6961)",color:"#FFF",
+      boxShadow:"0 8px 28px rgba(255,69,58,0.28)"
+    }}>
+      <span style=${{display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+        <${Ic} name="stop" size=${20} color="#FFF" sw=${2.5}/> Akhiri Rapat
+      </span>
+    </button>` : null}
+  </div>
+</div>
 
-    navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
-      streamRef.current = stream;
-      var ac = new (window.AudioContext||window.webkitAudioContext)(); acRef.current = ac;
-      var src = ac.createMediaStreamSource(stream); var an = ac.createAnalyser();
-      an.fftSize = 2048; an.smoothingTimeConstant = 0.8; src.connect(an); setAn(an);
-
-      startRecordingCycle(stream);
-      clockIntervalRef.current = setInterval(function(){ timeRef.current++; setTime(timeRef.current); }, 1000);
-      
-      var cDur = (set.chunk || 30) * 1000;
-      loopIntervalRef.current = setInterval(function(){
-        if(isRecRef.current && mrRef.current && mrRef.current.state === "recording"){
-          mrRef.current.stop(); setTimeout(function(){ startRecordingCycle(streamRef.current); }, 50);
-        }
-      }, cDur);
-    }).catch(function(e){ alert("Gagal mic: " + e.message); resetAll(); });
-  }
-
-  function stopRec(){
-    isRecRef.current = false; setRec(false); setSaving(true); setStatusMsg("Menyatukan Transkrip...");
-    clearInterval(clockIntervalRef.current); clearInterval(loopIntervalRef.current);
-    if(mrRef.current && mrRef.current.state === "recording") { mrRef.current.stop(); }
-    if(streamRef.current){streamRef.current.getTracks().forEach(function(t){t.stop()}); streamRef.current=null;}
-    if(acRef.current&&acRef.current.state!=="closed"){acRef.current.close();} setAn(null);
-    setTimeout(autoSaveIfDone, 500);
-  }
-
-  function resetAll(){
-    setFin([]); setNotes([]); setTime(0); setTitle(""); setSaving(false); setStatusMsg("");
-    finRef.current = []; notesRef.current = []; timeRef.current = 0; titleRef.current = "";
-    pendingReqs.current = 0; isRecRef.current = false; isFinalizingRef.current = false; setRec(false);
-  }
-
-  return h`<div>
-    <div style=${{textAlign:"center",padding:"48px 16px 16px", marginBottom:10}}>
-      <div className="pill" style=${{background:"rgba(88,86,214,0.15)",color:"#5856D6",marginBottom:12, backdropFilter:"blur(10px)"}}>
-        <${Ic} name="bot" size=${13} color="#5856D6"/>SMART PIPELINE AI
+<!-- QUICK SETTINGS (only when idle) -->
+${!isRec&&time===0&&!saving ? h`<div className="liquid-glass" style=${{padding:18,marginBottom:16}}>
+  <div style=${{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14}}>
+    <div style=${{display:"flex",alignItems:"center",gap:8}}>
+      <div style=${{width:28,height:28,borderRadius:9,background:"rgba(175,82,222,0.08)",display:"flex",alignItems:"center",justifyContent:"center"}}>
+        <${Ic} name="settings" size=${14} color="var(--purple)"/>
       </div>
-      <h1 style=${{fontWeight:800,fontSize:28,letterSpacing:"-1px",lineHeight:1.1,color:"#1C1C1E"}}>Smart Meeting Notes</h1>
-      <p style=${{fontSize:13,color:"#8E8E93",marginTop:8,fontWeight:500}}>Transkripsi Real-time & Executive Summary</p>
+      <span className="heading-md" style=${{fontSize:14}}>Pengaturan Cepat</span>
     </div>
-
-    <div style=${{maxWidth:500,margin:"0 auto",padding:"0 16px 16px"}}>
-
-      <!-- STATUS CARD -->
-      <div className="gl" style=${{padding:24,textAlign:"center",marginBottom:20,position:"relative"}}>
-        <div style=${{display:"inline-flex",justifyContent:"center",alignItems:"center",width:88,height:88,borderRadius:44,background:isRec?"rgba(255,69,58,0.12)":"rgba(88,86,214,0.1)",color:isRec?"#FF453A":"#5856D6",animation:isRec?"ripple 2s infinite":"none",marginBottom:16,boxShadow:isRec?"0 0 20px rgba(255,69,58,0.2)":""}}>
-          <${Ic} name=${isRec?"mic":"play"} size=${40}/>
-        </div>
-
-        <div style=${{fontSize:36,fontWeight:800,fontFamily:"'SF Mono',monospace",letterSpacing:-1.5,color:isRec?"#FF453A":"#1C1C1E",marginBottom:8}}>
-          ${fmt(time)}
-        </div>
-
-        ${isRec && h`<div className="pill" style=${{background:"rgba(50,215,75,0.15)",color:"#32D74B",marginBottom:12}}>
-          <div style=${{width:6,height:6,borderRadius:3,background:"#32D74B",animation:"pulse 1.2s infinite"}}/> Sedang Merekam...
-        </div>`}
-
-        ${saving && h`<div className="pill" style=${{background:"rgba(191,90,242,0.15)",color:"#BF5AF2",marginBottom:12}}>
-          <div className="spinner" style=${{borderColor:"rgba(191,90,242,0.2)",borderTopColor:"#BF5AF2"}}></div> ${statusMsg}
-        </div>`}
-
-        ${isRec && analyser ? h`<div style=${{marginBottom:16,padding:"0 8px"}}><${LevelMeter} an=${analyser}/></div>` : null}
-
-        ${!isRec && time===0 && !saving && h`<div style=${{marginBottom:16}}>
-          <input class="fi" value=${title} onInput=${function(e){setTitle(e.target.value)}} placeholder="Judul Rapat (opsional)" style=${{textAlign:"center",fontWeight:600}}/>
-        </div>`}
-
-        <div style=${{display:"flex",gap:12}}>
-          ${!isRec && time===0 && !saving ? h`<button onClick=${startRec} style=${{flex:1,padding:"16px",borderRadius:20,background:"linear-gradient(135deg,#5856D6,#7B79E8)",color:"#FFF",border:"none",fontSize:16,fontWeight:700,boxShadow:"0 8px 24px rgba(88,86,214,0.3)"}}>
-            <span style=${{display:"flex",alignItems:"center",justifyContent:"center",gap:6}}><${Ic} name="mic" size=${20} color="#FFF"/>Mulai Rapat</span>
-          </button>` : null}
-
-          ${isRec ? h`<button onClick=${stopRec} style=${{flex:1,padding:"16px",borderRadius:20,background:"#FF453A",color:"#FFF",border:"none",fontSize:16,fontWeight:700,boxShadow:"0 8px 24px rgba(255,69,58,0.3)"}}>
-            <span style=${{display:"flex",alignItems:"center",justifyContent:"center",gap:6}}><${Ic} name="stop" size=${20} color="#FFF"/>Akhiri Rapat</span>
-          </button>` : null}
-        </div>
-      </div>
-
-      <!-- QUICK SETTINGS -->
-      ${!isRec && time===0 && !saving ? h`<div className="gl" style=${{padding:16,marginBottom:20}}>
-        <div style=${{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
-           <div style=${{display:"flex",alignItems:"center",gap:8}}>
-             <div style=${{width:28,height:28,borderRadius:10,background:"rgba(191,90,242,0.1)",display:"flex",alignItems:"center",justifyContent:"center",color:"#BF5AF2"}}><${Ic} name="settings" size=${16}/></div>
-             <span style=${{fontWeight:700,fontSize:14}}>Pengaturan Cepat</span>
-           </div>
-           <div style=${{display:"flex",alignItems:"center",gap:6,fontSize:11,fontWeight:600,color:window.__AK?"#32D74B":"#FF453A"}}>
-             <div style=${{width:8,height:8,borderRadius:4,background:window.__AK?"#32D74B":"#FF453A"}}></div>
-             ${window.__AK ? "API Aktif" : "API Kosong"}
-           </div>
-        </div>
-        <div style=${{display:"flex",gap:12}}>
-          <div style=${{flex:1}}>
-            <div style=${{fontSize:11,fontWeight:600,color:"#8E8E93",marginBottom:6}}>Bahasa</div>
-            <div style=${{display:"flex",gap:4,background:"rgba(0,0,0,0.04)",padding:4,borderRadius:12}}>
-              ${[["id-ID","ID"],["en-US","EN"]].map(function(l){
-                var on=set.lang===l[0];
-                return h`<button key=${l[0]} onClick=${function(){updSet("lang",l[0])}} style=${{flex:1,padding:"8px 0",borderRadius:8,border:"none",background:on?"#FFF":"transparent",boxShadow:on?"0 2px 8px rgba(0,0,0,0.06)":"none",fontSize:12,fontWeight:700,color:on?"#1C1C1E":"#8E8E93"}}>${l[1]}</button>`;
-              })}
-            </div>
-          </div>
-          <div style=${{flex:1}}>
-            <div style=${{fontSize:11,fontWeight:600,color:"#8E8E93",marginBottom:6}}>Chunk AI (Detik)</div>
-            <div style=${{display:"flex",gap:4,background:"rgba(0,0,0,0.04)",padding:4,borderRadius:12}}>
-              ${[15,30,60].map(function(v){
-                var on=(set.chunk||30)===v;
-                return h`<button key=${v} onClick=${function(){updSet("chunk",v)}} style=${{flex:1,padding:"8px 0",borderRadius:8,border:"none",background:on?"#FFF":"transparent",boxShadow:on?"0 2px 8px rgba(0,0,0,0.06)":"none",fontSize:12,fontWeight:700,color:on?"#1C1C1E":"#8E8E93"}}>${v}</button>`;
-              })}
-            </div>
-          </div>
-        </div>
-      </div>` : null}
-
-      <!-- LIVE FEED: 1 KOLOM KE BAWAH -->
-      ${(notes.length > 0 || fin.length > 0) ? h`<div style=${{display:"flex",flexDirection:"column",gap:24,marginTop:10}}>
-         <!-- Kolom Timeline -->
-         <div>
-           <div style=${{fontSize:12,fontWeight:800,color:"#BF5AF2",marginBottom:12,display:"flex",alignItems:"center",gap:6,letterSpacing:"0.5px",textTransform:"uppercase"}}><${Ic} name="sparkle" size=${16}/> Timeline AI</div>
-           ${notes.length === 0 ? h`<div style=${{fontSize:13,color:"#8E8E93",fontStyle:"italic"}}>Menunggu proses AI...</div>` : null}
-           ${notes.map(function(n){
-             return h`<div key=${n.id} className="card-note" style=${{padding:"14px 16px"}}>
-               <div style=${{fontSize:11,color:"#BF5AF2",fontWeight:800,marginBottom:6}}>Menit ${fmt(n.time)}</div>
-               <div style=${{fontSize:14,lineHeight:1.6,color:"#1C1C1E",whiteSpace:"pre-wrap"}}>${n.text}</div>
-             </div>`
-           })}
-         </div>
-         
-         <!-- Kolom Transkrip -->
-         <div>
-           <div style=${{fontSize:12,fontWeight:800,color:"#5856D6",marginBottom:12,display:"flex",alignItems:"center",gap:6,letterSpacing:"0.5px",textTransform:"uppercase"}}><${Ic} name="text" size=${16}/> Transkrip Mentah</div>
-           ${fin.length === 0 ? h`<div style=${{fontSize:13,color:"#8E8E93",fontStyle:"italic"}}>Belum ada suara terekam...</div>` : null}
-           ${fin.map(function(f){
-             return h`<div key=${f.id} className="card-note" style=${{padding:"14px 16px",background:"rgba(255,255,255,0.4)"}}>
-               <div style=${{fontSize:11,color:"#5856D6",fontWeight:800,marginBottom:6}}>Menit ${fmt(f.time)}</div>
-               <div style=${{fontSize:13,lineHeight:1.6,color:"#48484A"}}>${f.text}</div>
-             </div>`
-           })}
-         </div>
-      </div>` : null}
-
+    <div className="pill" style=${{
+      background:window.__AK?"rgba(52,199,89,0.1)":"rgba(255,69,58,0.1)",
+      color:window.__AK?"var(--green)":"var(--red)",fontSize:10,padding:"3px 10px"
+    }}>
+      <div style=${{width:6,height:6,borderRadius:3,background:window.__AK?"var(--green)":"var(--red)"}}/>
+      ${window.__AK?"API Aktif":"Belum ada API"}
     </div>
-  </div>`;
-}
-
-/* ═══════════════════════
-   TAB: RIWAYAT
-   ═══════════════════════ */
-function HistTab(){
-  var _h=us(DB.get().history), hist=_h[0], setH=_h[1];
-  var _open=us(null), openId=_open[0], setOpen=_open[1];
-
-  ue(function(){ setH(DB.get().history); }, []);
-  function del(id){if(confirm("Hapus notulen ini?")){DB.delHist(id); setH(DB.get().history);}}
-  
-  if(!hist.length) return h`<div style=${{padding:"80px 20px",textAlign:"center"}}>
-    <${Ic} name="file" size=${56} color="#C7C7CC" sw=${1.5}/>
-    <div style=${{fontSize:18,fontWeight:700,color:"#8E8E93",marginTop:20}}>Belum ada notulen</div>
-    <div style=${{fontSize:14,color:"#C7C7CC",marginTop:6}}>Rapat yang disimpan akan muncul di sini.</div>
-  </div>`;
-
-  return h`<div style=${{padding:"24px 16px"}}>
-    <h2 style=${{fontSize:24,fontWeight:800,marginBottom:20,letterSpacing:"-0.5px"}}>Riwayat Rapat</h2>
-    ${hist.map(function(item){
-      var isOpen = openId===item.id;
-      return h`<div key=${item.id} className="gl" style=${{marginBottom:14,overflow:"hidden",background:isOpen?"#FFF":"var(--gl)",transition:"all 0.3s"}}>
-        <div onClick=${function(){setOpen(isOpen?null:item.id)}} style=${{padding:"16px",cursor:"pointer",display:"flex",alignItems:"center",gap:14}}>
-          <div style=${{width:44,height:44,borderRadius:14,background:"rgba(88,86,214,0.08)",display:"flex",alignItems:"center",justifyContent:"center",color:"#5856D6",flexShrink:0}}><${Ic} name="file" size=${22}/></div>
-          <div style=${{flex:1,minWidth:0}}>
-            <div style=${{fontWeight:700,fontSize:16,color:"#1C1C1E",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>${item.title||"Rapat"}</div>
-            <div style=${{fontSize:12,color:"#8E8E93",marginTop:2,fontWeight:500}}>
-              ${new Date(item.date).toLocaleDateString("id-ID",{day:"numeric",month:"short",year:"numeric"})} · Durasi: ${fmt(item.duration)}
-            </div>
-          </div>
-          <div style=${{width:28,height:28,borderRadius:14,background:"rgba(0,0,0,0.04)",display:"flex",alignItems:"center",justifyContent:"center"}}>
-             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8E8E93" strokeWidth="2.5" style=${{transform:isOpen?"rotate(90deg)":"none",transition:"0.3s"}}><path d="M9 18l6-6-6-6"/></svg>
-          </div>
-        </div>
-
-        ${isOpen ? h`<div style=${{padding:"0 16px 20px",animation:"fadeIn .3s"}}>
-          <div style=${{display:"flex",gap:8,marginBottom:16}}>
-            <button onClick=${function(e){e.stopPropagation();del(item.id)}} style=${{display:"inline-flex",alignItems:"center",gap:6,padding:"8px 14px",borderRadius:10,background:"rgba(255,69,58,0.08)",color:"#FF453A",fontSize:12,fontWeight:700,border:"none"}}>
-              <${Ic} name="trash" size=${14} color="#FF453A"/>Hapus
-            </button>
-          </div>
-
-          <!-- EXECUTIVE SUMMARY -->
-          ${item.overall ? h`<div style=${{marginBottom:20}}>
-            <div style=${{fontSize:11,fontWeight:800,color:"#BF5AF2",textTransform:"uppercase",letterSpacing:"1px",marginBottom:8,display:"flex",alignItems:"center",gap:6}}>
-              <${Ic} name="sparkle" size=${14} color="#BF5AF2"/>Ringkasan Eksekutif
-            </div>
-            <div className="card-note exec-card">
-              <div style=${{fontSize:14,lineHeight:1.6,whiteSpace:"pre-wrap",color:"#1C1C1E",fontWeight:500}}>${item.overall}</div>
-            </div>
-          </div>` : null}
-
-          <!-- CHUNK SUMMARY -->
-          ${item.notes ? h`<div style=${{marginBottom:20}}>
-            <div style=${{fontSize:11,fontWeight:800,color:"#5856D6",textTransform:"uppercase",letterSpacing:"1px",marginBottom:8,display:"flex",alignItems:"center",gap:6}}>
-              <${Ic} name="clock" size=${14} color="#5856D6"/>Timeline (Chunk)
-            </div>
-            <div className="card-note" style=${{background:"rgba(0,0,0,0.02)",border:"none",boxShadow:"none"}}>
-              <div style=${{fontSize:13,lineHeight:1.6,whiteSpace:"pre-wrap",color:"#48484A"}}>${item.notes}</div>
-            </div>
-          </div>` : null}
-
-          <!-- RAW AUDIO -->
-          <div>
-            <div style=${{fontSize:11,fontWeight:800,color:"#8E8E93",textTransform:"uppercase",letterSpacing:"1px",marginBottom:8}}>Transkrip Mentah</div>
-            <div style=${{maxHeight:250,overflowY:"auto",background:"#FFF",borderRadius:16,padding:16,border:"1px solid rgba(0,0,0,0.06)",fontSize:13,lineHeight:1.6,color:"#636366",whiteSpace:"pre-wrap"}}>
-              ${item.transcript || "(kosong)"}
-            </div>
-          </div>
-        </div>` : null}
-      </div>`;
-    })}
-  </div>`;
-}
-
-/* ═══════════════════════
-   TAB: PENGATURAN & PIPELINE
-   ═══════════════════════ */
-function SetTab(p){
-  var set=p.set, updSet=p.updSet;
-  var _sk=us(false), sk=_sk[0], sSk=_sk[1];
-
-  return h`<div style=${{padding:"24px 16px"}}>
-    <h2 style=${{fontSize:24,fontWeight:800,marginBottom:20,letterSpacing:"-0.5px"}}>Sistem & Pengaturan</h2>
-
-    <!-- SATU KOTAK BESAR UNTUK SEMUA PENGATURAN -->
-    <div className="gl" style=${{padding:20,marginBottom:16}}>
-      
-      <!-- Bagian 1: API KEY -->
-      <div style=${{display:"flex",alignItems:"center",gap:10,marginBottom:16}}>
-        <div style=${{width:32,height:32,borderRadius:10,background:"rgba(88,86,214,0.1)",display:"flex",alignItems:"center",justifyContent:"center",color:"#5856D6"}}><${Ic} name="key" size=${16}/></div>
-        <span style=${{fontWeight:700,fontSize:16}}>API Key Integrasi</span>
-      </div>
-      <div style=${{marginBottom:24}}>
-        <div style=${{fontSize:12,fontWeight:600,color:"#8E8E93",marginBottom:6}}>Groq API Key</div>
-        <div style=${{position:"relative"}}>
-          <input class="fi" type=${sk?"text":"password"} placeholder="gsk_..." value=${set.key} onInput=${function(e){updSet("key",e.target.value)}} style=${{paddingRight:44,fontWeight:500,fontSize:14}}/>
-          <button onClick=${function(){sSk(!sk)}} style=${{position:"absolute",right:8,top:"50%",transform:"translateY(-50%)",border:"none",background:"rgba(0,0,0,0.05)",borderRadius:8,padding:6}}><${Ic} name="eye" size=${16} color="#8E8E93"/></button>
-        </div>
-      </div>
-
-      <!-- Garis Pemisah (Divider) -->
-      <div style=${{height:1, background:"rgba(0,0,0,0.08)", margin:"0 -20px 24px -20px"}}></div>
-
-      <!-- Bagian 2: PIPELINE AI -->
-      <div style=${{display:"flex",alignItems:"center",gap:10,marginBottom:16}}>
-        <div style=${{width:32,height:32,borderRadius:10,background:"rgba(48,176,199,0.1)",display:"flex",alignItems:"center",justifyContent:"center",color:"#30B0C7"}}><${Ic} name="layers" size=${16}/></div>
-        <span style=${{fontWeight:700,fontSize:16}}>Alur Pipeline AI (Smart Mode)</span>
-      </div>
-      
-      <div style=${{display:"flex",flexDirection:"column",gap:16}}>
-         <div style=${{display:"flex",gap:12}}>
-            <div style=${{width:26,height:26,borderRadius:13,background:"#1C1C1E",color:"#FFF",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:800,flexShrink:0}}>1</div>
-            <div>
-               <div style=${{fontSize:14,fontWeight:700,color:"#1C1C1E"}}>Perekaman & Chunking</div>
-               <div style=${{fontSize:13,color:"#8E8E93",lineHeight:1.4,marginTop:4}}>Suara direkam via MediaRecorder dan dipotong otomatis setiap ${set.chunk||30} detik (background-safe).</div>
-            </div>
-         </div>
-         <div style=${{display:"flex",gap:12}}>
-            <div style=${{width:26,height:26,borderRadius:13,background:"#1C1C1E",color:"#FFF",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:800,flexShrink:0}}>2</div>
-            <div>
-               <div style=${{fontSize:14,fontWeight:700,color:"#1C1C1E"}}>Whisper Transkripsi</div>
-               <div style=${{fontSize:13,color:"#8E8E93",lineHeight:1.4,marginTop:4}}>Setiap potongan dikirim ke Groq (whisper-large-v3) untuk diubah menjadi teks mentah secara paralel.</div>
-            </div>
-         </div>
-         <div style=${{display:"flex",gap:12}}>
-            <div style=${{width:26,height:26,borderRadius:13,background:"#1C1C1E",color:"#FFF",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:800,flexShrink:0}}>3</div>
-            <div>
-               <div style=${{fontSize:14,fontWeight:700,color:"#1C1C1E"}}>Llama Timeline (Parsial)</div>
-               <div style=${{fontSize:13,color:"#8E8E93",lineHeight:1.4,marginTop:4}}>Teks mentah langsung diringkas menjadi poin-poin singkat untuk ditayangkan secara real-time.</div>
-            </div>
-         </div>
-         <div style=${{display:"flex",gap:12}}>
-            <div style=${{width:26,height:26,borderRadius:13,background:"linear-gradient(135deg,#BF5AF2,#5856D6)",color:"#FFF",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:800,flexShrink:0}}>4</div>
-            <div>
-               <div style=${{fontSize:14,fontWeight:700,color:"#BF5AF2"}}>Executive Summary Keseluruhan</div>
-               <div style=${{fontSize:13,color:"#8E8E93",lineHeight:1.4,marginTop:4}}>Saat rapat diakhiri, seluruh transkrip digabungkan dan LLM menghasilkan ringkasan eksekutif komprehensif.</div>
-            </div>
-         </div>
-      </div>
-      <div style=${{marginTop:24,paddingTop:16,borderTop:"1px solid rgba(0,0,0,0.06)",fontSize:11,color:"#C7C7CC",textAlign:"center",letterSpacing:"0.5px"}}>
-        v8.0 · iOS 26 Glassmorphism Build
-      </div>
-    </div>
-  </div>`;
-}
-
-/* ═══════════════════════
-   MAIN APP 
-   ═══════════════════════ */
-function App(){
-  var _tab=us("rec"), tab=_tab[0], setTab=_tab[1];
-  var _set=us(DB.getSet()), settings=_set[0], setSettings=_set[1];
-
-  ue(function(){ window.__AK = settings.key; }, [settings.key]);
-  function updSet(k,v){ DB.updSet(k,v); setSettings(DB.getSet()); }
-
-  return h`<div>
-    <div>
-      <div style=${{display: tab==="rec" ? "block" : "none"}}><${RecTab} set=${settings} updSet=${updSet} onSaveComplete=${function(){setTab("hist")}}/></div>
-      <div style=${{display: tab==="hist" ? "block" : "none"}}><${HistTab}/></div>
-      <div style=${{display: tab==="set" ? "block" : "none"}}><${SetTab} set=${settings} updSet=${updSet}/></div>
-    </div>
-
-    <!-- DYNAMIC ISLAND NAVIGATION -->
-    <div className="btab-container">
-      <div className="btab">
-        ${[["rec","mic","Rekam"],["hist","file","Riwayat"],["set","settings","Sistem"]].map(function(t){
-          return h`<button key=${t[0]} className=${tab===t[0]?"on":""} onClick=${function(){setTab(t[0])}}>
-            <${Ic} name=${t[1]} size=${22} color=${tab===t[0]?"#1C1C1E":"#8E8E93"} sw=${tab===t[0]?2.5:2}/>${t[2]}
-          </button>`;
+  </div>
+  <div style=${{display:"flex",gap:10}}>
+    <div style=${{flex:1}}>
+      <div className="caption" style=${{fontSize:11,fontWeight:700,marginBottom:6}}>Bahasa</div>
+      <div className="segment-wrap">
+        ${[["id-ID","ID"],["en-US","EN"]].map(function(l){
+          return h`<button key=${l[0]} className=${"segment-btn"+(set.lang===l[0]?" on":"")} onClick=${function(){updSet("lang",l[0])}}>${l[1]}</button>`;
         })}
       </div>
     </div>
+    <div style=${{flex:1}}>
+      <div className="caption" style=${{fontSize:11,fontWeight:700,marginBottom:6}}>Chunk (dtk)</div>
+      <div className="segment-wrap">
+        ${[15,30,60].map(function(v){
+          return h`<button key=${v} className=${"segment-btn"+((set.chunk||30)===v?" on":"")} onClick=${function(){updSet("chunk",v)}}>${v}</button>`;
+        })}
+      </div>
+    </div>
+  </div>
+</div>` : null}
+
+<!-- LIVE FEED -->
+${hasLive ? h`<div style=${{display:"flex",flexDirection:"column",gap:20,marginTop:8,paddingBottom:20}}>
+  <!-- AI Timeline -->
+  <div>
+    <div className="section-header" style=${{color:"var(--purple)"}}>
+      <${Ic} name="sparkle" size=${14} color="var(--purple)"/> Timeline AI
+    </div>
+    ${notes.length===0 ? h`<div className="caption" style=${{fontStyle:"italic"}}>Menunggu proses AI...</div>` : null}
+    ${notes.map(function(n,i){
+      return h`<div key=${n.id} className="note-card" style=${{animationDelay:i*0.05+"s"}}>
+        <div style=${{fontSize:11,fontWeight:800,color:"var(--purple)",marginBottom:6,letterSpacing:"0.3px"}}>
+          ${fmt(n.time)}
+        </div>
+        <div className="body" style=${{color:"var(--tx)",whiteSpace:"pre-wrap"}}>${n.text}</div>
+      </div>`;
+    })}
+  </div>
+  <!-- Raw Transcript -->
+  <div>
+    <div className="section-header" style=${{color:"var(--indigo)"}}>
+      <${Ic} name="text" size=${14} color="var(--indigo)"/> Transkrip
+    </div>
+    ${fin.length===0 ? h`<div className="caption" style=${{fontStyle:"italic"}}>Belum ada suara terekam...</div>` : null}
+    ${fin.map(function(f,i){
+      return h`<div key=${f.id} className="note-card" style=${{background:"rgba(255,255,255,0.5)",animationDelay:i*0.05+"s"}}>
+        <div style=${{fontSize:11,fontWeight:800,color:"var(--indigo)",marginBottom:6}}>${fmt(f.time)}</div>
+        <div style=${{fontSize:14,lineHeight:1.55,color:"var(--tx2)"}}>${f.text}</div>
+      </div>`;
+    })}
+  </div>
+</div>` : null}
+```
+
   </div>`;
 }
 
-ReactDOM.createRoot(document.getElementById("root")).render(h`<${App}/>`);
+/* ═══════════════════════
+TAB: RIWAYAT
+═══════════════════════ */
+function HistTab(){
+var _h=us(DB.get().history),hist=_h[0],setH=_h[1];
+var _open=us(null),openId=_open[0],setOpen=_open[1];
+ue(function(){setH(DB.get().history)},[]);
+function del(id){if(confirm(“Hapus notulen ini?”)){DB.delHist(id);setH(DB.get().history)}}
+
+if(!hist.length) return h`<div style=${{padding:“100px 20px”,textAlign:“center”}}>
+<div style=${{width:72,height:72,borderRadius:22,background:“rgba(142,142,147,0.08)”,display:“inline-flex”,alignItems:“center”,justifyContent:“center”,marginBottom:20}}>
+<${Ic} name=“file” size=${36} color=“var(–tx4)” sw=${1.5}/>
+</div>
+<div className=“heading-md” style=${{color:“var(–tx3)”,marginBottom:6}}>Belum ada notulen</div>
+<div className="caption">Rapat yang disimpan akan muncul di sini</div>
+
+  </div>`;
+
+return h`<div style=${{maxWidth:520,margin:"0 auto",padding:"24px 16px"}}> <h2 className="heading-xl" style=${{marginBottom:20}}>Riwayat</h2> ${hist.map(function(item){ var isOpen=openId===item.id; return h`<div key=${item.id} className=${isOpen?“glass-card”:“liquid-glass”} style=${{marginBottom:12,overflow:“hidden”,transition:“all 0.3s”}}>
+
+```
+    <!-- Header row -->
+    <div onClick=${function(){setOpen(isOpen?null:item.id)}} style=${{padding:"14px 16px",cursor:"pointer",display:"flex",alignItems:"center",gap:12}}>
+      <div style=${{
+        width:42,height:42,borderRadius:13,flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",
+        background:isOpen?"linear-gradient(135deg,#5856D6,#7B79E8)":"rgba(88,86,214,0.08)"
+      }}>
+        <${Ic} name="file" size=${20} color=${isOpen?"#FFF":"var(--indigo)"} sw=${2}/>
+      </div>
+      <div style=${{flex:1,minWidth:0}}>
+        <div className="heading-md" style=${{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",fontSize:15}}>
+          ${item.title||"Rapat"}
+        </div>
+        <div className="caption" style=${{marginTop:2,fontSize:12}}>
+          ${new Date(item.date).toLocaleDateString("id-ID",{day:"numeric",month:"short",year:"numeric"})} · ${fmt(item.duration)}
+        </div>
+      </div>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--tx4)" strokeWidth="2" strokeLinecap="round"
+        style=${{transform:isOpen?"rotate(90deg)":"none",transition:"0.3s"}}>
+        <path d="M9 18l6-6-6-6"/>
+      </svg>
+    </div>
+
+    <!-- Expanded content -->
+    ${isOpen ? h`<div style=${{padding:"0 16px 18px",animation:"fadeIn .25s"}}>
+      
+      <div style=${{display:"flex",gap:8,marginBottom:18}}>
+        <button onClick=${function(e){e.stopPropagation();del(item.id)}} style=${{
+          display:"inline-flex",alignItems:"center",gap:5,padding:"7px 14px",borderRadius:10,
+          background:"rgba(255,69,58,0.08)",color:"var(--red)",fontSize:12,fontWeight:700,border:"none"
+        }}>
+          <${Ic} name="trash" size=${13} color="var(--red)"/> Hapus
+        </button>
+      </div>
+
+      <!-- EXECUTIVE SUMMARY -->
+      ${item.overall ? h`<div style=${{marginBottom:18}}>
+        <div className="section-header" style=${{color:"var(--purple)"}}>
+          <${Ic} name="sparkle" size=${13} color="var(--purple)"/> Ringkasan Eksekutif
+        </div>
+        <div className="note-card exec-card">
+          <div className="body" style=${{whiteSpace:"pre-wrap"}}>${item.overall}</div>
+        </div>
+      </div>` : null}
+
+      <!-- CHUNK TIMELINE -->
+      ${item.notes ? h`<div style=${{marginBottom:18}}>
+        <div className="section-header" style=${{color:"var(--indigo)"}}>
+          <${Ic} name="clock" size=${13} color="var(--indigo)"/> Timeline
+        </div>
+        <div className="note-card" style=${{background:"rgba(0,0,0,0.015)",border:"none",boxShadow:"none"}}>
+          <div style=${{fontSize:13,lineHeight:1.6,whiteSpace:"pre-wrap",color:"var(--tx2)"}}>${item.notes}</div>
+        </div>
+      </div>` : null}
+
+      <!-- RAW TRANSCRIPT -->
+      <div>
+        <div className="section-header" style=${{color:"var(--tx3)"}}>Transkrip Mentah</div>
+        <div style=${{
+          maxHeight:220,overflowY:"auto",background:"rgba(255,255,255,0.5)",borderRadius:16,
+          padding:14,border:"0.5px solid rgba(0,0,0,0.04)",fontSize:13,lineHeight:1.6,
+          color:"var(--tx2)",whiteSpace:"pre-wrap",
+          WebkitBackdropFilter:"blur(10px)",backdropFilter:"blur(10px)"
+        }}>
+          ${item.transcript||"(kosong)"}
+        </div>
+      </div>
+    </div>` : null}
+  </div>`;
+})}
+```
+
+  </div>`;
+}
+
+/* ═══════════════════════
+TAB: PENGATURAN
+═══════════════════════ */
+function SetTab(p){
+var set=p.set,updSet=p.updSet;
+var _sk=us(false),sk=_sk[0],sSk=_sk[1];
+
+return h`<div style=${{maxWidth:520,margin:“0 auto”,padding:“24px 16px”}}>
+<h2 className="heading-xl" style=${{marginBottom:20}}>Pengaturan</h2>
+
+```
+<!-- API KEY SECTION -->
+<div className="liquid-glass" style=${{padding:20,marginBottom:14}}>
+  <div style=${{display:"flex",alignItems:"center",gap:10,marginBottom:16}}>
+    <div style=${{width:32,height:32,borderRadius:10,background:"rgba(88,86,214,0.08)",display:"flex",alignItems:"center",justifyContent:"center"}}>
+      <${Ic} name="key" size=${16} color="var(--indigo)"/>
+    </div>
+    <span className="heading-md">API Key</span>
+  </div>
+  <div style=${{marginBottom:6}}>
+    <div className="caption" style=${{fontSize:11,fontWeight:700,marginBottom:6}}>Groq API Key</div>
+    <div style=${{position:"relative"}}>
+      <input className="field" type=${sk?"text":"password"} placeholder="gsk_..." value=${set.key}
+        onInput=${function(e){updSet("key",e.target.value)}} style=${{paddingRight:42}}/>
+      <button onClick=${function(){sSk(!sk)}} style=${{
+        position:"absolute",right:6,top:"50%",transform:"translateY(-50%)",border:"none",
+        background:"rgba(0,0,0,0.04)",borderRadius:8,padding:"6px 7px",display:"flex"
+      }}>
+        <${Ic} name="eye" size=${15} color="var(--tx3)"/>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- PIPELINE SECTION -->
+<div className="liquid-glass" style=${{padding:20,marginBottom:14}}>
+  <div style=${{display:"flex",alignItems:"center",gap:10,marginBottom:18}}>
+    <div style=${{width:32,height:32,borderRadius:10,background:"rgba(48,176,199,0.08)",display:"flex",alignItems:"center",justifyContent:"center"}}>
+      <${Ic} name="layers" size=${16} color="var(--teal)"/>
+    </div>
+    <span className="heading-md">Pipeline AI</span>
+  </div>
+
+  <div style=${{display:"flex",flexDirection:"column",gap:18}}>
+    ${[
+      {n:"1",title:"Perekaman & Chunking",desc:"Suara direkam via MediaRecorder dan dipotong setiap "+(set.chunk||30)+" detik.",color:"var(--tx)"},
+      {n:"2",title:"Whisper Transkripsi",desc:"Setiap potongan dikirim ke Groq (whisper-large-v3-turbo) untuk speech-to-text.",color:"var(--tx)"},
+      {n:"3",title:"Llama Timeline",desc:"Teks mentah diringkas menjadi poin singkat secara real-time.",color:"var(--tx)"},
+      {n:"4",title:"Executive Summary",desc:"Seluruh transkrip digabungkan dan LLM menghasilkan ringkasan eksekutif.",color:"var(--purple)",grad:true}
+    ].map(function(step){
+      return h`<div key=${step.n} style=${{display:"flex",gap:12,alignItems:"flex-start"}}>
+        <div style=${{
+          width:26,height:26,borderRadius:13,flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",
+          fontSize:12,fontWeight:800,color:"#FFF",
+          background:step.grad?"linear-gradient(135deg,var(--purple),var(--indigo))":"var(--tx)"
+        }}>${step.n}</div>
+        <div>
+          <div className="heading-md" style=${{fontSize:14,color:step.color}}>${step.title}</div>
+          <div className="caption" style=${{marginTop:3,lineHeight:1.45}}>${step.desc}</div>
+        </div>
+      </div>`;
+    })}
+  </div>
+</div>
+
+<!-- VERSION -->
+<div style=${{textAlign:"center",padding:"12px 0",fontSize:11,color:"var(--tx4)",fontWeight:600,letterSpacing:"0.5px"}}>
+  Notulen AI v9.0 · Liquid Glass Build
+</div>
+```
+
+  </div>`;
+}
+
+/* ═══════════════════════
+MAIN APP
+═══════════════════════ */
+function App(){
+var _tab=us(“rec”),tab=_tab[0],setTab=_tab[1];
+var _set=us(DB.getSet()),settings=_set[0],setSettings=_set[1];
+ue(function(){window.__AK=settings.key},[settings.key]);
+function updSet(k,v){DB.updSet(k,v);setSettings(DB.getSet())}
+
+return h`<div>
+<div style=${{display:tab===“rec”?“block”:“none”}}><${RecTab} set=${settings} updSet=${updSet} onSaveComplete=${function(){setTab(“hist”)}}/></div>
+<div style=${{display:tab===“hist”?“block”:“none”}}><${HistTab}/></div>
+<div style=${{display:tab===“set”?“block”:“none”}}><${SetTab} set=${settings} updSet=${updSet}/></div>
+
+```
+<!-- TAB BAR — iOS 26 FLOATING GLASS -->
+<div className="tab-bar-wrap">
+  <div className="tab-bar">
+    ${[["rec","mic","Rekam"],["hist","file","Riwayat"],["set","settings","Sistem"]].map(function(t){
+      var active=tab===t[0];
+      return h`<button key=${t[0]} className=${active?"active":""} onClick=${function(){setTab(t[0])}}>
+        <${Ic} name=${t[1]} size=${21} color=${active?"var(--tx)":"var(--tx3)"} sw=${active?2.2:1.8}/>
+        ${t[2]}
+      </button>`;
+    })}
+  </div>
+</div>
+```
+
+  </div>`;
+}
+
+ReactDOM.createRoot(document.getElementById(“root”)).render(h`<${App}/>`);
 </script>
+
 </body>
 </html>
