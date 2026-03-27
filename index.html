@@ -152,10 +152,14 @@ function RecTab(p){
   var aiTmRef = ur(null);
   var lastSumLen = ur(0);
   var scrollRef = ur(null);
-  var acRef = ur(null);  // AudioContext
-  var msRef = ur(null);  // MediaStream
+  var acRef = ur(null);
+  var msRef = ur(null);
+  var isRecRef = ur(false); // ref mirror — survives closures
 
-  /* ── KEY: Initialize SR in useEffect with isRec dependency ── */
+  // Keep ref in sync with state
+  isRecRef.current = isRec;
+
+  /* ── Create SR once on mount (and when lang changes) ── */
   ue(function(){
     var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if(!SR) return;
@@ -181,26 +185,22 @@ function RecTab(p){
 
     sr.onerror = function(e){
       console.log("SR Error:", e.error);
-      // Permission is already handled by getUserMedia, so just log
-      if(e.error === "not-allowed"){
-        console.log("SR permission issue — getUserMedia should have handled this");
-      }
     };
 
     sr.onend = function(){
-      // Auto restart if still recording
-      if(isRec){
-        try{ sr.start(); } catch(ex){}
+      // Auto restart if still recording — use REF not state (avoids stale closure)
+      if(isRecRef.current){
+        setTimeout(function(){
+          if(isRecRef.current){
+            try{ sr.start(); } catch(ex){ console.log("SR restart err:", ex); }
+          }
+        }, 300);
       }
     };
 
     srRef.current = sr;
-
-    // Cleanup: stop SR when component re-renders with new isRec
-    return function(){
-      try{ sr.stop(); } catch(e){}
-    };
-  }, [set.lang, isRec]);
+    // NO cleanup return — don't kill running SR on re-render
+  }, [set.lang]); // Only recreate when language changes
 
   // Auto-scroll transcript
   ue(function(){
@@ -232,8 +232,7 @@ function RecTab(p){
       alert("Silakan isi API Key Groq di tab Pengaturan terlebih dahulu.");
       return;
     }
-    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if(!SR){
+    if(!srRef.current){
       alert("Browser tidak mendukung Speech Recognition.\nGunakan Chrome atau Edge.");
       return;
     }
@@ -241,20 +240,30 @@ function RecTab(p){
     // Reset state
     setFin(""); setInt(""); setNotes([]); setTime(0); setSaved(false);
     lastSumLen.current = 0;
-    setRec(true); // triggers useEffect → creates SR instance
 
-    // Start SR after useEffect tick
-    setTimeout(function(){
-      if(srRef.current){
-        try{ srRef.current.start(); } catch(e){ console.log("SR start error:", e); }
-      }
-    }, 150);
+    // Start SR directly — no setTimeout race condition
+    try{
+      srRef.current.start();
+    } catch(e){
+      console.log("SR start error, recreating:", e);
+      // If SR is in bad state, recreate it
+      var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      var sr = new SR();
+      sr.continuous = true; sr.interimResults = true; sr.lang = set.lang;
+      sr.onresult = srRef.current.onresult;
+      sr.onerror = srRef.current.onerror;
+      sr.onend = srRef.current.onend;
+      srRef.current = sr;
+      try{ sr.start(); } catch(e2){ alert("Gagal memulai Speech Recognition: " + e2.message); return; }
+    }
+
+    setRec(true);
 
     // Timer & AI interval
     tmRef.current = setInterval(function(){ setTime(function(t){ return t+1; }); }, 1000);
     aiTmRef.current = setInterval(function(){ triggerAI(); }, set.interval * 60000);
 
-    // Try to setup audio visualizer (optional, won't block recording)
+    // Audio visualizer (optional — failure won't affect recording)
     if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
       navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
         msRef.current = stream;
@@ -265,16 +274,14 @@ function RecTab(p){
         an.fftSize = 2048; an.smoothingTimeConstant = 0.8;
         src.connect(an);
         setAn(an);
-      }).catch(function(e){
-        // Visualizer won't work but SR still runs
-        console.log("Audio visualizer unavailable:", e.message);
-      });
+      }).catch(function(e){ console.log("Visualizer unavailable:", e.message); });
     }
   }
 
   /* ── Stop Recording ── */
   function stopRec(){
-    setRec(false); // This triggers useEffect cleanup → sr.stop()
+    setRec(false); // isRecRef.current becomes false → onend won't restart
+    if(srRef.current){ try{ srRef.current.stop(); } catch(e){} }
     clearInterval(tmRef.current);
     clearInterval(aiTmRef.current);
     // Clean up audio visualizer
