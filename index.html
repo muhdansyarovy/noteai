@@ -107,6 +107,7 @@ function fmt(s){return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60)
    ═══════════════════════════════════════ */
 function RecTab(p){
   var set = p.set;
+  var updSet = p.updSet;
   var _rec=us(false), isRec=_rec[0], setRec=_rec[1];
   var _fin=us(""), fin=_fin[0], setFin=_fin[1];
   var _int=us(""), int=_int[0], setInt=_int[1];
@@ -309,16 +310,35 @@ function RecTab(p){
             Baru
           </button>` : null}
         </div>
-
-        ${!isRec && time===0 && h`<div style=${{display:"flex",gap:6,marginTop:12,justifyContent:"center"}}>
-          <div className="pill" style=${{background:"rgba(0,0,0,0.04)",color:"#8E8E93",fontSize:10}}>
-            <${Ic} name="globe" size=${10} color="#8E8E93"/>${set.lang==="id-ID"?"Indonesia":"English"}
-          </div>
-          <div className="pill" style=${{background:"rgba(0,0,0,0.04)",color:"#8E8E93",fontSize:10}}>
-            <${Ic} name="clock" size=${10} color="#8E8E93"/>AI tiap ${set.interval}m
-          </div>
-        </div>`}
       </div>
+
+      <!-- QUICK SETTINGS (idle only) -->
+      ${!isRec && time===0 ? h`<div className="gl" style=${{padding:16,marginBottom:14}}>
+        <div style=${{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
+          <div style=${{width:28,height:28,borderRadius:8,background:"rgba(88,86,214,0.1)",display:"flex",alignItems:"center",justifyContent:"center",color:"#5856D6"}}><${Ic} name="settings" size=${15}/></div>
+          <span style=${{fontWeight:600,fontSize:13}}>Pengaturan Cepat</span>
+        </div>
+        <div style=${{display:"flex",gap:8}}>
+          <div style=${{flex:1}}>
+            <div style=${{fontSize:10,fontWeight:600,color:"#8E8E93",marginBottom:4}}>Bahasa</div>
+            <div style=${{display:"flex",gap:4}}>
+              ${[["id-ID","ID"],["en-US","EN"]].map(function(l){
+                var on=set.lang===l[0];
+                return h`<button key=${l[0]} onClick=${function(){updSet("lang",l[0])}} style=${{flex:1,padding:"8px",borderRadius:8,border:"1px solid "+(on?"rgba(88,86,214,0.3)":"rgba(0,0,0,0.08)"),background:on?"rgba(88,86,214,0.08)":"rgba(255,255,255,0.5)",fontSize:12,fontWeight:600,color:on?"#5856D6":"#8E8E93",fontFamily:"inherit"}}>${l[1]}</button>`;
+              })}
+            </div>
+          </div>
+          <div style=${{flex:1}}>
+            <div style=${{fontSize:10,fontWeight:600,color:"#8E8E93",marginBottom:4}}>Interval AI</div>
+            <div style=${{display:"flex",gap:4}}>
+              ${[[1,"1m"],[2,"2m"],[5,"5m"]].map(function(v){
+                var on=set.interval===v[0];
+                return h`<button key=${v[0]} onClick=${function(){updSet("interval",v[0])}} style=${{flex:1,padding:"8px",borderRadius:8,border:"1px solid "+(on?"rgba(88,86,214,0.3)":"rgba(0,0,0,0.08)"),background:on?"rgba(88,86,214,0.08)":"rgba(255,255,255,0.5)",fontSize:12,fontWeight:600,color:on?"#5856D6":"#8E8E93",fontFamily:"inherit"}}>${v[1]}</button>`;
+              })}
+            </div>
+          </div>
+        </div>
+      </div>` : null}
 
       <!-- LIVE TRANSCRIPT -->
       ${(fin || int) ? h`<div style=${{marginBottom:14}}>
@@ -463,60 +483,90 @@ function HistTab(){
 /* ═══════════════════════
    TAB: PENGATURAN
    ═══════════════════════ */
+function SegBtn(p){
+  var on=p.on;
+  return h`<button onClick=${p.onClick} style=${{flex:p.flex||1,padding:p.pad||"10px 4px",borderRadius:10,border:"1px solid "+(on?"rgba(88,86,214,0.3)":"rgba(0,0,0,0.08)"),background:on?"rgba(88,86,214,0.08)":"rgba(255,255,255,0.5)",fontSize:p.fs||12,fontWeight:600,color:on?"#5856D6":"#8E8E93",fontFamily:"inherit",display:"flex",alignItems:"center",justifyContent:"center",gap:4}}>${p.children}</button>`;
+}
+
 function SetTab(p){
   var set=p.set, updSet=p.updSet;
   var _sk=us(false), sk=_sk[0], sSk=_sk[1];
 
   return h`<div style=${{padding:"16px"}}>
-    <h2 style=${{fontSize:20,fontWeight:800,marginBottom:14}}>Pengaturan</h2>
+    <div style=${{fontWeight:700,fontSize:17,marginBottom:12}}>Pengaturan</div>
 
-    <div className="gl" style=${{padding:16,marginBottom:14,background:"#FFF"}}>
+    <!-- API KEY -->
+    <div className="gl" style=${{padding:16,marginBottom:12}}>
       <div style=${{display:"flex",alignItems:"center",gap:8,marginBottom:12}}>
-        <div style=${{width:30,height:30,borderRadius:8,background:"rgba(255,159,10,0.1)",color:"#FF9F0A",display:"flex",alignItems:"center",justifyContent:"center"}}><${Ic} name="key" size=${16}/></div>
-        <div style=${{fontWeight:600,fontSize:15}}>API Key Groq</div>
-      </div>
-      <p style=${{fontSize:12,color:"#8E8E93",marginBottom:10}}>Dibutuhkan untuk AI Summarizer. Daftar gratis di console.groq.com</p>
-      <div style=${{position:"relative"}}>
-        <input class="fi" type=${sk?"text":"password"} placeholder="gsk_..." value=${set.key} onInput=${function(e){updSet("key",e.target.value)}} style=${{paddingRight:40}}/>
-        <button onClick=${function(){sSk(!sk)}} style=${{position:"absolute",right:8,top:"50%",transform:"translateY(-50%)",border:"none",background:"transparent",padding:4,cursor:"pointer"}}>
-          <${Ic} name="eye" size=${14} color="#C7C7CC"/>
-        </button>
-      </div>
-      ${set.key ? h`<div style=${{fontSize:10,color:"#32D74B",marginTop:4,display:"flex",alignItems:"center",gap:3}}>
-        <${Ic} name="check" size=${10} color="#32D74B"/>Key tersimpan
-      </div>` : null}
-    </div>
-
-    <div className="gl" style=${{padding:16,marginBottom:14,background:"#FFF"}}>
-      <div style=${{display:"flex",alignItems:"center",gap:8,marginBottom:14}}>
-        <div style=${{width:30,height:30,borderRadius:8,background:"rgba(50,215,75,0.1)",color:"#32D74B",display:"flex",alignItems:"center",justifyContent:"center"}}><${Ic} name="settings" size=${16}/></div>
-        <div style=${{fontWeight:600,fontSize:15}}>Preferensi Rapat</div>
+        <div style=${{width:28,height:28,borderRadius:8,background:"rgba(88,86,214,0.1)",display:"flex",alignItems:"center",justifyContent:"center",color:"#5856D6"}}><${Ic} name="key" size=${15}/></div>
+        <span style=${{fontWeight:600,fontSize:14}}>API Key</span>
       </div>
 
-      <div style=${{marginBottom:14}}>
-        <div style=${{fontSize:12,fontWeight:600,color:"#8E8E93",marginBottom:6}}>Bahasa Percakapan</div>
-        <select class="fi" value=${set.lang} onChange=${function(e){updSet("lang",e.target.value)}}>
-          <option value="id-ID">Bahasa Indonesia</option>
-          <option value="en-US">English (US)</option>
-          <option value="en-GB">English (UK)</option>
-        </select>
+      <div style=${{marginBottom:10}}>
+        <div style=${{fontSize:10,fontWeight:600,color:"#8E8E93",marginBottom:4}}>Provider</div>
+        <div style=${{display:"flex",gap:4}}>
+          ${[["groq","Groq (gratis)"],["anthropic","Anthropic"]].map(function(pr){
+            var on=set.provider===pr[0];
+            return h`<${SegBtn} key=${pr[0]} on=${on} onClick=${function(){updSet("provider",pr[0])}}>${pr[1]}<//>`;
+          })}
+        </div>
       </div>
 
       <div>
-        <div style=${{fontSize:12,fontWeight:600,color:"#8E8E93",marginBottom:6}}>Interval AI Merangkum</div>
-        <select class="fi" value=${set.interval} onChange=${function(e){updSet("interval",parseInt(e.target.value))}}>
-          <option value="1">Setiap 1 Menit</option>
-          <option value="2">Setiap 2 Menit</option>
-          <option value="3">Setiap 3 Menit</option>
-          <option value="5">Setiap 5 Menit</option>
-        </select>
-        <p style=${{fontSize:11,color:"#C7C7CC",marginTop:6}}>AI akan merangkum poin penting dari percakapan baru setiap interval ini.</p>
+        <div style=${{fontSize:10,fontWeight:600,color:"#8E8E93",marginBottom:3}}>${set.provider==="groq"?"Groq API Key":"Anthropic API Key"}</div>
+        <div style=${{position:"relative"}}>
+          <input class="fi" type=${sk?"text":"password"} placeholder=${set.provider==="groq"?"gsk_...":"sk-ant-..."} value=${set.key} onInput=${function(e){updSet("key",e.target.value)}} style=${{paddingRight:40}}/>
+          <button onClick=${function(){sSk(!sk)}} style=${{position:"absolute",right:6,top:"50%",transform:"translateY(-50%)",border:"none",background:"transparent",padding:4}}>
+            <${Ic} name="eye" size=${14} color="#C7C7CC"/>
+          </button>
+        </div>
+        ${set.key ? h`<div style=${{fontSize:10,color:"#32D74B",marginTop:4,display:"flex",alignItems:"center",gap:3}}>
+          <${Ic} name="check" size=${10} color="#32D74B"/>Key tersimpan
+        </div>` : null}
+        <div style=${{fontSize:11,color:"#C7C7CC",marginTop:6}}>Daftar gratis di console.groq.com</div>
       </div>
     </div>
 
-    <div className="gl" style=${{padding:16,background:"#FFF"}}>
-      <div style=${{fontSize:12,color:"#636366",lineHeight:1.6}}>Notulen AI v4 — Speech Recognition + LLM Summarizer</div>
-      <div style=${{marginTop:8,padding:"8px 10px",borderRadius:8,background:"rgba(255,69,58,0.04)",border:"1px solid rgba(255,69,58,0.08)",fontSize:11,color:"#FF453A"}}>Data tersimpan di perangkat (localStorage). Bukan pengganti notulen resmi.</div>
+    <!-- BAHASA -->
+    <div className="gl" style=${{padding:16,marginBottom:12}}>
+      <div style=${{display:"flex",alignItems:"center",gap:8,marginBottom:12}}>
+        <div style=${{width:28,height:28,borderRadius:8,background:"rgba(48,176,199,0.1)",display:"flex",alignItems:"center",justifyContent:"center",color:"#30B0C7"}}><${Ic} name="globe" size=${15}/></div>
+        <span style=${{fontWeight:600,fontSize:14}}>Bahasa Transkripsi</span>
+      </div>
+      <div style=${{display:"flex",flexDirection:"column",gap:4}}>
+        ${[["id-ID","Bahasa Indonesia"],["en-US","English (US)"],["en-GB","English (UK)"]].map(function(l){
+          var on=set.lang===l[0];
+          return h`<button key=${l[0]} onClick=${function(){updSet("lang",l[0])}} style=${{padding:"10px 12px",borderRadius:12,border:"1px solid "+(on?"rgba(48,176,199,0.3)":"rgba(0,0,0,0.06)"),background:on?"rgba(48,176,199,0.06)":"rgba(255,255,255,0.5)",fontSize:13,fontWeight:on?600:400,color:on?"#30B0C7":"#48484A",textAlign:"left",display:"flex",alignItems:"center",justifyContent:"space-between",fontFamily:"inherit"}}>
+            ${l[1]}${on?h`<${Ic} name="check" size=${14} color="#30B0C7"/>`:null}
+          </button>`;
+        })}
+      </div>
+    </div>
+
+    <!-- INTERVAL -->
+    <div className="gl" style=${{padding:16,marginBottom:12}}>
+      <div style=${{display:"flex",alignItems:"center",gap:8,marginBottom:12}}>
+        <div style=${{width:28,height:28,borderRadius:8,background:"rgba(255,159,10,0.1)",display:"flex",alignItems:"center",justifyContent:"center",color:"#FF9F0A"}}><${Ic} name="clock" size=${15}/></div>
+        <span style=${{fontWeight:600,fontSize:14}}>Interval Ringkasan AI</span>
+      </div>
+      <div style=${{fontSize:11,color:"#8E8E93",marginBottom:8}}>AI otomatis meringkas percakapan setiap interval ini.</div>
+      <div style=${{display:"flex",gap:4}}>
+        ${[[1,"1 menit"],[2,"2 menit"],[3,"3 menit"],[5,"5 menit"]].map(function(v){
+          var on=set.interval===v[0];
+          return h`<button key=${v[0]} onClick=${function(){updSet("interval",v[0])}} style=${{flex:1,padding:"10px 4px",borderRadius:10,border:"1px solid "+(on?"rgba(255,159,10,0.3)":"rgba(0,0,0,0.08)"),background:on?"rgba(255,159,10,0.06)":"rgba(255,255,255,0.5)",fontSize:12,fontWeight:600,color:on?"#FF9F0A":"#8E8E93",fontFamily:"inherit"}}>${v[1]}</button>`;
+        })}
+      </div>
+    </div>
+
+    <!-- TENTANG -->
+    <div className="gl" style=${{padding:16}}>
+      <div style=${{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
+        <div style=${{width:28,height:28,borderRadius:8,background:"rgba(88,86,214,0.1)",display:"flex",alignItems:"center",justifyContent:"center",color:"#5856D6"}}><${Ic} name="bot" size=${15}/></div>
+        <span style=${{fontWeight:600,fontSize:14}}>Tentang</span>
+      </div>
+      <div style=${{fontSize:12,color:"#636366",lineHeight:1.6}}>Notulen AI mentranskripsi percakapan real-time (Web Speech API) dan meringkas poin penting menggunakan AI (Groq/Anthropic).</div>
+      <div style=${{marginTop:8,fontSize:11,color:"#8E8E93"}}>v4.0 · Speech Recognition + LLM</div>
+      <div style=${{marginTop:6,padding:"8px 10px",borderRadius:8,background:"rgba(255,69,58,0.04)",border:"1px solid rgba(255,69,58,0.08)",fontSize:11,color:"#FF453A"}}>Data tersimpan di perangkat (localStorage). Bukan pengganti notulen resmi.</div>
     </div>
   </div>`;
 }
@@ -537,7 +587,7 @@ function App(){
 
   return h`<div>
     <div style=${{paddingTop:10}}>
-      ${tab==="rec" ? h`<${RecTab} set=${settings}/>` : null}
+      ${tab==="rec" ? h`<${RecTab} set=${settings} updSet=${updSet}/>` : null}
       ${tab==="hist" ? h`<${HistTab}/>` : null}
       ${tab==="set" ? h`<${SetTab} set=${settings} updSet=${updSet}/>` : null}
     </div>
