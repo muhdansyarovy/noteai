@@ -5,988 +5,391 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Notulen AI — Smart Meeting Notes</title>
-
-<!-- ═══ PWA META (iOS 26 + Android) ═══ -->
-
-<meta name="theme-color" content="#5856D6" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#3A38B0" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Notulen AI">
-<meta name="application-name" content="Notulen AI">
-<meta name="description" content="Smart Meeting Notes — Transkripsi real-time & Executive Summary bertenaga AI">
-<meta name="mobile-web-app-capable" content="yes">
-
-<!-- Manifest & Icon injected by JS below -->
-
-<link rel="manifest" id="pwa-manifest">
-<link rel="apple-touch-icon" id="pwa-aticon">
-<link rel="apple-touch-startup-image" id="pwa-splash">
-
 <style>
-/* ═══ DESIGN TOKENS: iOS 26 ═══ */
 :root {
-  /* Surface */
-  --bg:       #ECEEFF;
-  --bg2:      #F5F4FF;
-  --tx:       #1C1C1E;
-  --tx2:      #636366;
-  --tx3:      #AEAEB2;
-
-  /* Brand */
-  --indigo:   #5856D6;
-  --indigo-l: #8B89F0;
-  --purple:   #BF5AF2;
-  --teal:     #30B0C7;
-  --red:      #FF453A;
-  --green:    #32D74B;
-  --orange:   #FF9F0A;
-
-  /* Liquid Glass */
-  --gl-bg:    rgba(255,255,255,0.52);
-  --gl-bd:    rgba(255,255,255,0.80);
-  --gl-hi:    rgba(255,255,255,0.92); /* specular top highlight */
-  --gl-sh:    0 20px 60px rgba(88,86,214,0.07), 0 4px 16px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.03);
-  --gl-blur:  blur(64px) saturate(220%) brightness(1.03);
-
-  /* Nav glass */
-  --nav-bg:   rgba(255,255,255,0.72);
-  --nav-bd:   rgba(255,255,255,0.6);
+  --bg: #F2F2F7; --tx: #1C1C1E; --txm: #8E8E93; 
+  --gl: rgba(255,255,255,0.55); --gb: rgba(255,255,255,0.8);
+  --blue: #0A84FF; --red: #FF453A; --purple: #BF5AF2; 
+  --green: #32D74B; --orange: #FF9F0A; --teal: #30B0C7; --indigo: #5856D6;
 }
-
-/* ═══ RESET & BASE ═══ */
-*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+* { margin:0; padding:0; box-sizing:border-box; }
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', sans-serif;
-  background: var(--bg);
-  color: var(--tx);
-  min-height: 100vh;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  padding-bottom: 108px;
-  overflow-x: hidden;
-  text-rendering: optimizeLegibility;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  min-height: 100vh; background: #E8E8ED; color: var(--tx);
+  -webkit-font-smoothing: antialiased; padding-bottom: 90px; overflow-x: hidden;
 }
-
-/* ═══ ANIMATED MESH BACKGROUND ═══ */
-.mesh {
-  position: fixed; inset: 0; z-index: -1;
-  background:
-    radial-gradient(ellipse 80% 55% at 15% -5%,  rgba(120,119,230,0.28) 0%, transparent 60%),
-    radial-gradient(ellipse 55% 45% at 92% 18%,  rgba(48,176,199,0.22)  0%, transparent 55%),
-    radial-gradient(ellipse 65% 55% at 8%  85%,  rgba(191,90,242,0.16)  0%, transparent 60%),
-    radial-gradient(ellipse 50% 40% at 85% 88%,  rgba(88,86,214,0.14)   0%, transparent 55%),
-    radial-gradient(ellipse 70% 60% at 50% 50%,  rgba(240,239,255,1)    0%, #E8E7FF         100%);
+.mesh-bg {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;
+  background-image: 
+    radial-gradient(at 10% 0%, rgba(88,86,214,0.12) 0, transparent 40%), 
+    radial-gradient(at 90% 10%, rgba(48,176,199,0.1) 0, transparent 40%),
+    radial-gradient(at 50% 90%, rgba(191,90,242,0.08) 0, transparent 50%);
+  filter: blur(40px);
 }
-.mesh-orb {
-  position: fixed; z-index: -1; border-radius: 50%;
-  filter: blur(80px); pointer-events: none; will-change: transform;
-}
-.mesh-orb-1 { width:400px; height:400px; top:-100px; left:-80px; background:radial-gradient(rgba(120,119,230,0.18),transparent 70%); animation: float1 18s ease-in-out infinite; }
-.mesh-orb-2 { width:350px; height:350px; top:40%; right:-100px; background:radial-gradient(rgba(48,176,199,0.16),transparent 70%); animation: float2 22s ease-in-out infinite; }
-.mesh-orb-3 { width:300px; height:300px; bottom:-80px; left:30%; background:radial-gradient(rgba(191,90,242,0.14),transparent 70%); animation: float3 20s ease-in-out infinite; }
-
-@keyframes float1 { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(30px,-20px) scale(1.05)} 66%{transform:translate(-15px,25px) scale(0.97)} }
-@keyframes float2 { 0%,100%{transform:translate(0,0) scale(1)} 40%{transform:translate(-25px,15px) scale(1.04)} 70%{transform:translate(10px,-20px) scale(0.98)} }
-@keyframes float3 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(20px,-30px) scale(1.06)} }
-
-/* ═══ LIQUID GLASS BASE ═══ */
+@keyframes slideUp { from{opacity:0;transform:translateY(24px) scale(0.98)} to{opacity:1;transform:translateY(0) scale(1)} }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+@keyframes ripple { 0%{box-shadow:0 0 0 0 rgba(255,69,58,0.2)} 70%{box-shadow:0 0 0 20px rgba(255,69,58,0)} 100%{box-shadow:0 0 0 0 rgba(255,69,58,0)} }
 .gl {
-  background: var(--gl-bg);
-  -webkit-backdrop-filter: var(--gl-blur);
-  backdrop-filter: var(--gl-blur);
-  border: 1px solid var(--gl-bd);
-  border-radius: 28px;
-  box-shadow:
-    inset 0 1.5px 0 var(--gl-hi),     /* ← iOS 26 specular top highlight */
-    inset 0 -0.5px 0 rgba(255,255,255,0.25),
-    inset 1px 0 0 rgba(255,255,255,0.35),
-    inset -1px 0 0 rgba(255,255,255,0.35),
-    var(--gl-sh);
+  background: var(--gl); -webkit-backdrop-filter: blur(60px) saturate(220%); backdrop-filter: blur(60px) saturate(220%);
+  border: 1px solid rgba(255,255,255,0.6); border-radius: 28px;
+  box-shadow: 0 10px 40px rgba(0,0,0,.03), inset 0 1px 1px rgba(255,255,255,.9);
 }
-.gl-dark {
-  background: rgba(26,26,38,0.78);
-  -webkit-backdrop-filter: blur(48px) saturate(180%);
-  backdrop-filter: blur(48px) saturate(180%);
-  border: 1px solid rgba(255,255,255,0.12);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.1),
-    0 24px 64px rgba(0,0,0,0.25),
-    0 4px 16px rgba(0,0,0,0.18);
+.pill { border-radius: 100px; padding: 4px 12px; display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; }
+button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; transition: all .15s cubic-bezier(0.4, 0, 0.2, 1); font-family: inherit; cursor: pointer; }
+button:active { transform: scale(.95); opacity: 0.8; }
+button:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+.btab-container { position: fixed; bottom: env(safe-area-inset-bottom, 16px); left: 16px; right: 16px; z-index: 100; display: flex; justify-content: center; }
+.btab {
+  display: flex; background: rgba(255,255,255,0.75); -webkit-backdrop-filter: blur(40px) saturate(200%); backdrop-filter: blur(40px) saturate(200%);
+  border: 1px solid rgba(255,255,255,0.5); padding: 6px; border-radius: 100px; box-shadow: 0 8px 32px rgba(0,0,0,0.08); gap: 4px;
 }
-.gl-inset {
-  background: rgba(0,0,0,0.04);
-  border: 1px solid rgba(0,0,0,0.06);
-  border-radius: 16px;
-  box-shadow: inset 0 2px 6px rgba(0,0,0,0.04);
+.btab button {
+  flex: 1; min-width: 80px; border: none; background: transparent; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 8px 16px; font-size: 10px; font-weight: 600; color: #8E8E93; border-radius: 100px; transition: 0.3s;
 }
-
-/* ═══ PILLS & BADGES ═══ */
-.pill {
-  display: inline-flex; align-items: center; gap: 5px;
-  padding: 4px 12px; border-radius: 100px;
-  font-size: 11px; font-weight: 700; letter-spacing: 0.2px;
-}
-.pill-live { background: rgba(50,215,75,0.14); color: var(--green); }
-.pill-ai   { background: rgba(191,90,242,0.14); color: var(--purple); }
-.pill-sys  { background: rgba(88,86,214,0.12); color: var(--indigo); }
-.pill-err  { background: rgba(255,69,58,0.12); color: var(--red); }
-
-/* ═══ BUTTONS ═══ */
-button {
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-  font-family: inherit;
-  cursor: pointer;
-  border: none;
-  outline: none;
-  transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.12s;
-}
-button:active { transform: scale(0.94) !important; opacity: 0.82; }
-button:disabled { opacity: 0.45; cursor: not-allowed; transform: none !important; }
-
-/* Primary action buttons */
-.btn-primary {
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  width: 100%; padding: 17px 20px; border-radius: 20px;
-  font-size: 17px; font-weight: 700; letter-spacing: -0.2px; color: #fff;
-  box-shadow: 0 8px 32px rgba(88,86,214,0.35), 0 2px 8px rgba(88,86,214,0.2), inset 0 1px 0 rgba(255,255,255,0.22);
-  background: linear-gradient(155deg, #7B79E8 0%, #5856D6 45%, #4A48C8 100%);
-  transition: transform 0.15s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.15s;
-}
-.btn-primary:hover { box-shadow: 0 12px 40px rgba(88,86,214,0.45), 0 3px 12px rgba(88,86,214,0.25), inset 0 1px 0 rgba(255,255,255,0.22); }
-.btn-stop {
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  width: 100%; padding: 17px 20px; border-radius: 20px;
-  font-size: 17px; font-weight: 700; letter-spacing: -0.2px; color: #fff;
-  background: linear-gradient(155deg, #FF6B63 0%, #FF453A 50%, #E53935 100%);
-  box-shadow: 0 8px 32px rgba(255,69,58,0.4), 0 2px 8px rgba(255,69,58,0.2), inset 0 1px 0 rgba(255,255,255,0.2);
-}
-
-/* ═══ FORM INPUTS ═══ */
-.fi {
-  width: 100%; padding: 14px 16px;
-  border-radius: 14px; border: 1px solid rgba(0,0,0,0.07);
-  background: rgba(255,255,255,0.6);
-  font-family: inherit; font-size: 15px; font-weight: 500; color: var(--tx);
-  outline: none; transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
-  -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
-}
-.fi:focus {
-  border-color: rgba(88,86,214,0.5);
-  background: rgba(255,255,255,0.85);
-  box-shadow: 0 0 0 4px rgba(88,86,214,0.12), inset 0 1px 3px rgba(0,0,0,0.03);
-}
-.fi::placeholder { color: var(--tx3); font-weight: 400; }
-
-/* ═══ CARDS ═══ */
-.card {
-  background: rgba(255,255,255,0.75);
-  border: 1px solid rgba(0,0,0,0.04);
-  border-radius: 18px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.03), 0 1px 4px rgba(0,0,0,0.02);
-  overflow: hidden;
-}
-.card-chunk {
-  background: rgba(255,255,255,0.7);
-  border: 1px solid rgba(0,0,0,0.04);
-  border-radius: 16px;
-  padding: 14px;
-  margin-bottom: 10px;
-  box-shadow: 0 3px 12px rgba(0,0,0,0.025);
-  animation: slideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-/* ═══ ANIMATIONS ═══ */
-@keyframes slideUp   { from{opacity:0;transform:translateY(18px) scale(0.97)} to{opacity:1;transform:none} }
-@keyframes fadeIn    { from{opacity:0} to{opacity:1} }
-@keyframes scaleIn   { from{opacity:0;transform:scale(0.92)} to{opacity:1;transform:none} }
-@keyframes pulse     { 0%,100%{opacity:1} 50%{opacity:0.35} }
-@keyframes rippleRec { 0%{box-shadow:0 0 0 0 rgba(255,69,58,0.3)} 70%{box-shadow:0 0 0 28px rgba(255,69,58,0)} 100%{box-shadow:0 0 0 0 rgba(255,69,58,0)} }
-@keyframes spin      { to{transform:rotate(360deg)} }
-@keyframes breathe   { 0%,100%{transform:scale(1)} 50%{transform:scale(1.03)} }
-@keyframes shimmer   { 0%{background-position:-200% center} 100%{background-position:200% center} }
-
-.spinner {
-  width: 16px; height: 16px; border-radius: 50%;
-  border: 2.5px solid rgba(191,90,242,0.25);
-  border-top-color: var(--purple);
-  animation: spin 0.9s linear infinite; display: inline-block;
-}
-
-/* ═══ FLOATING NAV — iOS 26 FLOATING ISLAND ═══ */
-.nav-wrap {
-  position: fixed;
-  bottom: max(env(safe-area-inset-bottom, 0px) + 12px, 20px);
-  left: 50%; transform: translateX(-50%);
-  z-index: 200;
-  width: min(calc(100vw - 32px), 380px);
-}
-.nav-pill {
-  display: flex; align-items: center;
-  background: rgba(255,255,255,0.78);
-  -webkit-backdrop-filter: blur(48px) saturate(220%);
-  backdrop-filter: blur(48px) saturate(220%);
-  border: 1px solid rgba(255,255,255,0.65);
-  border-radius: 100px;
-  padding: 5px;
-  gap: 3px;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.9),
-    0 20px 60px rgba(88,86,214,0.1),
-    0 6px 24px rgba(0,0,0,0.07),
-    0 2px 6px rgba(0,0,0,0.05);
-}
-.nav-btn {
-  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
-  padding: 8px 12px; border-radius: 100px;
-  background: transparent; color: var(--tx3);
-  font-size: 10px; font-weight: 600; letter-spacing: 0.2px;
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-.nav-btn.on {
-  background: rgba(255,255,255,0.9);
-  color: var(--tx);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,1);
-}
-.nav-dot {
-  width: 5px; height: 5px; border-radius: 50%;
-  background: var(--indigo);
-  position: absolute; bottom: 2px;
-  transition: opacity 0.2s;
-}
-
-/* ═══ RECORDING ISLAND ═══ */
-.rec-island {
-  border-radius: 32px;
-  padding: 28px 24px 24px;
-  text-align: center;
-  transition: all 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
-  position: relative;
-  overflow: hidden;
-}
-.rec-island.idle {}
-.rec-island.active { border-color: rgba(255,69,58,0.2); }
-.rec-island.active::before {
-  content: '';
-  position: absolute; inset: 0; border-radius: inherit;
-  background: linear-gradient(160deg, rgba(255,69,58,0.04), transparent 60%);
-  pointer-events: none;
-}
-
-.rec-avatar {
-  width: 96px; height: 96px; border-radius: 48px;
-  display: inline-flex; align-items: center; justify-content: center;
-  margin-bottom: 16px;
-  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-  position: relative;
-}
-.rec-avatar.idle {
-  background: rgba(88,86,214,0.1);
-  color: var(--indigo);
-}
-.rec-avatar.active {
-  background: rgba(255,69,58,0.12);
-  color: var(--red);
-  animation: rippleRec 2s ease-out infinite;
-}
-.rec-avatar.active::after {
-  content: '';
-  position: absolute; inset: -6px;
-  border-radius: 54px;
-  border: 1.5px solid rgba(255,69,58,0.25);
-  animation: breathe 2s ease-in-out infinite;
-}
-
-.rec-timer {
-  font-size: 44px; font-weight: 800; letter-spacing: -2px;
-  font-variant-numeric: tabular-nums;
-  transition: color 0.3s;
-  line-height: 1;
-  margin-bottom: 12px;
-}
-.rec-timer.idle { color: var(--tx); }
-.rec-timer.active { color: var(--red); }
-
-/* ═══ LEVEL METER ═══ */
-.meter-wrap {
-  margin: 16px -4px 20px;
-  border-radius: 12px; overflow: hidden;
-  height: 48px;
-  background: rgba(0,0,0,0.04);
-  border: 1px solid rgba(0,0,0,0.05);
-  position: relative;
-}
-
-/* ═══ LIVE FEED COLUMNS ═══ */
-.feed-col-head {
-  font-size: 10px; font-weight: 800; letter-spacing: 0.8px;
-  text-transform: uppercase; margin-bottom: 10px;
-  display: flex; align-items: center; gap: 6px;
-}
-
-/* ═══ HISTORY CARD ═══ */
-.hist-card {
-  background: rgba(255,255,255,0.72);
-  border: 1px solid rgba(255,255,255,0.85);
-  border-radius: 22px;
-  margin-bottom: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(88,86,214,0.05), 0 1px 4px rgba(0,0,0,0.03);
-  transition: box-shadow 0.25s, transform 0.25s;
-  animation: slideUp 0.4s cubic-bezier(0.16,1,0.3,1) both;
-}
-.hist-card:hover { box-shadow: 0 8px 32px rgba(88,86,214,0.1), 0 2px 8px rgba(0,0,0,0.05); }
-
-.exec-card {
-  background: linear-gradient(140deg, rgba(191,90,242,0.06), rgba(88,86,214,0.06));
-  border: 1px solid rgba(191,90,242,0.18);
-  border-radius: 16px; padding: 16px;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
-}
-
-/* ═══ PIPELINE STEPS ═══ */
-.pipe-step {
-  display: flex; gap: 14px; align-items: flex-start;
-  padding: 12px 0;
-  border-bottom: 1px solid rgba(0,0,0,0.04);
-  animation: fadeIn 0.3s both;
-}
-.pipe-step:last-child { border-bottom: none; }
-.pipe-num {
-  width: 28px; height: 28px; border-radius: 14px; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 11px; font-weight: 800; color: #fff;
-}
-
-/* ═══ QUICK SETTINGS SEGMENT ═══ */
-.seg-wrap { display:flex; background:rgba(0,0,0,0.05); padding:4px; border-radius:12px; gap:3px; }
-.seg-btn  { flex:1; padding:9px 4px; border-radius:9px; background:transparent; font-size:13px; font-weight:700; color:var(--tx3); transition:all 0.2s; }
-.seg-btn.on { background:#FFF; color:var(--tx); box-shadow:0 2px 10px rgba(0,0,0,0.07); }
-
-/* ═══ INSTALL HINT ═══ */
-.install-hint {
-  display:flex; align-items:center; gap:10px;
-  background:rgba(88,86,214,0.07); border:1px solid rgba(88,86,214,0.15);
-  border-radius:14px; padding:12px 14px; margin-top:12px;
-  font-size:13px; font-weight:500; color:var(--indigo);
-}
-
-/* Scroll tweaks */
-::-webkit-scrollbar { width: 0; }
-* { -webkit-overflow-scrolling: touch; }
+.btab button.on { background: #FFF; color: #1C1C1E; box-shadow: 0 4px 12px rgba(0,0,0,0.05); transform: scale(1.02); }
+.fi { font-family: inherit; font-size: 15px; padding: 14px 16px; border-radius: 16px; border: 1px solid rgba(0,0,0,0.06); background: rgba(255,255,255,0.5); outline: none; width: 100%; transition: 0.2s; }
+.fi:focus { border-color: rgba(88,86,214,0.4); background: #FFF; box-shadow: 0 0 0 4px rgba(88,86,214,0.1); }
+.card-note { background: #FFF; border-radius: 20px; padding: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.02); margin-bottom: 12px; animation: slideUp .4s cubic-bezier(0.16, 1, 0.3, 1); border: 1px solid rgba(0,0,0,0.03); }
+.spinner { border: 3px solid rgba(88,86,214,0.2); border-top: 3px solid #5856D6; border-radius: 50%; width: 16px; height: 16px; animation: spin 1s linear infinite; display: inline-block; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+.exec-card { background: linear-gradient(135deg, rgba(191,90,242,0.05), rgba(88,86,214,0.05)); border: 1px solid rgba(191,90,242,0.2); }
 </style>
-
-<!-- React 18: cdnjs (reliable globally) -->
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-
-<!-- HTM 3.1.1: INLINED (zero CDN dependency, avoids unpkg/jsdelivr block) -->
-
+<!-- HTM 3.1.1 inlined — menghindari blokir unpkg.com di Indonesia -->
 <script>!function(n,e){"object"==typeof exports&&"undefined"!=typeof module?module.exports=e():"function"==typeof define&&define.amd?define(e):n.htm=e()}(this,function(){var n=function(e,t,u,s){var r;t[0]=0;for(var p=1;p<t.length;p++){var h=t[p++],o=t[p]?(t[0]|=h?1:2,u[t[p++]]):t[++p];3===h?s[0]=o:4===h?s[1]=Object.assign(s[1]||{},o):5===h?(s[1]=s[1]||{})[t[++p]]=o:6===h?s[1][t[++p]]+=o+"":h?(r=e.apply(o,n(e,o,u,["",null])),s.push(r),o[0]?t[0]|=2:(t[p-2]=0,t[p]=r)):s.push(o)}return s},e=new Map;return function(t){var u=e.get(this);return u||(u=new Map,e.set(this,u)),(u=n(this,u.get(t)||(u.set(t,u=function(n){for(var e,t,u=1,s="",r="",p=[0],h=function(n){1===u&&(n||(s=s.replace(/^\s*\n\s*|\s*\n\s*$/g,"")))?p.push(0,n,s):3===u&&(n||s)?(p.push(3,n,s),u=2):2===u&&"..."===s&&n?p.push(4,n,0):2===u&&s&&!n?p.push(5,0,!0,s):u>=5&&((s||!n&&5===u)&&(p.push(u,0,s,t),u=6),n&&(p.push(u,n,0,t),u=6)),s=""},o=0;o<n.length;o++){o&&(1===u&&h(),h(o));for(var f=0;f<n[o].length;f++)e=n[o][f],1===u?"<"===e?(h(),p=[p],u=3):s+=e:4===u?"--"===s&&">"===e?(u=1,s=""):s=e+s[0]:r?e===r?r="":s+=e:'"'===e||"'"===e?r=e:">"===e?(h(),u=1):u&&("="===e?(u=5,t=s,s=""):"/"===e&&(u<5||">"===n[o][f+1])?(h(),3===u&&(p=p[0]),u=p,(p=p[0]).push(2,0,u),u=0):" "===e||"\t"===e||"\n"===e||"\r"===e?(h(),u=2):s+=e),3===u&&"!--"===s&&(u=4,p=p[0])}return h(),p}(t)),u),arguments,[])).length>1?u:u[0]}});</script>
-
 </head>
-
 <body>
-<div class="mesh"></div>
-<div class="mesh-orb mesh-orb-1"></div>
-<div class="mesh-orb mesh-orb-2"></div>
-<div class="mesh-orb mesh-orb-3"></div>
+<div class="mesh-bg"></div>
 <div id="root"></div>
-
 <script>
-/* ═══════════════════════════════════════════
-   0. PWA BOOTSTRAP — Icon + Manifest + SW
-   ═══════════════════════════════════════════ */
-(function bootPWA(){
-  /* Generate App Icon on Canvas */
-  function makeIcon(sz){
-    var c=document.createElement('canvas'); c.width=c.height=sz;
-    var x=c.getContext('2d'), s=sz;
+var h=htm.bind(React.createElement),us=React.useState,ur=React.useRef,ue=React.useEffect;
 
-    /* Squircle background */
-    var r=s*0.224;
-    function squircle(){
-      x.beginPath();
-      x.moveTo(r,0); x.arcTo(s,0,s,r,r);
-      x.arcTo(s,s,s-r,s,r); x.arcTo(0,s,0,s-r,r);
-      x.arcTo(0,0,r,0,r); x.closePath();
-    }
-
-    /* Gradient fill */
-    var g=x.createLinearGradient(0,0,s*0.8,s);
-    g.addColorStop(0,'#9B99F5'); g.addColorStop(0.45,'#7B79E8'); g.addColorStop(1,'#5856D6');
-    squircle(); x.fillStyle=g; x.fill();
-
-    /* Top shine */
-    x.save(); squircle(); x.clip();
-    var shine=x.createLinearGradient(0,0,s*0.5,s*0.45);
-    shine.addColorStop(0,'rgba(255,255,255,0.26)');
-    shine.addColorStop(0.5,'rgba(255,255,255,0.08)');
-    shine.addColorStop(1,'rgba(255,255,255,0)');
-    x.fillStyle=shine; x.fillRect(0,0,s,s);
-    x.restore();
-
-    /* Left-edge glass glint */
-    x.save(); squircle(); x.clip();
-    var glint=x.createLinearGradient(0,0,s*0.12,s*0.6);
-    glint.addColorStop(0,'rgba(255,255,255,0.15)'); glint.addColorStop(1,'rgba(255,255,255,0)');
-    x.fillStyle=glint; x.fillRect(0,0,s,s);
-    x.restore();
-
-    /* Mic icon */
-    x.strokeStyle='rgba(255,255,255,0.96)';
-    x.lineWidth=s*0.052; x.lineCap='round'; x.lineJoin='round';
-
-    var cx=s*0.5, mW=s*0.11;
-    var mTop=s*0.20, mBot=s*0.54;
-    var mR=mW; /* pill radius = half width */
-
-    /* Mic body pill */
-    x.beginPath();
-    x.arc(cx,mTop+mR,mR,Math.PI,0,false); /* top cap */
-    x.lineTo(cx+mW,mBot-mR);
-    x.arc(cx,mBot-mR,mR,0,Math.PI,false); /* bottom cap */
-    x.lineTo(cx-mW,mTop+mR);
-    x.closePath(); x.stroke();
-
-    /* Stand arc (U-shape below mic) */
-    var arcR=s*0.155;
-    x.beginPath();
-    x.arc(cx,mBot,arcR,Math.PI,0,true); /* anticlockwise → U shape */
-    x.stroke();
-
-    /* Vertical pole */
-    x.beginPath();
-    x.moveTo(cx,mBot+arcR); x.lineTo(cx,mBot+arcR+s*0.09); x.stroke();
-
-    /* Horizontal base */
-    var baseY=mBot+arcR+s*0.09;
-    x.beginPath();
-    x.moveTo(cx-s*0.14,baseY); x.lineTo(cx+s*0.14,baseY); x.stroke();
-
-    /* Sparkle dot top-right */
-    x.beginPath(); x.arc(cx+mW+s*0.035, mTop-s*0.04, s*0.022, 0, Math.PI*2);
-    x.fillStyle='rgba(255,255,255,0.7)'; x.fill();
-
-    return c.toDataURL('image/png');
-  }
-
-  try {
-    var ic180=makeIcon(180), ic192=makeIcon(192), ic512=makeIcon(512);
-
-    /* Apple Touch Icon */
-    document.getElementById('pwa-aticon').href=ic180;
-
-    /* Web App Manifest via Blob */
-    var mf=JSON.stringify({
-      name:'Notulen AI — Smart Meeting Notes',
-      short_name:'Notulen AI',
-      description:'Transkripsi rapat real-time & Executive Summary bertenaga AI',
-      start_url:'./',
-      display:'standalone',
-      orientation:'portrait-primary',
-      theme_color:'#5856D6',
-      background_color:'#ECEEFF',
-      categories:['productivity','utilities'],
-      icons:[
-        {src:ic192, sizes:'192x192', type:'image/png', purpose:'any maskable'},
-        {src:ic512, sizes:'512x512', type:'image/png', purpose:'any maskable'}
-      ]
-    });
-    var blob=new Blob([mf],{type:'application/json'});
-    document.getElementById('pwa-manifest').href=URL.createObjectURL(blob);
-  } catch(e){ console.warn('PWA icon setup:',e); }
-
-  /* Service Worker (best-effort for Chrome install prompt) */
-  if('serviceWorker' in navigator){
-    var sw=`
-      const V='notulen-v8';
-      self.addEventListener('install',()=>self.skipWaiting());
-      self.addEventListener('activate',e=>e.waitUntil(self.clients.claim()));
-      self.addEventListener('fetch',e=>{ try{ e.respondWith(fetch(e.request)); }catch(x){} });
-    `;
-    var swBlob=new Blob([sw],{type:'application/javascript'});
-    navigator.serviceWorker.register(URL.createObjectURL(swBlob),{scope:'./'}).catch(function(){});
-  }
-})();
-
-/* ═══════════════════════════════════════════
-   1. GLOBALS & ALIASES
-   ═══════════════════════════════════════════ */
-var h=htm.bind(React.createElement), us=React.useState, ur=React.useRef, ue=React.useEffect;
-
-/* ═══ STORAGE v8 ═══ */
 var DB={
-  get:function(){try{return JSON.parse(localStorage.getItem("notulen_v8")||"null")||this.def()}catch(e){return this.def()}},
-  def:function(){return{history:[],set:{lang:"id-ID",key:"",provider:"groq",chunk:30}}},
-  save:function(d){localStorage.setItem("notulen_v8",JSON.stringify(d))},
-  addHist:function(r){var d=this.get();d.history.unshift(r);if(d.history.length>50)d.history.length=50;this.save(d)},
-  delHist:function(id){var d=this.get();d.history=d.history.filter(function(x){return x.id!==id});this.save(d)},
-  getSet:function(){return this.get().set},
-  updSet:function(k,v){var d=this.get();d.set[k]=v;this.save(d);window.__AK=d.set.key}
+get:function(){try{return JSON.parse(localStorage.getItem(“notulen_v7”)||“null”)||this.def()}catch(e){return this.def()}},
+def:function(){return{history:[],set:{lang:“id-ID”,key:””,provider:“groq”, chunk: 30}}},
+save:function(d){localStorage.setItem(“notulen_v7”,JSON.stringify(d))},
+addHist:function(r){var d=this.get();d.history.unshift(r);if(d.history.length>50)d.history.length=50;this.save(d)},
+delHist:function(id){var d=this.get();d.history=d.history.filter(function(x){return x.id!==id});this.save(d)},
+getSet:function(){return this.get().set},
+updSet:function(k,v){var d=this.get();d.set[k]=v;this.save(d);window.__AK=d.set.key}
 };
 
-/* ═══ ICON SVG ═══ */
 function Ic(p){
-  var n=p.name,s=p.size||20,c=p.color||'currentColor',sw=p.sw||2.5;
-  var P={
-    mic:'M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3ZM19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8',
-    stop:'M6 6h12v12H6z',
-    play:'M5 3l14 9-14 9V3z',
-    file:'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M16 13H8M16 17H8M10 9H8',
-    settings:'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9',
-    trash:'M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6',
-    key:'M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3m-3.5 3.5L19 4',
-    sparkle:'M12 2l3 6 6 3-6 3-3 6-3-6-6-3 6-3z',
-    copy:'M20 9h-9a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2zM5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1',
-    eye:'M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z',
-    bot:'M12 8V4M8 4h8M2 14h2M20 14h2M15 13v2M9 13v2M4 8h16v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z',
-    clock:'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 6v6l4 2',
-    layers:'M12 2L2 7l10 5 10-5-10-5zM2 12l10 5 10-5M2 17l10 5 10-5',
-    alert:'M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4M12 17h.01',
-    text:'M4 7V4h16v3M9 20h6M12 4v16',
-    share:'M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98M21 5a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM9 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM21 19a3 3 0 1 1-6 0 3 3 0 0 1 6 0z',
-    download:'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3',
-    chevron:'M9 18l6-6-6-6'
-  };
-  return h`<svg width=${s} height=${s} viewBox="0 0 24 24" fill="none" stroke=${c} strokeWidth=${sw} strokeLinecap="round" strokeLinejoin="round" style=${{flexShrink:0}}><path d=${P[n]||'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z'}/></svg>`;
+var s=p.size||20,c=p.color||“currentColor”,paths={
+mic:“M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z M19 10v2a7 7 0 0 1-14 0v-2 M12 19v4 M8 23h8”,
+stop:“M6 6h12v12H6z”, play:“M5 3l14 9-14 9V3z”, check:“M20 6L9 17l-5-5”,
+file:“M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M14 2v6h6 M16 13H8 M16 17H8 M10 9H8”,
+settings:“M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z”,
+trash:“M3 6h18 M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2 M10 11v6 M14 11v6”,
+key:“M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4”,
+sparkle:“M12 2l3 6 6 3-6 3-3 6-3-6-6-3 6-3z”,
+copy:“M20 9h-9a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2z M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1”,
+alert:“M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z M12 9v4 M12 17h.01”,
+globe:“M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z M2 12h20 M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z”,
+eye:“M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z”,
+text:“M4 7V4h16v3 M9 20h6 M12 4v16”, bot:“M12 8V4 M8 4h8 M2 14h2 M20 14h2 M15 13v2 M9 13v2 M4 8h16v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z”,
+clock:“M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z M12 6v6l4 2”,
+layers:“M12 2L2 7l10 5 10-5-10-5z M2 12l10 5 10-5 M2 17l10 5 10-5”
+};
+return h`<svg width=${s} height=${s} viewBox="0 0 24 24" fill="none" stroke=${c} strokeWidth=${p.sw||2.5} strokeLinecap="round" strokeLinejoin="round"><path d=${paths[p.name]||"M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z"}/></svg>`;
 }
 
-/* ═══ API HELPERS ═══ */
-function fmt(s){return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
-
-function transcribeAudio(blob,lang,key){
-  return new Promise(function(res,rej){
-    var fd=new FormData();
-    fd.append('file',blob,'chunk.webm');
-    fd.append('model','whisper-large-v3-turbo');
-    fd.append('response_format','json');
-    fd.append('language',lang==='id-ID'?'id':'en');
-    fetch('https://api.groq.com/openai/v1/audio/transcriptions',{method:'POST',headers:{Authorization:'Bearer '+key},body:fd})
-      .then(function(r){return r.json()})
-      .then(function(d){if(d.error)throw new Error(d.error.message);res(d.text);})
-      .catch(function(e){rej(e.message||e);});
-  });
+function transcribeAudio(audioBlob, lang, key){
+return new Promise(function(resolve, reject){
+var fd = new FormData();
+fd.append(“file”, audioBlob, “chunk.webm”);
+fd.append(“model”, “whisper-large-v3-turbo”);
+fd.append(“response_format”, “json”);
+fd.append(“language”, lang === “id-ID” ? “id” : “en”);
+fetch(“https://api.groq.com/openai/v1/audio/transcriptions”, { method: “POST”, headers: {“Authorization”: “Bearer “ + key}, body: fd })
+.then(function(r){return r.json()}).then(function(d){ if(d.error) throw new Error(d.error.message); resolve(d.text); })
+.catch(function(e){reject(e.message||e)});
+});
 }
 
-function aiChunkSummary(text,lang,key){
-  var prompt=lang==='id-ID'
-    ?'Ringkas transkrip 30 detik ini menjadi 1-3 poin singkat. Langsung poinnya saja.\n\n'+text
-    :'Extract 1-3 key bullet points from this chunk. No intro.\n\n'+text;
-  return llm([{role:'system',content:'You are a concise meeting assistant.'},{role:'user',content:prompt}],300,key);
+function aiSummarizeChunk(text, lang, key){
+return new Promise(function(resolve, reject){
+var prompt = lang===“id-ID”
+? “Buat ringkasan singkat (1-3 poin utama) dari transkrip rapat 30 detik ini. Langsung berikan poinnya tanpa basa-basi.\n\nTranskrip:\n” + text
+: “Extract key bullet points from this short meeting chunk. Concise only, no intro.\n\nTranscript:\n” + text;
+fetch(“https://api.groq.com/openai/v1/chat/completions”, {
+method: “POST”, headers: {“Content-Type”:“application/json”,“Authorization”:“Bearer “+key},
+body: JSON.stringify({ model: “llama-3.3-70b-versatile”, messages: [{role:“system”,content:“You are a concise meeting assistant.”},{role:“user”,content:prompt}], temperature: 0.3, max_tokens: 300 })
+}).then(function(r){return r.json()}).then(function(d){ if(d.error) throw new Error(d.error.message); resolve(d.choices[0].message.content); })
+.catch(function(e){reject(e.message||e)});
+});
 }
 
-function aiOverallSummary(text,lang,key){
-  var prompt=lang==='id-ID'
-    ?'Buat Ringkasan Eksekutif komprehensif dari rapat ini. Sertakan: 1. Topik Utama, 2. Keputusan, 3. Action Items. Bahasa profesional.\n\nTranskrip:\n'+text
-    :'Write a comprehensive Executive Summary. Sections: 1. Main Topics, 2. Decisions, 3. Action Items.\n\nTranscript:\n'+text;
-  return llm([{role:'system',content:'You are an expert executive secretary.'},{role:'user',content:prompt}],1500,key);
+function aiSummarizeOverall(text, lang, key){
+return new Promise(function(resolve, reject){
+var prompt = lang===“id-ID”
+? “Buat Ringkasan Eksekutif komprehensif dari seluruh transkrip rapat ini. Sertakan bagian: 1. Topik Utama, 2. Keputusan, 3. Tindak Lanjut (Action Items). Gunakan bahasa profesional.\n\nTranskrip:\n” + text
+: “Create a comprehensive Executive Summary of this entire meeting transcript. Include sections: 1. Main Topics, 2. Decisions Made, 3. Action Items. Professional tone.\n\nTranscript:\n” + text;
+fetch(“https://api.groq.com/openai/v1/chat/completions”, {
+method: “POST”, headers: {“Content-Type”:“application/json”,“Authorization”:“Bearer “+key},
+body: JSON.stringify({ model: “llama-3.3-70b-versatile”, messages: [{role:“system”,content:“You are an expert executive secretary.”},{role:“user”,content:prompt}], temperature: 0.4, max_tokens: 1500 })
+}).then(function(r){return r.json()}).then(function(d){ if(d.error) throw new Error(d.error.message); resolve(d.choices[0].message.content); })
+.catch(function(e){reject(e.message||e)});
+});
 }
 
-function llm(messages,max,key){
-  return fetch('https://api.groq.com/openai/v1/chat/completions',{
-    method:'POST',
-    headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
-    body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:messages,temperature:0.35,max_tokens:max})
-  }).then(function(r){return r.json()}).then(function(d){
-    if(d.error)throw new Error(d.error.message);
-    return d.choices[0].message.content;
-  });
-}
+function fmt(s){return String(Math.floor(s/60)).padStart(2,“0”)+”:”+String(s%60).padStart(2,“0”)}
 
-/* ═══ LEVEL METER ═══ */
 function LevelMeter(p){
-  var cv=ur(null),raf=ur(null);
-  ue(function(){
-    if(!p.an||!cv.current)return;
-    var c=cv.current,x=c.getContext('2d'),da=new Uint8Array(p.an.frequencyBinCount);
-    function draw(){
-      raf.current=requestAnimationFrame(draw);
-      p.an.getByteFrequencyData(da);
-      var dp=devicePixelRatio||1,rc=c.getBoundingClientRect();
-      c.width=rc.width*dp; c.height=rc.height*dp; x.scale(dp,dp);
-      var W=rc.width,H=rc.height; x.clearRect(0,0,W,H);
-      var sm=0; for(var i=0;i<da.length;i++)sm+=da[i];
-      var av=sm/da.length/255, bs=40, gp=3, bw=(W-(bs-1)*gp)/bs;
-      for(var i=0;i<bs;i++){
-        var th=(i+1)/bs, on=av>=th*0.55;
-        var bh=H*(0.4+Math.random()*0.25*(on?1:0.3)), yy=(H-bh)/2;
-        var xx=i*(bw+gp);
-        if(on){
-          var it=Math.min(1,(av-th*0.35)*3.5);
-          var ratio=i/bs;
-          if(ratio>0.78)x.fillStyle='rgba(255,69,58,'+(0.55+it*0.45)+')';
-          else if(ratio>0.5)x.fillStyle='rgba(255,159,10,'+(0.45+it*0.55)+')';
-          else x.fillStyle='rgba(120,119,240,'+(0.45+it*0.55)+')';
-        }else{x.fillStyle='rgba(0,0,0,0.07)';}
-        x.beginPath();
-        if(x.roundRect)x.roundRect(xx,yy,bw,bh,bw/2);
-        else{ x.rect(xx,yy,bw,bh); }
-        x.fill();
-      }
-    }
-    draw(); return function(){cancelAnimationFrame(raf.current);};
-  },[p.an]);
-  return h`<canvas ref=${cv} style=${{width:'100%',height:'100%',display:'block'}}/>`;
+var cv=ur(null),rf=ur(null);
+ue(function(){
+if(!p.an||!cv.current) return;
+var c=cv.current,x=c.getContext(“2d”),da=new Uint8Array(p.an.frequencyBinCount);
+function draw(){
+rf.current=requestAnimationFrame(draw);
+p.an.getByteFrequencyData(da);
+var dp=devicePixelRatio||1,rc=c.getBoundingClientRect();
+c.width=rc.width*dp;c.height=rc.height*dp;x.scale(dp,dp);
+var W=rc.width,H=rc.height;x.clearRect(0,0,W,H);
+var sm=0;for(var i=0;i<da.length;i++)sm+=da[i];
+var av=sm/da.length/255,bs=32,gp=4,bw=(W-(bs-1)*gp)/bs;
+for(var i=0;i<bs;i++){
+var th=(i+1)/bs,on=av>=th*0.6;
+var bh=H*0.75,yy=(H-bh)/2,xx=i*(bw+gp);
+if(on){var it=Math.min(1,(av-th*0.4)*3); x.fillStyle=i/bs>0.75?“rgba(255,69,58,”+(0.6+it*0.4)+”)”:i/bs>0.45?“rgba(255,159,10,”+(0.5+it*0.5)+”)”:“rgba(88,86,214,”+(0.4+it*0.6)+”)”;
+}else{x.fillStyle=“rgba(0,0,0,0.06)”;}
+x.beginPath(); x.roundRect(xx,yy,bw,bh,bw/2); x.fill();
+}
+}
+draw(); return function(){cancelAnimationFrame(rf.current)};
+},[p.an]);
+return h`<canvas ref=${cv} style=${{width:"100%",height:44,borderRadius:16,background:"rgba(255,255,255,0.4)",display:"block",border:"1px solid rgba(255,255,255,0.6)"}}/>`;
 }
 
-/* ══════════════════════════════════════════════════
-   TAB 1: REKAM
-   ══════════════════════════════════════════════════ */
 function RecTab(p){
-  var set=p.set,updSet=p.updSet,onDone=p.onDone;
+var set = p.set, updSet = p.updSet, onSaveComplete = p.onSaveComplete;
+var _isRec=us(false), isRec=_isRec[0], setRec=_isRec[1];
+var _time=us(0), time=_time[0], setTime=_time[1];
+var _title=us(””), title=_title[0], setTitle=_title[1];
+var _an=us(null), analyser=_an[0], setAn=_an[1];
+var _fin=us([]), fin=_fin[0], setFin=_fin[1];
+var _notes=us([]), notes=_notes[0], setNotes=_notes[1];
+var _saving=us(false), saving=_saving[0], setSaving=_saving[1];
+var _status=us(””), statusMsg=_status[0], setStatusMsg=_status[1];
+var isRecRef = ur(false), isFinalizingRef = ur(false);
+var timeRef = ur(0), pendingReqs = ur(0);
+var streamRef = ur(null), acRef = ur(null), mrRef = ur(null);
+var loopIntervalRef = ur(null), clockIntervalRef = ur(null);
+var finRef = ur([]), notesRef = ur([]), titleRef = ur(””);
 
-  var _rec=us(false),isRec=_rec[0],setRec=_rec[1];
-  var _time=us(0),time=_time[0],setTime=_time[1];
-  var _title=us(''),title=_title[0],setTitle=_title[1];
-  var _an=us(null),an=_an[0],setAn=_an[1];
-  var _fin=us([]),fin=_fin[0],setFin=_fin[1];
-  var _notes=us([]),notes=_notes[0],setNotes=_notes[1];
-  var _saving=us(false),saving=_saving[0],setSaving=_saving[1];
-  var _status=us(''),statusMsg=_status[0],setStatus=_status[1];
+function addFin(data){ setFin(function(p){ var n=p.concat([data]); finRef.current=n; return n; }); }
+function addNote(data){ setNotes(function(p){ var n=p.concat([data]); notesRef.current=n; return n; }); }
 
-  var isRecR=ur(false),isFinalR=ur(false),timeR=ur(0),pendR=ur(0);
-  var streamR=ur(null),acR=ur(null),mrR=ur(null);
-  var loopR=ur(null),clockR=ur(null),finR=ur([]),notesR=ur([]),titleR=ur('');
+function autoSaveIfDone() {
+if (!isRecRef.current && pendingReqs.current === 0 && !isFinalizingRef.current) {
+if (finRef.current.length === 0) { setSaving(false); return; }
+isFinalizingRef.current = true;
+setStatusMsg(“Menganalisis Rapat Secara Keseluruhan…”);
+var finalRaw = finRef.current.map(function(x){return “[Menit “+fmt(x.time)+”] “+x.text}).join(”\n\n”);
+var finalSumChunk = notesRef.current.map(function(x){return “[Menit “+fmt(x.time)+”]\n”+x.text}).join(”\n\n”);
+aiSummarizeOverall(finalRaw, set.lang, window.__AK)
+.then(function(overallSum){
+DB.addHist({
+id: Date.now().toString(), date: new Date().toISOString(), duration: timeRef.current,
+title: titleRef.current || (“Rapat “ + new Date().toLocaleDateString(“id-ID”,{day:“numeric”,month:“short”,hour:“2-digit”,minute:“2-digit”})),
+transcript: finalRaw, notes: finalSumChunk, overall: overallSum
+});
+setSaving(false); onSaveComplete(); resetAll();
+})
+.catch(function(err){
+alert(“Gagal membuat ringkasan akhir: “ + err.message + “\n(Menyimpan data parsial)”);
+DB.addHist({
+id: Date.now().toString(), date: new Date().toISOString(), duration: timeRef.current,
+title: titleRef.current, transcript: finalRaw, notes: finalSumChunk, overall: “Gagal memproses ringkasan akhir.”
+});
+setSaving(false); onSaveComplete(); resetAll();
+});
+}
+}
 
-  function addFin(d){setFin(function(p){var n=p.concat([d]);finR.current=n;return n;});}
-  function addNote(d){setNotes(function(p){var n=p.concat([d]);notesR.current=n;return n;});}
+function processChunk(blob, startTime){
+pendingReqs.current++;
+transcribeAudio(blob, set.lang, window.__AK)
+.then(function(text){
+if(!text || text.trim().length < 5) return;
+var cleanedText = text.trim();
+addFin({time: startTime, text: cleanedText, id: Date.now()});
+pendingReqs.current++;
+aiSummarizeChunk(cleanedText, set.lang, window.__AK)
+.then(function(summary){ addNote({time: startTime, text: summary, id: Date.now()}); })
+.catch(function(err){ console.log(“AI Chunk Err:”, err); })
+.finally(function(){ pendingReqs.current–; autoSaveIfDone(); });
+})
+.catch(function(err){ console.log(“Whisper Err:”, err); })
+.finally(function(){ pendingReqs.current–; autoSaveIfDone(); });
+}
 
-  function trySave(){
-    if(isRecR.current||pendR.current>0||isFinalR.current)return;
-    if(finR.current.length===0){setSaving(false);return;}
-    isFinalR.current=true;
-    setStatus('Menyusun Ringkasan Eksekutif…');
-    var rawAll=finR.current.map(function(x){return '['+fmt(x.time)+'] '+x.text;}).join('\n\n');
-    var notesAll=notesR.current.map(function(x){return '['+fmt(x.time)+']\n'+x.text;}).join('\n\n');
-    aiOverallSummary(rawAll,set.lang,window.__AK)
-      .then(function(ov){
-        DB.addHist({id:Date.now().toString(),date:new Date().toISOString(),duration:timeR.current,
-          title:titleR.current||'Rapat '+new Date().toLocaleDateString('id-ID',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}),
-          transcript:rawAll,notes:notesAll,overall:ov});
-        setSaving(false);onDone();resetAll();
-      }).catch(function(e){
-        alert('Gagal ringkasan akhir: '+e);
-        DB.addHist({id:Date.now().toString(),date:new Date().toISOString(),duration:timeR.current,
-          title:titleR.current,transcript:rawAll,notes:notesAll,overall:'Gagal memproses ringkasan.'});
-        setSaving(false);onDone();resetAll();
-      });
-  }
+function startRecordingCycle(stream) {
+if(!isRecRef.current) return;
+var mr = new MediaRecorder(stream);
+var localChunks = [];
+var startTime = timeRef.current;
+mr.ondataavailable = function(e){ if(e.data.size > 0) localChunks.push(e.data); };
+mr.onstop = function(){ if(localChunks.length > 0) processChunk(new Blob(localChunks, {type: ‘audio/webm’}), startTime); };
+mr.start(); mrRef.current = mr;
+}
 
-  function processChunk(blob,t0){
-    pendR.current++;
-    transcribeAudio(blob,set.lang,window.__AK)
-      .then(function(txt){
-        if(!txt||txt.trim().length<5){pendR.current--;trySave();return;}
-        var clean=txt.trim();
-        addFin({time:t0,text:clean,id:Date.now()});
-        pendR.current++;
-        aiChunkSummary(clean,set.lang,window.__AK)
-          .then(function(s){addNote({time:t0,text:s,id:Date.now()});})
-          .catch(function(){})
-          .finally(function(){pendR.current--;trySave();});
-        pendR.current--;trySave();
-      })
-      .catch(function(){pendR.current--;trySave();});
-  }
+function startRec(){
+if(!window.__AK){ alert(“Isi API Key Groq di Pengaturan.”); return; }
+if(!navigator.mediaDevices){ alert(“Browser tidak mendukung mic.”); return; }
+resetAll(); isRecRef.current = true; setRec(true); titleRef.current = title;
+navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
+streamRef.current = stream;
+var ac = new (window.AudioContext||window.webkitAudioContext)(); acRef.current = ac;
+var src = ac.createMediaStreamSource(stream); var an = ac.createAnalyser();
+an.fftSize = 2048; an.smoothingTimeConstant = 0.8; src.connect(an); setAn(an);
+startRecordingCycle(stream);
+clockIntervalRef.current = setInterval(function(){ timeRef.current++; setTime(timeRef.current); }, 1000);
+var cDur = (set.chunk || 30) * 1000;
+loopIntervalRef.current = setInterval(function(){
+if(isRecRef.current && mrRef.current && mrRef.current.state === “recording”){
+mrRef.current.stop(); setTimeout(function(){ startRecordingCycle(streamRef.current); }, 50);
+}
+}, cDur);
+}).catch(function(e){ alert(“Gagal mic: “ + e.message); resetAll(); });
+}
 
-  function cycle(stream){
-    if(!isRecR.current)return;
-    var mr=new MediaRecorder(stream),chunks=[],t0=timeR.current;
-    mr.ondataavailable=function(e){if(e.data.size>0)chunks.push(e.data);};
-    mr.onstop=function(){if(chunks.length)processChunk(new Blob(chunks,{type:'audio/webm'}),t0);};
-    mr.start(); mrR.current=mr;
-  }
+function stopRec(){
+isRecRef.current = false; setRec(false); setSaving(true); setStatusMsg(“Sinkronisasi Transkrip…”);
+clearInterval(clockIntervalRef.current); clearInterval(loopIntervalRef.current);
+if(mrRef.current && mrRef.current.state === “recording”) { mrRef.current.stop(); }
+if(streamRef.current){streamRef.current.getTracks().forEach(function(t){t.stop()}); streamRef.current=null;}
+if(acRef.current&&acRef.current.state!==“closed”){acRef.current.close();} setAn(null);
+setTimeout(autoSaveIfDone, 500);
+}
 
-  function startRec(){
-    if(!window.__AK){alert('Isi API Key Groq di tab Sistem terlebih dahulu.');return;}
-    if(!navigator.mediaDevices){alert('Browser tidak mendukung microphone.');return;}
-    resetAll(); isRecR.current=true; setRec(true); titleR.current=title;
-    navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
-      streamR.current=stream;
-      var ac=new(window.AudioContext||window.webkitAudioContext)(); acR.current=ac;
-      var src=ac.createMediaStreamSource(stream),a=ac.createAnalyser();
-      a.fftSize=2048; a.smoothingTimeConstant=0.82; src.connect(a); setAn(a);
-      cycle(stream);
-      clockR.current=setInterval(function(){timeR.current++;setTime(timeR.current);},1000);
-      var cDur=(set.chunk||30)*1000;
-      loopR.current=setInterval(function(){
-        if(isRecR.current&&mrR.current&&mrR.current.state==='recording'){
-          mrR.current.stop(); setTimeout(function(){cycle(streamR.current);},60);
-        }
-      },cDur);
-    }).catch(function(e){alert('Gagal akses mic: '+e.message);resetAll();});
-  }
+function resetAll(){
+setFin([]); setNotes([]); setTime(0); setTitle(””); setSaving(false); setStatusMsg(””);
+finRef.current = []; notesRef.current = []; timeRef.current = 0; titleRef.current = “”;
+pendingReqs.current = 0; isRecRef.current = false; isFinalizingRef.current = false; setRec(false);
+}
 
-  function stopRec(){
-    isRecR.current=false; setRec(false); setSaving(true); setStatus('Sinkronisasi transkrip…');
-    clearInterval(clockR.current); clearInterval(loopR.current);
-    if(mrR.current&&mrR.current.state==='recording')mrR.current.stop();
-    if(streamR.current){streamR.current.getTracks().forEach(function(t){t.stop();}); streamR.current=null;}
-    if(acR.current&&acR.current.state!=='closed')acR.current.close();
-    setAn(null); setTimeout(trySave,500);
-  }
+return h`<div> <div style=${{textAlign:"center",padding:"48px 16px 16px", marginBottom:10}}> <div className="pill" style=${{background:"rgba(88,86,214,0.15)",color:"#5856D6",marginBottom:12, backdropFilter:"blur(10px)"}}> <${Ic} name="bot" size=${13} color="#5856D6"/>SMART PIPELINE AI </div> <h1 style=${{fontWeight:800,fontSize:28,letterSpacing:"-1px",lineHeight:1.1,color:"#1C1C1E"}}>Smart Meeting Notes</h1> <p style=${{fontSize:13,color:"#8E8E93",marginTop:8,fontWeight:500}}>Transkripsi Real-time & Executive Summary</p> </div> <div style=${{maxWidth:500,margin:"0 auto",padding:"0 16px 16px"}}> <div className="gl" style=${{padding:24,textAlign:"center",marginBottom:20,position:"relative"}}> <div style=${{display:"inline-flex",justifyContent:"center",alignItems:"center",width:88,height:88,borderRadius:44,background:isRec?"rgba(255,69,58,0.12)":"rgba(88,86,214,0.1)",color:isRec?"#FF453A":"#5856D6",animation:isRec?"ripple 2s infinite":"none",marginBottom:16,boxShadow:isRec?"0 0 20px rgba(255,69,58,0.2)":""}}> <${Ic} name=${isRec?"mic":"play"} size=${40}/> </div> <div style=${{fontSize:36,fontWeight:800,fontFamily:"'SF Mono',monospace",letterSpacing:-1.5,color:isRec?"#FF453A":"#1C1C1E",marginBottom:8}}> ${fmt(time)} </div> ${isRec && h`<div className=“pill” style=${{background:“rgba(50,215,75,0.15)”,color:”#32D74B”,marginBottom:12}}>
+<div style=${{width:6,height:6,borderRadius:3,background:”#32D74B”,animation:“pulse 1.2s infinite”}}/> Sedang Merekam…
+</div>`} ${saving && h`<div className=“pill” style=${{background:“rgba(191,90,242,0.15)”,color:”#BF5AF2”,marginBottom:12}}>
+<div className=“spinner” style=${{borderColor:“rgba(191,90,242,0.2)”,borderTopColor:”#BF5AF2”}}></div> ${statusMsg}
+</div>`} ${isRec && analyser ? h`<div style=${{marginBottom:16,padding:“0 8px”}}><${LevelMeter} an=${analyser}/></div>` : null} ${!isRec && time===0 && !saving && h`<div style=${{marginBottom:16}}>
+<input class=“fi” value=${title} onInput=${function(e){setTitle(e.target.value)}} placeholder=“Judul Rapat (opsional)” style=${{textAlign:“center”,fontWeight:600}}/>
+</div>`} <div style=${{display:"flex",gap:12}}> ${!isRec && time===0 && !saving ? h`<button onClick=${startRec} style=${{flex:1,padding:“16px”,borderRadius:20,background:“linear-gradient(135deg,#5856D6,#7B79E8)”,color:”#FFF”,border:“none”,fontSize:16,fontWeight:700,boxShadow:“0 8px 24px rgba(88,86,214,0.3)”}}>
+<span style=${{display:“flex”,alignItems:“center”,justifyContent:“center”,gap:6}}><${Ic} name=“mic” size=${20} color=”#FFF”/>Mulai Rapat</span>
+</button>` : null} ${isRec ? h`<button onClick=${stopRec} style=${{flex:1,padding:“16px”,borderRadius:20,background:”#FF453A”,color:”#FFF”,border:“none”,fontSize:16,fontWeight:700,boxShadow:“0 8px 24px rgba(255,69,58,0.3)”}}>
+<span style=${{display:“flex”,alignItems:“center”,justifyContent:“center”,gap:6}}><${Ic} name=“stop” size=${20} color=”#FFF”/>Akhiri Rapat</span>
+</button>` : null} </div> </div> ${!isRec && time===0 && !saving ? h`<div className="gl" style=${{padding:16,marginBottom:20}}>
+<div style=${{display:“flex”,alignItems:“center”,justifyContent:“space-between”,marginBottom:12}}>
+<div style=${{display:“flex”,alignItems:“center”,gap:8}}>
+<div style=${{width:28,height:28,borderRadius:10,background:“rgba(191,90,242,0.1)”,display:“flex”,alignItems:“center”,justifyContent:“center”,color:”#BF5AF2”}}><${Ic} name=“settings” size=${16}/></div>
+<span style=${{fontWeight:700,fontSize:14}}>Pengaturan Cepat</span>
+</div>
+<div style=${{display:“flex”,alignItems:“center”,gap:6,fontSize:11,fontWeight:600,color:window.__AK?”#32D74B”:”#FF453A”}}>
+<div style=${{width:8,height:8,borderRadius:4,background:window.__AK?”#32D74B”:”#FF453A”}}></div>
+${window.__AK ? “API Aktif” : “API Kosong”}
+</div>
+</div>
+<div style=${{display:“flex”,gap:12}}>
+<div style=${{flex:1}}>
+<div style=${{fontSize:11,fontWeight:600,color:”#8E8E93”,marginBottom:6}}>Bahasa</div>
+<div style=${{display:“flex”,gap:4,background:“rgba(0,0,0,0.04)”,padding:4,borderRadius:12}}>
+${[[“id-ID”,“ID”],[“en-US”,“EN”]].map(function(l){
+var on=set.lang===l[0];
+return h`<button key=${l[0]} onClick=${function(){updSet("lang",l[0])}} style=${{flex:1,padding:"8px 0",borderRadius:8,border:"none",background:on?"#FFF":"transparent",boxShadow:on?"0 2px 8px rgba(0,0,0,0.06)":"none",fontSize:12,fontWeight:700,color:on?"#1C1C1E":"#8E8E93"}}>${l[1]}</button>`;
+})}
+</div>
+</div>
+<div style=${{flex:1}}>
+<div style=${{fontSize:11,fontWeight:600,color:”#8E8E93”,marginBottom:6}}>Chunk AI (Detik)</div>
+<div style=${{display:“flex”,gap:4,background:“rgba(0,0,0,0.04)”,padding:4,borderRadius:12}}>
+${[15,30,60].map(function(v){
+var on=(set.chunk||30)===v;
+return h`<button key=${v} onClick=${function(){updSet("chunk",v)}} style=${{flex:1,padding:"8px 0",borderRadius:8,border:"none",background:on?"#FFF":"transparent",boxShadow:on?"0 2px 8px rgba(0,0,0,0.06)":"none",fontSize:12,fontWeight:700,color:on?"#1C1C1E":"#8E8E93"}}>${v}</button>`;
+})}
+</div>
+</div>
+</div>
+</div>` : null} ${(notes.length > 0 || fin.length > 0) ? h`<div>
+<div style=${{display:“flex”,gap:12}}>
+<div style=${{flex:1}}>
+<div style=${{fontSize:11,fontWeight:700,color:”#BF5AF2”,marginBottom:8,display:“flex”,alignItems:“center”,gap:6}}><${Ic} name=“sparkle” size=${14}/> TIMELINE AI</div>
+${notes.map(function(n){
+return h`<div key=${n.id} className="card-note" style=${{padding:"12px 14px"}}> <div style=${{fontSize:11,color:"#BF5AF2",fontWeight:800,marginBottom:6}}>Menit ${fmt(n.time)}</div> <div style=${{fontSize:13,lineHeight:1.6,color:"#1C1C1E",whiteSpace:"pre-wrap"}}>${n.text}</div> </div>`
+})}
+</div>
+<div style=${{flex:1}}>
+<div style=${{fontSize:11,fontWeight:700,color:”#5856D6”,marginBottom:8,display:“flex”,alignItems:“center”,gap:6}}><${Ic} name=“text” size=${14}/> TRANSKRIP (RAW)</div>
+${fin.map(function(f){
+return h`<div key=${f.id} className="card-note" style=${{padding:"12px 14px",background:"rgba(255,255,255,0.4)"}}> <div style=${{fontSize:11,color:"#5856D6",fontWeight:800,marginBottom:6}}>Menit ${fmt(f.time)}</div> <div style=${{fontSize:12,lineHeight:1.6,color:"#48484A"}}>${f.text}</div> </div>`
+})}
+</div>
+</div>
+</div>` : null}
+</div>
 
-  function resetAll(){
-    setFin([]);setNotes([]);setTime(0);setTitle('');setSaving(false);setStatus('');
-    finR.current=[];notesR.current=[];timeR.current=0;titleR.current='';
-    pendR.current=0;isRecR.current=false;isFinalR.current=false;setRec(false);
-  }
-
-  var hasData=notes.length>0||fin.length>0;
-
-  return h`<div style=${{paddingTop:56}}>
-
-    <!-- ── HEADER ── -->
-    <div style=${{textAlign:'center',padding:'0 20px 20px'}}>
-      <div class="pill pill-sys" style=${{marginBottom:14}}>
-        <${Ic} name="bot" size=${12} color="#5856D6"/> SMART PIPELINE AI
-      </div>
-      <h1 style=${{fontSize:30,fontWeight:800,letterSpacing:'-1.2px',lineHeight:1.08,color:'#1C1C1E'}}>
-        Smart Meeting<br/>Notes
-      </h1>
-      <p style=${{fontSize:14,color:'#8E8E93',marginTop:8,fontWeight:500,letterSpacing:'-0.1px'}}>
-        Transkripsi real-time · Executive Summary
-      </p>
-    </div>
-
-    <div style=${{maxWidth:520,margin:'0 auto',padding:'0 16px 24px'}}>
-
-      <!-- ── RECORDING ISLAND ── -->
-      <div class=${'gl rec-island '+(isRec?'active':'idle')} style=${{marginBottom:20}}>
-
-        <!-- Avatar icon -->
-        <div class=${'rec-avatar '+(isRec?'active':'idle')} style=${{margin:'0 auto 16px'}}}>
-          <${Ic} name=${isRec?'mic':'play'} size=${44} color=${isRec?'#FF453A':'#5856D6'} sw=${isRec?2:2.5}/>
-        </div>
-
-        <!-- Timer -->
-        <div class=${'rec-timer '+(isRec?'active':'idle')}>
-          ${fmt(time)}
-        </div>
-
-        <!-- Status Pills -->
-        <div style=${{minHeight:32,display:'flex',justifyContent:'center',alignItems:'center',gap:8,marginBottom:18,flexWrap:'wrap'}}>
-          ${isRec && h`<span class="pill pill-live">
-            <span style=${{width:6,height:6,borderRadius:3,background:'#32D74B',display:'inline-block',animation:'pulse 1.2s infinite'}}></span>
-            Sedang Merekam
-          </span>`}
-          ${saving && h`<span class="pill pill-ai">
-            <span class="spinner" style=${{width:10,height:10,borderWidth:1.5,borderColor:'rgba(191,90,242,0.25)',borderTopColor:'#BF5AF2'}}></span>
-            ${statusMsg}
-          </span>`}
-          ${!isRec&&time===0&&!saving&&window.__AK && h`<span class="pill" style=${{background:'rgba(50,215,75,0.12)',color:'#32D74B'}}>
-            <span style=${{width:6,height:6,borderRadius:3,background:'#32D74B',display:'inline-block'}}></span>API Aktif
-          </span>`}
-          ${!isRec&&time===0&&!saving&&!window.__AK && h`<span class="pill pill-err">
-            <${Ic} name="alert" size=${11} color="#FF453A"/>API Key Kosong
-          </span>`}
-        </div>
-
-        <!-- Level Meter (visible only while recording) -->
-        ${isRec && an ? h`<div class="meter-wrap" style=${{marginBottom:20}}><${LevelMeter} an=${an}/></div>` : null}
-
-        <!-- Title input (idle only) -->
-        ${!isRec && time===0 && !saving ? h`<div style=${{marginBottom:20}}>
-          <input class="fi" value=${title}
-            onInput=${function(e){setTitle(e.target.value);}}
-            placeholder="Nama Rapat (opsional)"
-            style=${{textAlign:'center',fontWeight:600,fontSize:16}}/>
-        </div>` : null}
-
-        <!-- Action Buttons -->
-        ${!isRec && time===0 && !saving ? h`<button class="btn-primary" onClick=${startRec}>
-          <${Ic} name="mic" size=${20} color="#fff"/>Mulai Rapat
-        </button>` : null}
-
-        ${isRec ? h`<button class="btn-stop" onClick=${stopRec}>
-          <${Ic} name="stop" size=${20} color="#fff"/>Akhiri Rapat
-        </button>` : null}
-      </div>
-
-      <!-- ── QUICK SETTINGS (idle only) ── -->
-      ${!isRec && time===0 && !saving ? h`<div class="gl" style=${{padding:'18px 18px 16px',marginBottom:20}}>
-        <div style=${{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:14}}>
-          <div style=${{display:'flex',alignItems:'center',gap:8}}>
-            <div style=${{width:30,height:30,borderRadius:10,background:'rgba(191,90,242,0.1)',display:'flex',alignItems:'center',justifyContent:'center',color:'#BF5AF2'}}>
-              <${Ic} name="settings" size=${15}/>
-            </div>
-            <span style=${{fontWeight:700,fontSize:14,letterSpacing:'-0.2px'}}>Pengaturan Cepat</span>
-          </div>
-        </div>
-        <div style=${{display:'flex',gap:12}}>
-          <div style=${{flex:1}}>
-            <div style=${{fontSize:11,fontWeight:700,color:'#8E8E93',marginBottom:7,letterSpacing:'0.3px'}}>BAHASA</div>
-            <div class="seg-wrap">
-              ${[['id-ID','🇮🇩 ID'],['en-US','🇺🇸 EN']].map(function(l){
-                var on=set.lang===l[0];
-                return h`<button key=${l[0]} class=${'seg-btn'+(on?' on':'')} onClick=${function(){updSet('lang',l[0]);}}>${l[1]}</button>`;
-              })}
-            </div>
-          </div>
-          <div style=${{flex:1}}>
-            <div style=${{fontSize:11,fontWeight:700,color:'#8E8E93',marginBottom:7,letterSpacing:'0.3px'}}>CHUNK (DETIK)</div>
-            <div class="seg-wrap">
-              ${[15,30,60].map(function(v){
-                var on=(set.chunk||30)===v;
-                return h`<button key=${v} class=${'seg-btn'+(on?' on':'')} onClick=${function(){updSet('chunk',v);}}>${v}</button>`;
-              })}
-            </div>
-          </div>
-        </div>
-
-        <!-- Install hint -->
-        <div class="install-hint" style=${{marginTop:14}}>
-          <${Ic} name="download" size=${16} color="#5856D6"/>
-          <span>Tambahkan ke Home Screen via menu browser untuk pengalaman penuh sebagai PWA.</span>
-        </div>
-      </div>` : null}
-
-      <!-- ── LIVE FEED ── -->
-      ${hasData ? h`<div>
-        <div style=${{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}}>
-          <!-- AI Timeline Column -->
-          <div>
-            <div class="feed-col-head" style=${{color:'#BF5AF2'}}>
-              <${Ic} name="sparkle" size=${13} color="#BF5AF2"/>Timeline AI
-            </div>
-            ${notes.map(function(n){
-              return h`<div key=${n.id} class="card-chunk">
-                <div style=${{fontSize:10,fontWeight:800,color:'#BF5AF2',marginBottom:5,letterSpacing:'0.3px'}}>MENIT ${fmt(n.time)}</div>
-                <div style=${{fontSize:12,lineHeight:1.65,color:'#1C1C1E',whiteSpace:'pre-wrap'}}>${n.text}</div>
-              </div>`;
-            })}
-          </div>
-          <!-- Raw Transcript Column -->
-          <div>
-            <div class="feed-col-head" style=${{color:'#5856D6'}}>
-              <${Ic} name="text" size=${13} color="#5856D6"/>Transkrip
-            </div>
-            ${fin.map(function(f){
-              return h`<div key=${f.id} class="card-chunk" style=${{background:'rgba(255,255,255,0.5)'}}>
-                <div style=${{fontSize:10,fontWeight:800,color:'#5856D6',marginBottom:5,letterSpacing:'0.3px'}}>MENIT ${fmt(f.time)}</div>
-                <div style=${{fontSize:11,lineHeight:1.65,color:'#636366'}}>${f.text}</div>
-              </div>`;
-            })}
-          </div>
-        </div>
-      </div>` : null}
-
-    </div>
   </div>`;
 }
 
-/* ══════════════════════════════════════════════════
-   TAB 2: RIWAYAT
-   ══════════════════════════════════════════════════ */
 function HistTab(){
-  var _h=us(DB.get().history),hist=_h[0],setH=_h[1];
-  var _open=us(null),openId=_open[0],setOpen=_open[1];
+var _h=us(DB.get().history), hist=_h[0], setH=_h[1];
+var _open=us(null), openId=_open[0], setOpen=_open[1];
+ue(function(){ setH(DB.get().history); }, []);
+function del(id){if(confirm(“Hapus notulen ini?”)){DB.delHist(id); setH(DB.get().history);}}
+if(!hist.length) return h`<div style=${{padding:“80px 20px”,textAlign:“center”}}>
+<${Ic} name=“file” size=${56} color=”#C7C7CC” sw=${1.5}/>
+<div style=${{fontSize:18,fontWeight:700,color:”#8E8E93”,marginTop:20}}>Belum ada notulen</div>
+<div style=${{fontSize:14,color:”#C7C7CC”,marginTop:6}}>Rapat yang disimpan akan muncul di sini.</div>
 
-  ue(function(){setH(DB.get().history);},[]);
-
-  function del(id){
-    if(confirm('Hapus notulen ini?')){DB.delHist(id);setH(DB.get().history);setOpen(null);}
-  }
-
-  if(!hist.length) return h`<div style=${{paddingTop:56,padding:'80px 20px 40px',textAlign:'center'}}>
-    <div style=${{width:80,height:80,borderRadius:24,background:'rgba(88,86,214,0.07)',display:'inline-flex',alignItems:'center',justifyContent:'center',marginBottom:20}}>
-      <${Ic} name="file" size=${40} color="#C7C7CC" sw=${1.5}/>
-    </div>
-    <div style=${{fontSize:20,fontWeight:800,color:'#8E8E93',marginBottom:8,letterSpacing:'-0.4px'}}>Belum Ada Notulen</div>
-    <div style=${{fontSize:14,color:'#C7C7CC',fontWeight:500}}>Rapat yang direkam akan tersimpan di sini.</div>
   </div>`;
-
-  return h`<div style=${{paddingTop:56,padding:'24px 16px 24px'}}>
-    <h2 style=${{fontSize:26,fontWeight:800,marginBottom:6,letterSpacing:'-0.8px'}}>Riwayat Rapat</h2>
-    <div style=${{fontSize:13,color:'#8E8E93',fontWeight:500,marginBottom:20}}>${hist.length} notulen tersimpan</div>
-
-    ${hist.map(function(item,idx){
-      var isOpen=openId===item.id;
-      return h`<div key=${item.id} class="hist-card" style=${{animationDelay:idx*0.04+'s'}}>
-        <!-- Card Header -->
-        <div onClick=${function(){setOpen(isOpen?null:item.id);}}
-          style=${{padding:'16px',cursor:'pointer',display:'flex',alignItems:'center',gap:14,userSelect:'none'}}>
-          <div style=${{width:48,height:48,borderRadius:16,flexShrink:0,
-            background:isOpen?'rgba(88,86,214,0.12)':'rgba(88,86,214,0.07)',
-            display:'flex',alignItems:'center',justifyContent:'center',color:'#5856D6',
-            transition:'all 0.25s',boxShadow:isOpen?'inset 0 1px 0 rgba(255,255,255,0.7)':'none'}}>
-            <${Ic} name="file" size=${24} sw=${isOpen?2.5:2}/>
-          </div>
+  return h`<div style=${{padding:"24px 16px"}}>
+    <h2 style=${{fontSize:24,fontWeight:800,marginBottom:20,letterSpacing:"-0.5px"}}>Riwayat Rapat</h2>
+    ${hist.map(function(item){
+      var isOpen = openId===item.id;
+      return h`<div key=${item.id} className="gl" style=${{marginBottom:14,overflow:"hidden",background:isOpen?"#FFF":"var(--gl)",transition:"all 0.3s"}}>
+        <div onClick=${function(){setOpen(isOpen?null:item.id)}} style=${{padding:"16px",cursor:"pointer",display:"flex",alignItems:"center",gap:14}}>
+          <div style=${{width:44,height:44,borderRadius:14,background:"rgba(88,86,214,0.08)",display:"flex",alignItems:"center",justifyContent:"center",color:"#5856D6",flexShrink:0}}><${Ic} name="file" size=${22}/></div>
           <div style=${{flex:1,minWidth:0}}>
-            <div style=${{fontWeight:700,fontSize:16,letterSpacing:'-0.3px',
-              overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',color:'#1C1C1E'}}>
-              ${item.title||'Rapat'}
-            </div>
-            <div style=${{fontSize:12,color:'#8E8E93',marginTop:3,fontWeight:500,display:'flex',alignItems:'center',gap:8}}>
-              <${Ic} name="clock" size=${12} color="#AEAEB2"/>
-              ${new Date(item.date).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'})}
-              <span style=${{color:'#C7C7CC'}}>·</span>
-              ${fmt(item.duration)}
+            <div style=${{fontWeight:700,fontSize:16,color:"#1C1C1E",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>${item.title||"Rapat"}</div>
+            <div style=${{fontSize:12,color:"#8E8E93",marginTop:2,fontWeight:500}}>
+              ${new Date(item.date).toLocaleDateString("id-ID",{day:"numeric",month:"short",year:"numeric"})} · Durasi: ${fmt(item.duration)}
             </div>
           </div>
-          <div style=${{width:30,height:30,borderRadius:15,background:'rgba(0,0,0,0.04)',
-            display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,
-            transition:'all 0.3s'}}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#AEAEB2" strokeWidth="2.5"
-              style=${{transform:isOpen?'rotate(90deg)':'none',transition:'transform 0.3s cubic-bezier(0.34,1.56,0.64,1)'}}>
-              <path d="M9 18l6-6-6-6"/>
-            </svg>
+          <div style=${{width:28,height:28,borderRadius:14,background:"rgba(0,0,0,0.04)",display:"flex",alignItems:"center",justifyContent:"center"}}>
+             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8E8E93" strokeWidth="2.5" style=${{transform:isOpen?"rotate(90deg)":"none",transition:"0.3s"}}><path d="M9 18l6-6-6-6"/></svg>
           </div>
         </div>
-
-        <!-- Expanded Content -->
-        ${isOpen ? h`<div style=${{padding:'0 16px 20px',animation:'fadeIn 0.3s both'}}>
-
-          <!-- Action bar -->
-          <div style=${{display:'flex',gap:8,marginBottom:20,paddingTop:4,borderTop:'1px solid rgba(0,0,0,0.05)'}}>
-            <button onClick=${function(e){e.stopPropagation();del(item.id);}}
-              style=${{display:'inline-flex',alignItems:'center',gap:6,padding:'8px 14px',
-                borderRadius:10,background:'rgba(255,69,58,0.08)',color:'#FF453A',
-                fontSize:12,fontWeight:700,letterSpacing:'-0.1px'}}>
-              <${Ic} name="trash" size=${13} color="#FF453A"/>Hapus
+        ${isOpen ? h`<div style=${{padding:"0 16px 20px",animation:"fadeIn .3s"}}>
+          <div style=${{display:"flex",gap:8,marginBottom:16}}>
+            <button onClick=${function(e){e.stopPropagation();del(item.id)}} style=${{display:"inline-flex",alignItems:"center",gap:6,padding:"8px 14px",borderRadius:10,background:"rgba(255,69,58,0.08)",color:"#FF453A",fontSize:12,fontWeight:700,border:"none"}}>
+              <${Ic} name="trash" size=${14} color="#FF453A"/>Hapus
             </button>
           </div>
-
-          <!-- Executive Summary -->
-          ${item.overall ? h`<div style=${{marginBottom:18}}>
-            <div style=${{fontSize:10,fontWeight:800,color:'#BF5AF2',letterSpacing:'0.8px',marginBottom:10,
-              display:'flex',alignItems:'center',gap:6}}>
-              <${Ic} name="sparkle" size=${14} color="#BF5AF2"/>RINGKASAN EKSEKUTIF
+          ${item.overall ? h`<div style=${{marginBottom:20}}>
+            <div style=${{fontSize:11,fontWeight:800,color:"#BF5AF2",textTransform:"uppercase",letterSpacing:"1px",marginBottom:8,display:"flex",alignItems:"center",gap:6}}>
+              <${Ic} name="sparkle" size=${14} color="#BF5AF2"/>Ringkasan Eksekutif
             </div>
-            <div class="exec-card">
-              <div style=${{fontSize:13,lineHeight:1.7,whiteSpace:'pre-wrap',color:'#1C1C1E',fontWeight:500}}>
-                ${item.overall}
-              </div>
+            <div className="card-note exec-card">
+              <div style=${{fontSize:14,lineHeight:1.6,whiteSpace:"pre-wrap",color:"#1C1C1E",fontWeight:500}}>${item.overall}</div>
             </div>
           </div>` : null}
-
-          <!-- Timeline -->
-          ${item.notes ? h`<div style=${{marginBottom:18}}>
-            <div style=${{fontSize:10,fontWeight:800,color:'#5856D6',letterSpacing:'0.8px',marginBottom:10,
-              display:'flex',alignItems:'center',gap:6}}>
-              <${Ic} name="clock" size=${14} color="#5856D6"/>TIMELINE (CHUNK)
+          ${item.notes ? h`<div style=${{marginBottom:20}}>
+            <div style=${{fontSize:11,fontWeight:800,color:"#5856D6",textTransform:"uppercase",letterSpacing:"1px",marginBottom:8,display:"flex",alignItems:"center",gap:6}}>
+              <${Ic} name="clock" size=${14} color="#5856D6"/>Timeline (Chunk)
             </div>
-            <div style=${{background:'rgba(0,0,0,0.025)',border:'1px solid rgba(0,0,0,0.05)',
-              borderRadius:14,padding:14}}>
-              <div style=${{fontSize:12,lineHeight:1.7,whiteSpace:'pre-wrap',color:'#48484A'}}>
-                ${item.notes}
-              </div>
+            <div className="card-note" style=${{background:"rgba(0,0,0,0.02)",border:"none",boxShadow:"none"}}>
+              <div style=${{fontSize:13,lineHeight:1.6,whiteSpace:"pre-wrap",color:"#48484A"}}>${item.notes}</div>
             </div>
           </div>` : null}
-
-          <!-- Raw Transcript -->
           <div>
-            <div style=${{fontSize:10,fontWeight:800,color:'#AEAEB2',letterSpacing:'0.8px',marginBottom:10}}>
-              TRANSKRIP MENTAH
-            </div>
-            <div style=${{maxHeight:220,overflowY:'auto',background:'rgba(0,0,0,0.02)',
-              borderRadius:14,padding:14,border:'1px solid rgba(0,0,0,0.05)',
-              fontSize:12,lineHeight:1.7,color:'#636366',whiteSpace:'pre-wrap'}}>
-              ${item.transcript||'(kosong)'}
+            <div style=${{fontSize:11,fontWeight:800,color:"#8E8E93",textTransform:"uppercase",letterSpacing:"1px",marginBottom:8}}>Transkrip Mentah</div>
+            <div style=${{maxHeight:250,overflowY:"auto",background:"#FFF",borderRadius:16,padding:16,border:"1px solid rgba(0,0,0,0.06)",fontSize:13,lineHeight:1.6,color:"#636366",whiteSpace:"pre-wrap"}}>
+              ${item.transcript || "(kosong)"}
             </div>
           </div>
         </div>` : null}
@@ -995,161 +398,81 @@ function HistTab(){
   </div>`;
 }
 
-/* ══════════════════════════════════════════════════
-   TAB 3: PENGATURAN
-   ══════════════════════════════════════════════════ */
 function SetTab(p){
-  var set=p.set,updSet=p.updSet;
-  var _show=us(false),show=_show[0],setShow=_show[1];
+var set=p.set, updSet=p.updSet;
+var _sk=us(false), sk=_sk[0], sSk=*sk[1];
+return h`<div style=${{padding:“24px 16px”}}>
+<h2 style=${{fontSize:24,fontWeight:800,marginBottom:20,letterSpacing:”-0.5px”}}>Pengaturan</h2>
+<div className="gl" style=${{padding:20,marginBottom:16}}>
+<div style=${{display:“flex”,alignItems:“center”,gap:10,marginBottom:16}}>
+<div style=${{width:32,height:32,borderRadius:10,background:“rgba(88,86,214,0.1)”,display:“flex”,alignItems:“center”,justifyContent:“center”,color:”#5856D6”}}><${Ic} name=“key” size=${16}/></div>
+<span style=${{fontWeight:700,fontSize:16}}>API Key Integrasi</span>
+</div>
+<div>
+<div style=${{fontSize:12,fontWeight:600,color:”#8E8E93”,marginBottom:6}}>Groq API Key</div>
+<div style=${{position:“relative”}}>
+<input class=“fi” type=${sk?“text”:“password”} placeholder=“gsk*…” value=${set.key} onInput=${function(e){updSet(“key”,e.target.value)}} style=${{paddingRight:44,fontWeight:500,fontSize:14}}/>
+<button onClick=${function(){sSk(!sk)}} style=${{position:“absolute”,right:8,top:“50%”,transform:“translateY(-50%)”,border:“none”,background:“rgba(0,0,0,0.05)”,borderRadius:8,padding:6}}><${Ic} name=“eye” size=${16} color=”#8E8E93”/></button>
+</div>
+</div>
+</div>
+<div className="gl" style=${{padding:20}}>
+<div style=${{display:“flex”,alignItems:“center”,gap:10,marginBottom:16}}>
+<div style=${{width:32,height:32,borderRadius:10,background:“rgba(48,176,199,0.1)”,display:“flex”,alignItems:“center”,justifyContent:“center”,color:”#30B0C7”}}><${Ic} name=“layers” size=${16}/></div>
+<span style=${{fontWeight:700,fontSize:16}}>Alur Pipeline AI (Smart Mode)</span>
+</div>
+<div style=${{display:“flex”,flexDirection:“column”,gap:12}}>
+<div style=${{display:“flex”,gap:12}}>
+<div style=${{width:24,height:24,borderRadius:12,background:”#1C1C1E”,color:”#FFF”,display:“flex”,alignItems:“center”,justifyContent:“center”,fontSize:11,fontWeight:800,flexShrink:0}}>1</div>
+<div>
+<div style=${{fontSize:13,fontWeight:700,color:”#1C1C1E”}}>Perekaman & Chunking</div>
+<div style=${{fontSize:12,color:”#8E8E93”,lineHeight:1.4,marginTop:2}}>Suara direkam via MediaRecorder dan dipotong otomatis setiap ${set.chunk||30} detik (background-safe).</div>
+</div>
+</div>
+<div style=${{display:“flex”,gap:12}}>
+<div style=${{width:24,height:24,borderRadius:12,background:”#1C1C1E”,color:”#FFF”,display:“flex”,alignItems:“center”,justifyContent:“center”,fontSize:11,fontWeight:800,flexShrink:0}}>2</div>
+<div>
+<div style=${{fontSize:13,fontWeight:700,color:”#1C1C1E”}}>Whisper Transkripsi</div>
+<div style=${{fontSize:12,color:”#8E8E93”,lineHeight:1.4,marginTop:2}}>Setiap potongan dikirim ke Groq (whisper-large-v3) untuk diubah menjadi teks mentah secara paralel.</div>
+</div>
+</div>
+<div style=${{display:“flex”,gap:12}}>
+<div style=${{width:24,height:24,borderRadius:12,background:”#1C1C1E”,color:”#FFF”,display:“flex”,alignItems:“center”,justifyContent:“center”,fontSize:11,fontWeight:800,flexShrink:0}}>3</div>
+<div>
+<div style=${{fontSize:13,fontWeight:700,color:”#1C1C1E”}}>Llama Timeline (Parsial)</div>
+<div style=${{fontSize:12,color:”#8E8E93”,lineHeight:1.4,marginTop:2}}>Teks mentah langsung diringkas menjadi poin-poin singkat untuk ditayangkan secara real-time.</div>
+</div>
+</div>
+<div style=${{display:“flex”,gap:12}}>
+<div style=${{width:24,height:24,borderRadius:12,background:“linear-gradient(135deg,#BF5AF2,#5856D6)”,color:”#FFF”,display:“flex”,alignItems:“center”,justifyContent:“center”,fontSize:11,fontWeight:800,flexShrink:0}}>4</div>
+<div>
+<div style=${{fontSize:13,fontWeight:700,color:”#BF5AF2”}}>Executive Summary Keseluruhan</div>
+<div style=${{fontSize:12,color:”#8E8E93”,lineHeight:1.4,marginTop:2}}>Saat rapat diakhiri, seluruh transkrip digabungkan dan LLM menghasilkan ringkasan eksekutif komprehensif.</div>
+</div>
+</div>
+</div>
+<div style=${{marginTop:16,borderTop:“1px solid rgba(0,0,0,0.06)”,paddingTop:12,fontSize:11,color:”#C7C7CC”,textAlign:“center”}}>v7.1 · HTM Inlined Build</div>
+</div>
 
-  return h`<div style=${{paddingTop:56,padding:'24px 16px 24px'}}>
-    <h2 style=${{fontSize:26,fontWeight:800,marginBottom:20,letterSpacing:'-0.8px'}}>Sistem</h2>
-
-    <!-- API Key -->
-    <div class="gl" style=${{padding:'20px',marginBottom:14}}>
-      <div style=${{display:'flex',alignItems:'center',gap:10,marginBottom:16}}>
-        <div style=${{width:36,height:36,borderRadius:12,background:'rgba(88,86,214,0.1)',
-          display:'flex',alignItems:'center',justifyContent:'center',color:'#5856D6',
-          boxShadow:'inset 0 1px 0 rgba(255,255,255,0.6)'}}>
-          <${Ic} name="key" size=${17}/>
-        </div>
-        <div>
-          <div style=${{fontWeight:700,fontSize:15,letterSpacing:'-0.2px'}}>API Key Integrasi</div>
-          <div style=${{fontSize:12,color:'#8E8E93',fontWeight:500}}>Groq (Whisper + Llama)</div>
-        </div>
-        <div style=${{marginLeft:'auto',display:'flex',alignItems:'center',gap:6,fontSize:11,fontWeight:700,
-          color:window.__AK?'#32D74B':'#FF453A'}}>
-          <div style=${{width:7,height:7,borderRadius:4,background:window.__AK?'#32D74B':'#FF453A'}}></div>
-          ${window.__AK?'Aktif':'Kosong'}
-        </div>
-      </div>
-      <div style=${{position:'relative'}}>
-        <input class="fi" type=${show?'text':'password'} value=${set.key}
-          placeholder="gsk_..."
-          onInput=${function(e){updSet('key',e.target.value);}}
-          style=${{paddingRight:46,fontSize:14,fontWeight:500,fontFamily:'monospace'}}/>
-        <button onClick=${function(){setShow(!show);}}
-          style=${{position:'absolute',right:10,top:'50%',transform:'translateY(-50%)',
-            width:30,height:30,borderRadius:8,background:'rgba(0,0,0,0.05)',
-            display:'flex',alignItems:'center',justifyContent:'center'}}>
-          <${Ic} name="eye" size=${15} color="#8E8E93"/>
-        </button>
-      </div>
-      <div style=${{fontSize:12,color:'#AEAEB2',marginTop:10,lineHeight:1.5}}>
-        Dapatkan key gratis di <span style=${{color:'#5856D6',fontWeight:600}}>console.groq.com</span> — tidak disimpan ke server manapun.
-      </div>
-    </div>
-
-    <!-- PWA Info -->
-    <div class="gl" style=${{padding:'20px',marginBottom:14}}>
-      <div style=${{display:'flex',alignItems:'center',gap:10,marginBottom:14}}>
-        <div style=${{width:36,height:36,borderRadius:12,background:'rgba(50,215,75,0.1)',
-          display:'flex',alignItems:'center',justifyContent:'center',color:'#32D74B',
-          boxShadow:'inset 0 1px 0 rgba(255,255,255,0.6)'}}>
-          <${Ic} name="download" size=${17} color="#32D74B"/>
-        </div>
-        <div>
-          <div style=${{fontWeight:700,fontSize:15,letterSpacing:'-0.2px'}}>Pasang Sebagai PWA</div>
-          <div style=${{fontSize:12,color:'#8E8E93',fontWeight:500}}>Install ke Home Screen</div>
-        </div>
-      </div>
-      <div style=${{display:'flex',flexDirection:'column',gap:8}}>
-        ${[
-          ['🍎','iOS Safari','Tap tombol Bagikan → "Tambahkan ke Layar Utama"'],
-          ['🤖','Android Chrome','Tap menu ⋮ → "Tambahkan ke layar utama" atau "Instal Aplikasi"'],
-          ['💻','Desktop Chrome','Klik ikon ⊕ di address bar']
-        ].map(function(r){
-          return h`<div style=${{display:'flex',alignItems:'flex-start',gap:10,padding:'10px 12px',
-            background:'rgba(0,0,0,0.025)',borderRadius:12}}>
-            <span style=${{fontSize:18,flexShrink:0}}>${r[0]}</span>
-            <div>
-              <div style=${{fontSize:12,fontWeight:700,color:'#1C1C1E',marginBottom:2}}>${r[1]}</div>
-              <div style=${{fontSize:12,color:'#8E8E93',lineHeight:1.4}}>${r[2]}</div>
-            </div>
-          </div>`;
-        })}
-      </div>
-    </div>
-
-    <!-- Pipeline Info -->
-    <div class="gl" style=${{padding:'20px'}}>
-      <div style=${{display:'flex',alignItems:'center',gap:10,marginBottom:16}}>
-        <div style=${{width:36,height:36,borderRadius:12,background:'rgba(48,176,199,0.1)',
-          display:'flex',alignItems:'center',justifyContent:'center',color:'#30B0C7',
-          boxShadow:'inset 0 1px 0 rgba(255,255,255,0.6)'}}>
-          <${Ic} name="layers" size=${17} color="#30B0C7"/>
-        </div>
-        <div>
-          <div style=${{fontWeight:700,fontSize:15,letterSpacing:'-0.2px'}}>Alur Pipeline AI</div>
-          <div style=${{fontSize:12,color:'#8E8E93',fontWeight:500}}>Smart Mode · 4 Tahap</div>
-        </div>
-      </div>
-
-      ${[
-        ['#1C1C1E','Perekaman & Chunking',
-          'Suara direkam via MediaRecorder, dipotong otomatis setiap '+(set.chunk||30)+' detik secara background-safe.'],
-        ['#1C1C1E','Whisper Transkripsi',
-          'Setiap chunk dikirim ke Groq whisper-large-v3 secara paralel untuk menghasilkan teks mentah.'],
-        ['#1C1C1E','Llama Timeline Parsial',
-          'Teks mentah langsung diringkas menjadi poin-poin singkat untuk ditayangkan real-time.'],
-        ['linear-gradient(135deg,#BF5AF2,#5856D6)','Executive Summary',
-          'Saat rapat diakhiri, seluruh transkrip digabung dan LLM menyusun ringkasan eksekutif komprehensif.'],
-      ].map(function(step,i){
-        return h`<div class="pipe-step" key=${i}>
-          <div class="pipe-num" style=${{background:step[0]}}>${i+1}</div>
-          <div style=${{flex:1}}>
-            <div style=${{fontSize:13,fontWeight:700,color:i===3?'#BF5AF2':'#1C1C1E',letterSpacing:'-0.1px'}}>${step[1]}</div>
-            <div style=${{fontSize:12,color:'#8E8E93',lineHeight:1.5,marginTop:3}}>${step[2]}</div>
-          </div>
-        </div>`;
-      })}
-
-      <div style=${{marginTop:14,padding:'10px 0 0',borderTop:'1px solid rgba(0,0,0,0.05)',
-        fontSize:11,color:'#C7C7CC',textAlign:'center',letterSpacing:'0.2px'}}>
-        Notulen AI v8.0 · iOS 26 Liquid Glass Build
-      </div>
-    </div>
   </div>`;
 }
 
-/* ══════════════════════════════════════════════════
-   ROOT APP
-   ══════════════════════════════════════════════════ */
 function App(){
-  var _tab=us('rec'),tab=_tab[0],setTab=_tab[1];
-  var _set=us(DB.getSet()),settings=_set[0],setSettings=_set[1];
+var _tab=us(“rec”), tab=_tab[0], setTab=_tab[1];
+var _set=us(DB.getSet()), settings=_set[0], setSettings=_set[1];
+ue(function(){ window.__AK = settings.key; }, [settings.key]);
+function updSet(k,v){ DB.updSet(k,v); setSettings(DB.getSet()); }
+return h`<div> <div> <div style=${{display: tab==="rec" ? "block" : "none"}}><${RecTab} set=${settings} updSet=${updSet} onSaveComplete=${function(){setTab("hist")}}/></div> <div style=${{display: tab==="hist" ? "block" : "none"}}><${HistTab}/></div> <div style=${{display: tab==="set" ? "block" : "none"}}><${SetTab} set=${settings} updSet=${updSet}/></div> </div> <div className="btab-container"> <div className="btab"> ${[["rec","mic","Rekam"],["hist","file","Riwayat"],["set","settings","Sistem"]].map(function(t){ return h`<button key=${t[0]} className=${tab===t[0]?“on”:””} onClick=${function(){setTab(t[0])}}>
+<${Ic} name=${t[1]} size=${22} color=${tab===t[0]?”#1C1C1E”:”#8E8E93”} sw=${tab===t[0]?2.5:2}/>${t[2]}
+</button>`;
+})}
+</div>
+</div>
 
-  ue(function(){window.__AK=settings.key;},[settings.key]);
-  function updSet(k,v){DB.updSet(k,v);setSettings(DB.getSet());}
-
-  var tabs=[
-    ['rec','mic','Rekam'],
-    ['hist','file','Riwayat'],
-    ['set','settings','Sistem']
-  ];
-
-  return h`<div>
-    <!-- Tabs (kept in DOM for instant switching) -->
-    <div style=${{display:tab==='rec'?'block':'none'}}><${RecTab} set=${settings} updSet=${updSet} onDone=${function(){setTab('hist');}}/></div>
-    <div style=${{display:tab==='hist'?'block':'none'}}><${HistTab}/></div>
-    <div style=${{display:tab==='set'?'block':'none'}}><${SetTab} set=${settings} updSet=${updSet}/></div>
-
-    <!-- Floating Navigation Island -->
-    <div class="nav-wrap">
-      <nav class="nav-pill">
-        ${tabs.map(function(t){
-          var on=tab===t[0];
-          return h`<button key=${t[0]} class=${'nav-btn'+(on?' on':'')} onClick=${function(){setTab(t[0]);}}>
-            <${Ic} name=${t[1]} size=${20} color=${on?'#1C1C1E':'#AEAEB2'} sw=${on?2.5:2}/>
-            <span>${t[2]}</span>
-          </button>`;
-        })}
-      </nav>
-    </div>
   </div>`;
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(h`<${App}/>`);
+ReactDOM.createRoot(document.getElementById(“root”)).render(h`<${App}/>`);
 </script>
 
 </body>
