@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>NotulenAI — Smart Notes</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+:root { --bg: #F2F2F7; --tx: #1C1C1E; --txm: #8E8E93; --gl: rgba(255,255,255,0.65); --gb: rgba(255,255,255,0.8); --blue: #0A84FF; --red: #FF453A; --purple: #BF5AF2; --green: #32D74B; --orange: #FF9F0A; --cyan: #5AC8FA; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif; min-height: 100vh; background: var(--bg); background-image: radial-gradient(at 0% 0%, rgba(10,132,255,0.06) 0px, transparent 50%), radial-gradient(at 100% 0%, rgba(50,215,75,0.06) 0px, transparent 50%); color: var(--tx); -webkit-font-smoothing: antialiased; padding-bottom: 72px; }
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+@keyframes ripple { 0% { box-shadow: 0 0 0 0 rgba(255,69,58,0.4); } 70% { box-shadow: 0 0 0 15px rgba(255,69,58,0); } 100% { box-shadow: 0 0 0 0 rgba(255,69,58,0); } }
+.gl { background: var(--gl); -webkit-backdrop-filter: blur(40px) saturate(200%); backdrop-filter: blur(40px) saturate(200%); border: 1px solid var(--gb); border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.04); }
+.pill { border-radius: 100px; padding: 4px 12px; display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; }
+button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; transition: transform 0.15s, opacity 0.15s; cursor: pointer; font-family: inherit; }
+button:active { transform: scale(0.96); }
+button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.btab { position: fixed; bottom: 0; left: 0; right: 0; display: flex; background: rgba(255,255,255,0.85); -webkit-backdrop-filter: blur(30px) saturate(180%); backdrop-filter: blur(30px) saturate(180%); border-top: 1px solid rgba(0,0,0,0.06); padding: 6px 0 env(safe-area-inset-bottom, 6px); z-index: 100; }
+.btab button { flex: 1; border: none; background: none; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 0; font-size: 10px; font-weight: 600; color: #8E8E93; }
+.btab button.on { color: var(--blue); }
+.fi { font-family: inherit; font-size: 14px; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.08); background: rgba(0,0,0,0.02); outline: none; width: 100%; transition: border-color 0.2s; }
+.fi:focus { border-color: rgba(10,132,255,0.5); background: #FFF; }
+select.fi { appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238E8E93' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; }
+.txt-live { font-size: 15px; line-height: 1.5; color: var(--tx); }
+.txt-interim { color: var(--txm); font-style: italic; }
+.card-note { background: #FFF; border-radius: 14px; padding: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); margin-bottom: 10px; animation: slideUp 0.3s ease-out; border: 1px solid rgba(0,0,0,0.04); }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/htm@3.1.1/dist/htm.js"></script>
+</head>
+<body>
+<div id="root"></div>
+<script>
+const h = htm.bind(React.createElement), us = React.useState, ur = React.useRef, ue = React.useEffect;
+
+/* DATABASE & SETTINGS */
+const DB = {
+  get: function() {
+    try { return JSON.parse(localStorage.getItem("notulen_app") || "null") || this.def(); } 
+    catch(e) { return this.def(); }
+  },
+  def: function() { return { history: [], set: { lang: "id-ID", interval: 1, key: "" } }; },
+  save: function(d) { localStorage.setItem("notulen_app", JSON.stringify(d)); },
+  addHist: function(r) { let d = this.get(); d.history.unshift(r); this.save(d); },
+  delHist: function(id) { let d = this.get(); d.history = d.history.filter(x => x.id !== id); this.save(d); },
+  updateSet: function(k, v) { let d = this.get(); d.set[k] = v; this.save(d); window.__API = d.set.key; }
+};
+
+/* ICONS SVG (No Emojis) */
+function Ic({ name, size = 20, color = "currentColor", sw = 2 }) {
+  const p = {
+    mic: "M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z M19 10v2a7 7 0 0 1-14 0v-2 M12 19v4 M8 23h8",
+    stop: "M6 6h12v12H6z",
+    play: "M5 3l14 9-14 9V3z",
+    file: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M14 2v6h6 M16 13H8 M16 17H8 M10 9H8",
+    settings: "M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z",
+    clock: "M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z M12 6v6l4 2",
+    check: "M20 6L9 17l-5-5",
+    trash: "M3 6h18 M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2 M10 11v6 M14 11v6",
+    key: "M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4",
+    sparkle: "M12 2l3 6 6 3-6 3-3 6-3-6-6-3 6-3z"
+  };
+  return h`<svg width=${size} height=${size} viewBox="0 0 24 24" fill="none" stroke=${color} strokeWidth=${sw} strokeLinecap="round" strokeLinejoin="round"><path d=${p[name]||""}/></svg>`;
+}
+
+/* AI SUMMARIZER (GROQ) */
+function autoSummarize(text, lang, key) {
+  return new Promise((resolve, reject) => {
+    if (!key) return reject("API Key kosong");
+    const promptId = "Ekstrak poin-poin notulen penting dari transkrip rapat ini. Singkat, padat, profesional. Format sebagai list poin (tanpa pembukaan/penutup). Transkrip: " + text;
+    const promptEn = "Extract key meeting notes from this transcript. Professional and concise bullet points. No intro/outro. Transcript: " + text;
+    
+    fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + key },
+      body: JSON.stringify({
+        model: "llama-3.3-70b-versatile",
+        messages: [{ role: "system", content: "You are an AI assistant that writes clean, concise meeting minutes." }, { role: "user", content: lang === 'id-ID' ? promptId : promptEn }],
+        temperature: 0.3,
+        max_tokens: 1000
+      })
+    }).then(r => r.json()).then(d => {
+      if (d.error) throw new Error(d.error.message);
+      resolve(d.choices[0].message.content);
+    }).catch(e => reject(e.message));
+  });
+}
+
+/* TAB: RECORD & AI AUTO NOTES */
+function RecordTab({ set }) {
+  const [isRec, setRec] = us(false);
+  const [fin, setFin] = us(""); // Finalized text
+  const [int, setInt] = us(""); // Interim text
+  const [notes, setNotes] = us([]); // Array of summaries
+  const [time, setTime] = us(0);
+  const [aiLoad, setAiLoad] = us(false);
+  
+  const srRef = ur(null);
+  const tmRef = ur(null);
+  const aiTmRef = ur(null);
+  const lastSumLen = ur(0); // track char length of last summarized point
+
+  // Initialize Speech Recognition
+  ue(() => {
+    const Sr = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (Sr) {
+      srRef.current = new Sr();
+      srRef.current.continuous = true;
+      srRef.current.interimResults = true;
+      srRef.current.lang = set.lang;
+      
+      srRef.current.onresult = (e) => {
+        let f = "", i = "";
+        for (let j = e.resultIndex; j < e.results.length; j++) {
+          if (e.results[j].isFinal) f += e.results[j][0].transcript + " ";
+          else i += e.results[j][0].transcript;
+        }
+        if (f) setFin(prev => prev + f);
+        setInt(i);
+      };
+      
+      srRef.current.onerror = (e) => {
+        console.error("Speech Error:", e.error);
+        if(e.error === 'not-allowed') stopRec();
+      };
+      
+      srRef.current.onend = () => {
+        // Auto restart if still supposed to record (hack for Web Speech API timeout)
+        if (isRec) {
+            try { srRef.current.start(); } catch(e){}
+        }
+      };
+    }
+  }, [set.lang, isRec]);
+
+  const triggerAI = (forceAll = false) => {
+    if (!window.__API) return;
+    setFin(currFin => {
+      const textToSummarize = forceAll ? currFin : currFin.slice(lastSumLen.current);
+      if (textToSummarize.trim().length > 30) {
+        setAiLoad(true);
+        autoSummarize(textToSummarize, set.lang, window.__API)
+          .then(res => {
+            setNotes(p => [{ time: time, text: res }, ...p]);
+            lastSumLen.current = currFin.length;
+          })
+          .catch(err => console.error("AI Error:", err))
+          .finally(() => setAiLoad(false));
+      }
+      return currFin;
+    });
+  };
+
+  const startRec = () => {
+    if (!window.__API) return alert("Silakan isi API Key Groq di Pengaturan terlebih dahulu.");
+    if (!srRef.current) return alert("Browser tidak mendukung Web Speech API (Gunakan Chrome/Safari).");
+    
+    setFin(""); setInt(""); setNotes([]); setTime(0); lastSumLen.current = 0;
+    try { srRef.current.start(); } catch(e){}
+    setRec(true);
+    
+    tmRef.current = setInterval(() => setTime(t => t + 1), 1000);
+    // Auto-summary interval
+    aiTmRef.current = setInterval(() => {
+      triggerAI(false);
+    }, set.interval * 60000);
+  };
+
+  const stopRec = () => {
+    setRec(false);
+    if(srRef.current) srRef.current.stop();
+    clearInterval(tmRef.current);
+    clearInterval(aiTmRef.current);
+    
+    // Final trigger for remaining text
+    setTimeout(() => triggerAI(false), 500);
+  };
+
+  const saveMeeting = () => {
+    if (!fin && notes.length === 0) return;
+    DB.addHist({
+      id: Date.now().toString(),
+      date: new Date().toISOString(),
+      duration: time,
+      transcript: fin,
+      notes: notes
+    });
+    setFin(""); setInt(""); setNotes([]); setTime(0); lastSumLen.current = 0;
+    alert("Notulen berhasil disimpan ke Riwayat.");
+  };
+
+  const fmt = (s) => `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+
+  return h`<div>
+    <div className="gl" style=${{ margin: "16px", padding: "20px", textAlign: "center", position: "relative" }}>
+      <div style=${{ fontSize: 13, fontWeight: 700, color: "#8E8E93", marginBottom: 16 }}>STATUS</div>
+      
+      <div style=${{ display: "inline-flex", justifyContent: "center", alignItems: "center", width: 80, height: 80, borderRadius: 40, background: isRec ? "rgba(255,69,58,0.1)" : "rgba(10,132,255,0.1)", color: isRec ? "#FF453A" : "#0A84FF", animation: isRec ? "ripple 2s infinite" : "none", marginBottom: 12 }}>
+        <${Ic} name=${isRec ? "mic" : "play"} size=${36} />
+      </div>
+      
+      <div style=${{ fontSize: 28, fontWeight: 800, fontFamily: "monospace", letterSpacing: -1, color: isRec ? "#FF453A" : "inherit" }}>
+        ${fmt(time)}
+      </div>
+      
+      <div style=${{ display: "flex", gap: 10, marginTop: 20 }}>
+        ${!isRec ? 
+          h`<button onClick=${startRec} style=${{ flex: 1, padding: "14px", borderRadius: 14, background: "#0A84FF", color: "#FFF", border: "none", fontSize: 15, fontWeight: 600 }}>Mulai Rapat</button>` :
+          h`<button onClick=${stopRec} style=${{ flex: 1, padding: "14px", borderRadius: 14, background: "#FF453A", color: "#FFF", border: "none", fontSize: 15, fontWeight: 600 }}>Akhiri Rapat</button>`
+        }
+      </div>
+    </div>
+
+    ${(fin || int) && h`<div style=${{ padding: "0 16px" }}>
+      <div style=${{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+        <div className="pill" style=${{ background: "rgba(10,132,255,0.1)", color: "#0A84FF" }}>Transkrip Live</div>
+        ${aiLoad && h`<div style=${{ fontSize: 11, color: "#BF5AF2", display: "flex", alignItems: "center", gap: 4 }}><div style=${{width:6,height:6,borderRadius:3,background:"#BF5AF2",animation:"pulse 1s infinite"}}/> AI Merangkum...</div>`}
+      </div>
+      <div className="gl" style=${{ padding: "16px", maxHeight: "180px", overflowY: "auto", marginBottom: 16, background: "rgba(255,255,255,0.9)" }}>
+        <span className="txt-live">${fin}</span>
+        <span className="txt-interim"> ${int}</span>
+      </div>
+    </div>`}
+
+    ${notes.length > 0 && h`<div style=${{ padding: "0 16px" }}>
+      <div className="pill" style=${{ background: "rgba(191,90,242,0.1)", color: "#BF5AF2", marginBottom: 10 }}>Poin Notulen AI</div>
+      ${notes.map((n, i) => h`<div key=${i} className="card-note">
+        <div style=${{ fontSize: 11, color: "#8E8E93", marginBottom: 6, display: "flex", alignItems: "center", gap: 4 }}><${Ic} name="sparkle" size=${12} color="#BF5AF2"/> Menit ${Math.floor(n.time/60)}</div>
+        <div style=${{ fontSize: 14, lineHeight: 1.6, color: "#1C1C1E", whiteSpace: "pre-wrap" }}>${n.text}</div>
+      </div>`)}
+      
+      ${!isRec && h`<button onClick=${saveMeeting} style=${{ width: "100%", padding: "14px", borderRadius: 14, background: "#32D74B", color: "#FFF", border: "none", fontSize: 15, fontWeight: 600, marginTop: 10 }}>Simpan ke Riwayat</button>`}
+    </div>`}
+  </div>`;
+}
+
+/* TAB: HISTORY */
+function HistoryTab() {
+  const [hist, setHist] = us(DB.get().history);
+  
+  const refresh = () => setHist(DB.get().history);
+  const del = (id) => { if(confirm("Hapus notulen ini?")) { DB.delHist(id); refresh(); } };
+
+  if (hist.length === 0) return h`<div style=${{ padding: "60px 20px", textAlign: "center" }}>
+    <${Ic} name="file" size=${48} color="#C7C7CC" sw=${1}/>
+    <div style=${{ fontSize: 16, fontWeight: 600, color: "#8E8E93", marginTop: 16 }}>Belum ada notulen</div>
+    <div style=${{ fontSize: 13, color: "#C7C7CC", marginTop: 4 }}>Rapat yang Anda simpan akan muncul di sini.</div>
+  </div>`;
+
+  return h`<div style=${{ padding: "16px" }}>
+    <h2 style=${{ fontSize: 22, fontWeight: 800, marginBottom: 16 }}>Riwayat Rapat</h2>
+    <div style=${{ display: "flex", flexDirection: "column", gap: 12 }}>
+      ${hist.map(hItem => h`<div key=${hItem.id} className="gl" style=${{ padding: "16px", background: "#FFF" }}>
+        <div style=${{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
+          <div>
+            <div style=${{ fontSize: 14, fontWeight: 700, marginBottom: 2 }}>Rapat ${new Date(hItem.date).toLocaleDateString('id-ID', {day:'numeric', month:'long', year:'numeric'})}</div>
+            <div style=${{ fontSize: 12, color: "#8E8E93" }}>${new Date(hItem.date).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})} · Durasi: ${Math.floor(hItem.duration/60)}m ${hItem.duration%60}s</div>
+          </div>
+          <button onClick=${()=>del(hItem.id)} style=${{ background: "rgba(255,69,58,0.1)", border: "none", width: 32, height: 32, borderRadius: 10, color: "#FF453A", display: "flex", alignItems: "center", justifyContent: "center" }}><${Ic} name="trash" size=${16}/></button>
+        </div>
+        
+        <div style=${{ background: "rgba(191,90,242,0.04)", border: "1px solid rgba(191,90,242,0.1)", borderRadius: 12, padding: "12px" }}>
+          <div style=${{ fontSize: 11, fontWeight: 700, color: "#BF5AF2", marginBottom: 6, display: "flex", alignItems: "center", gap: 4 }}><${Ic} name="sparkle" size=${14}/> RANGKUMAN KESELURUHAN</div>
+          <div style=${{ fontSize: 13, lineHeight: 1.6, color: "#48484A", whiteSpace: "pre-wrap" }}>
+            ${hItem.notes.map(n => n.text).join('\n\n')}
+          </div>
+        </div>
+      </div>`)}
+    </div>
+  </div>`;
+}
+
+/* TAB: SETTINGS */
+function SettingsTab({ set, updateSet }) {
+  return h`<div style=${{ padding: "16px" }}>
+    <h2 style=${{ fontSize: 22, fontWeight: 800, marginBottom: 16 }}>Pengaturan</h2>
+    
+    <div className="gl" style=${{ padding: "16px", marginBottom: 16, background: "#FFF" }}>
+      <div style=${{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+        <div style=${{ width: 30, height: 30, borderRadius: 8, background: "rgba(255,159,10,0.1)", color: "#FF9F0A", display: "flex", alignItems: "center", justifyContent: "center" }}><${Ic} name="key" size=${16}/></div>
+        <div style=${{ fontWeight: 600, fontSize: 15 }}>API Key Groq</div>
+      </div>
+      <p style=${{ fontSize: 12, color: "#8E8E93", marginBottom: 10 }}>Dibutuhkan untuk menjalankan AI Summarizer.</p>
+      <input class="fi" type="password" placeholder="gsk_..." value=${set.key} onInput=${e => updateSet('key', e.target.value)} />
+    </div>
+
+    <div className="gl" style=${{ padding: "16px", marginBottom: 16, background: "#FFF" }}>
+      <div style=${{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+        <div style=${{ width: 30, height: 30, borderRadius: 8, background: "rgba(50,215,75,0.1)", color: "#32D74B", display: "flex", alignItems: "center", justifyContent: "center" }}><${Ic} name="settings" size=${16}/></div>
+        <div style=${{ fontWeight: 600, fontSize: 15 }}>Preferensi Rapat</div>
+      </div>
+      
+      <div style=${{ marginBottom: 14 }}>
+        <div style=${{ fontSize: 12, fontWeight: 600, color: "#8E8E93", marginBottom: 6 }}>Bahasa Percakapan</div>
+        <select class="fi" value=${set.lang} onChange=${e => updateSet('lang', e.target.value)}>
+          <option value="id-ID">Bahasa Indonesia</option>
+          <option value="en-US">English (US)</option>
+        </select>
+      </div>
+
+      <div>
+        <div style=${{ fontSize: 12, fontWeight: 600, color: "#8E8E93", marginBottom: 6 }}>Interval AI Merangkum</div>
+        <select class="fi" value=${set.interval} onChange=${e => updateSet('interval', parseInt(e.target.value))}>
+          <option value="1">Setiap 1 Menit</option>
+          <option value="2">Setiap 2 Menit</option>
+          <option value="5">Setiap 5 Menit</option>
+        </select>
+        <p style=${{ fontSize: 11, color: "#C7C7CC", marginTop: 6 }}>AI akan mengekstrak poin penting dari percakapan baru setiap interval ini.</p>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* MAIN APP COMPONENT */
+function App() {
+  const [tab, setTab] = us("rec");
+  const [settings, setSettings] = us(DB.get().set);
+
+  ue(() => { window.__API = settings.key; }, [settings.key]);
+
+  const updateSet = (k, v) => {
+    DB.updateSet(k, v);
+    setSettings(DB.get().set);
+  };
+
+  return h`<div>
+    <div style=${{ paddingTop: 20 }}>
+      ${tab === "rec" && h`<${RecordTab} set=${settings} />`}
+      ${tab === "hist" && h`<${HistoryTab} />`}
+      ${tab === "set" && h`<${SettingsTab} set=${settings} updateSet=${updateSet} />`}
+    </div>
+
+    <div className="btab">
+      ${[
+        ["rec", "mic", "Rekam"],
+        ["hist", "file", "Riwayat"],
+        ["set", "settings", "Pengaturan"]
+      ].map(t => h`<button key=${t[0]} className=${tab === t[0] ? "on" : ""} onClick=${() => setTab(t[0])}>
+        <${Ic} name=${t[1]} size=${22} color=${tab === t[0] ? "#0A84FF" : "#8E8E93"}/>
+        ${t[2]}
+      </button>`)}
+    </div>
+  </div>`;
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(h`<${App}/>`);
+</script>
+</body>
+</html>
