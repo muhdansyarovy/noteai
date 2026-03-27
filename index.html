@@ -7,199 +7,550 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <style>
-:root{--bg:#F2F2F7;--tx:#1C1C1E;--txm:#8E8E93;--txs:#636366;--gl:rgba(255,255,255,0.65);--gb:rgba(255,255,255,0.8);--indigo:#5856D6;--red:#FF453A;--green:#32D74B;--orange:#FF9F0A;--teal:#30B0C7}
+:root{--bg:#F2F2F7;--tx:#1C1C1E;--txm:#8E8E93;--gl:rgba(255,255,255,0.65);--gb:rgba(255,255,255,0.8);--blue:#0A84FF;--red:#FF453A;--purple:#BF5AF2;--green:#32D74B;--orange:#FF9F0A;--teal:#30B0C7;--indigo:#5856D6}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif;min-height:100vh;background:var(--bg);background-image:radial-gradient(at 20% 0%,rgba(88,86,214,0.07) 0,transparent 50%),radial-gradient(at 80% 10%,rgba(48,176,199,0.06) 0,transparent 50%);color:var(--tx);-webkit-font-smoothing:antialiased;padding-bottom:72px;overflow-x:hidden}
 @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes ripple{0%{box-shadow:0 0 0 0 rgba(255,69,58,0.3)}70%{box-shadow:0 0 0 16px rgba(255,69,58,0)}100%{box-shadow:0 0 0 0 rgba(255,69,58,0)}}
 @keyframes breathe{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(88,86,214,.12)}50%{transform:scale(1.03);box-shadow:0 0 0 18px rgba(88,86,214,0)}}
-@keyframes pulseRec{0%,100%{opacity:.7;transform:scale(.9)}50%{opacity:1;transform:scale(1.1)}}
-@keyframes typeIn{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:translateX(0)}}
 .gl{background:var(--gl);-webkit-backdrop-filter:blur(48px) saturate(200%);backdrop-filter:blur(48px) saturate(200%);border:1px solid var(--gb);border-radius:22px;box-shadow:0 8px 32px rgba(0,0,0,.04),inset 0 1px 1px rgba(255,255,255,.8)}
-.pill{border-radius:100px}
+.pill{border-radius:100px;padding:3px 10px;display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700}
 button{-webkit-tap-highlight-color:transparent;touch-action:manipulation;transition:transform .12s;font-family:inherit;cursor:pointer}
 button:active{transform:scale(.96)}
+button:disabled{opacity:.5;cursor:not-allowed;transform:none}
 .btab{position:fixed;bottom:0;left:0;right:0;display:flex;background:rgba(255,255,255,0.88);-webkit-backdrop-filter:blur(40px) saturate(180%);backdrop-filter:blur(40px) saturate(180%);border-top:1px solid rgba(0,0,0,0.06);padding:4px 0 env(safe-area-inset-bottom,4px);z-index:100}
-.btab button{flex:1;border:none;background:none;display:flex;flex-direction:column;align-items:center;gap:1px;padding:6px 0;font-family:inherit;font-size:9px;font-weight:600;color:#8E8E93}
+.btab button{flex:1;border:none;background:none;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;font-family:inherit;font-size:9px;font-weight:600;color:#8E8E93}
 .btab button.on{color:#5856D6}
 .btab button:active{transform:none}
-.fi{font-family:inherit;font-size:14px;padding:10px 12px;border-radius:12px;border:1px solid rgba(0,0,0,0.08);background:rgba(0,0,0,0.02);outline:none;width:100%}
-.fi:focus{border-color:rgba(88,86,214,0.4)}
-.tl{animation:typeIn .3s ease both;padding:8px 12px;border-radius:12px;margin-bottom:4px;font-size:13px;line-height:1.5}
-.tl.f{background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.6)}
-.tl.i{background:rgba(88,86,214,.04);border:1px solid rgba(88,86,214,.08);color:var(--txs);font-style:italic}
-.sb{animation:slideUp .4s ease both;padding:14px 16px;border-radius:16px;margin-bottom:8px;background:rgba(88,86,214,.04);border:1px solid rgba(88,86,214,.08)}
-.ob{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:10px;font-size:12px;font-weight:600;font-family:inherit;border:none;cursor:pointer}
+.fi{font-family:inherit;font-size:14px;padding:12px 14px;border-radius:12px;border:1px solid rgba(0,0,0,0.08);background:rgba(0,0,0,0.02);outline:none;width:100%;transition:border-color .2s}
+.fi:focus{border-color:rgba(88,86,214,0.5);background:#FFF}
+select.fi{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238E8E93' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
+.card-note{background:#FFF;border-radius:14px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,0.03);margin-bottom:10px;animation:slideUp .3s ease-out;border:1px solid rgba(0,0,0,0.04)}
 </style>
-</head>
-<body>
-<div id="root"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/htm@3.1.1/dist/htm.js"></script>
+</head>
+<body>
+<div id="root"></div>
 <script>
-"use strict";
 var h=htm.bind(React.createElement),us=React.useState,ur=React.useRef,ue=React.useEffect;
-var ST={_d:null,_l:function(){if(!this._d){try{this._d=JSON.parse(localStorage.getItem("not4")||"null")}catch(e){}if(!this._d)this._d={ss:[],st:{iv:2,ln:"id-ID",ak:"",ap:"groq"}};}return this._d;},_s:function(){try{localStorage.setItem("not4",JSON.stringify(this._d))}catch(e){}},gs:function(){return this._l().st;},ss:function(s){this._l();Object.assign(this._d.st,s);this._s();},gl:function(){return this._l().ss||[];},as:function(s){this._l();this._d.ss.unshift(s);if(this._d.ss.length>100)this._d.ss.length=100;this._s();},ds:function(id){this._l();this._d.ss=this._d.ss.filter(function(s){return s.id!==id;});this._s();}};
 
-function Ic(p){var s=p.size||20,c=p.color||"currentColor",W={mic:"M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3ZM19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8",stop:"M6 4h4v16H6zM14 4h4v16h-4z",file:"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M16 13H8M16 17H8M10 9H8",settings:"M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2zM12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z",clock:"M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 6v6l4 2",check:"M22 11.08V12a10 10 0 1 1-5.93-9.14M22 4L12 14.01l-3-3",trash:"M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6",copy:"M20 9h-9a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2zM5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1",key:"M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4",bot:"M12 8V4M8 4h8M2 14h2M20 14h2M15 13v2M9 13v2M4 8h16v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z",list:"M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01",play:"M5 3l14 9-14 9V3z",globe:"M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z",search:"M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.35-4.35",zap:"M13 2L3 14h9l-1 8 10-12h-9l1-8z",alert:"M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4M12 17h.01",text:"M4 7V4h16v3M9 20h6M12 4v16",eye:"M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z",pause:"M6 4h4v16H6zM14 4h4v16h-4z",chevR:"M9 18l6-6-6-6",vol:"M11 5L6 9H2v6h4l5 4V5zM19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"};return h`<svg width=${s} height=${s} viewBox="0 0 24 24" fill="none" stroke=${c} strokeWidth=${p.sw||2} strokeLinecap="round" strokeLinejoin="round"><path d=${W[p.name]||"M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z"}/></svg>`;}
+/* ═══ STORAGE ═══ */
+var DB={
+  get:function(){try{return JSON.parse(localStorage.getItem("notulen_v4")||"null")||this.def()}catch(e){return this.def()}},
+  def:function(){return{history:[],set:{lang:"id-ID",interval:1,key:"",provider:"groq"}}},
+  save:function(d){localStorage.setItem("notulen_v4",JSON.stringify(d))},
+  addHist:function(r){var d=this.get();d.history.unshift(r);if(d.history.length>50)d.history.length=50;this.save(d)},
+  delHist:function(id){var d=this.get();d.history=d.history.filter(function(x){return x.id!==id});this.save(d)},
+  getSet:function(){return this.get().set},
+  updSet:function(k,v){var d=this.get();d.set[k]=v;this.save(d);window.__AK=d.set.key}
+};
 
-function aiCall(pr,sp){return new Promise(function(res){var s=ST.gs(),k=s.ak;if(!k){res("[Atur API Key di tab Pengaturan]");return;}var pv=s.ap||"groq",url,hd,bd;if(pv==="groq"){url="https://api.groq.com/openai/v1/chat/completions";hd={"Content-Type":"application/json","Authorization":"Bearer "+k};bd=JSON.stringify({model:"llama-3.3-70b-versatile",messages:[{role:"system",content:sp||"Anda asisten notulen rapat. Bahasa Indonesia. Ringkas padat. JANGAN markdown."},{role:"user",content:pr}],temperature:0.3,max_tokens:800});}else{url="https://api.anthropic.com/v1/messages";hd={"Content-Type":"application/json","x-api-key":k,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"};bd=JSON.stringify({model:"claude-sonnet-4-20250514",system:sp||"Anda asisten notulen rapat. Bahasa Indonesia. Ringkas padat. JANGAN markdown.",messages:[{role:"user",content:pr}],max_tokens:800});}fetch(url,{method:"POST",headers:hd,body:bd}).then(function(r){return r.json()}).then(function(d){if(pv==="groq"){if(d.error)throw new Error(d.error.message);res(d.choices[0].message.content)}else{if(d.error)throw new Error(d.error.message);res(d.content[0].text)}}).catch(function(e){res("Error: "+e.message)})});}
+/* ═══ ICON ═══ */
+function Ic(p){
+  var s=p.size||20,c=p.color||"currentColor",paths={
+    mic:"M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z M19 10v2a7 7 0 0 1-14 0v-2 M12 19v4 M8 23h8",
+    stop:"M6 6h12v12H6z",
+    play:"M5 3l14 9-14 9V3z",
+    pause:"M6 4h4v16H6zM14 4h4v16h-4z",
+    file:"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M14 2v6h6 M16 13H8 M16 17H8 M10 9H8",
+    settings:"M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z",
+    clock:"M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z M12 6v6l4 2",
+    check:"M20 6L9 17l-5-5",
+    trash:"M3 6h18 M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2 M10 11v6 M14 11v6",
+    key:"M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4",
+    sparkle:"M12 2l3 6 6 3-6 3-3 6-3-6-6-3 6-3z",
+    copy:"M20 9h-9a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2z M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1",
+    zap:"M13 2L3 14h9l-1 8 10-12h-9l1-8z",
+    alert:"M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z M12 9v4 M12 17h.01",
+    globe:"M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z M2 12h20 M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z",
+    eye:"M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z",
+    list:"M8 6h13 M8 12h13 M8 18h13 M3 6h.01 M3 12h.01 M3 18h.01",
+    text:"M4 7V4h16v3 M9 20h6 M12 4v16",
+    bot:"M12 8V4 M8 4h8 M2 14h2 M20 14h2 M15 13v2 M9 13v2 M4 8h16v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"
+  };
+  return h`<svg width=${s} height=${s} viewBox="0 0 24 24" fill="none" stroke=${c} strokeWidth=${p.sw||2} strokeLinecap="round" strokeLinejoin="round"><path d=${paths[p.name]||"M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z"}/></svg>`;
+}
 
-function LevelMeter(p){var cv=ur(null),rf=ur(null);ue(function(){if(!p.an||!cv.current)return;var c=cv.current,x=c.getContext("2d"),da=new Uint8Array(p.an.frequencyBinCount);function draw(){rf.current=requestAnimationFrame(draw);p.an.getByteFrequencyData(da);var dp=devicePixelRatio||1,rc=c.getBoundingClientRect();c.width=rc.width*dp;c.height=rc.height*dp;x.scale(dp,dp);var W=rc.width,H=rc.height;x.clearRect(0,0,W,H);var sm=0;for(var i=0;i<da.length;i++)sm+=da[i];var av=sm/da.length/255,bs=32,gp=3,bw=(W-(bs-1)*gp)/bs;for(var i=0;i<bs;i++){var th=(i+1)/bs,on=av>=th*0.7,bh=H*0.8,yy=(H-bh)/2,xx=i*(bw+gp);if(on){var it=Math.min(1,(av-th*0.5)*3);x.fillStyle=i/bs>0.7?"rgba(255,69,58,"+(0.5+it*0.5)+")":i/bs>0.4?"rgba(255,159,10,"+(0.4+it*0.6)+")":"rgba(88,86,214,"+(0.3+it*0.7)+")";}else{x.fillStyle="rgba(0,0,0,0.05)"}x.fillRect(xx,yy,bw,bh);}}draw();return function(){cancelAnimationFrame(rf.current)};},[p.an]);return h`<canvas ref=${cv} style=${{width:"100%",height:40,borderRadius:12,background:"rgba(255,255,255,0.4)",display:"block"}}/>`;}
+/* ═══ AI SUMMARIZE ═══ */
+function aiSummarize(text, lang, key){
+  return new Promise(function(resolve, reject){
+    if(!key) return reject("API Key kosong");
+    var prompt = lang==="id-ID"
+      ? "Ekstrak poin-poin notulen penting dari transkrip rapat ini. Singkat, padat, profesional. Format sebagai list poin bernomor (tanpa pembukaan/penutup). Transkrip:\n\n" + text
+      : "Extract key meeting notes from this transcript. Professional concise numbered points. No intro/outro. Transcript:\n\n" + text;
 
+    fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {"Content-Type":"application/json","Authorization":"Bearer "+key},
+      body: JSON.stringify({
+        model: "llama-3.3-70b-versatile",
+        messages: [{role:"system",content:"You write clean, concise meeting minutes."},{role:"user",content:prompt}],
+        temperature: 0.3,
+        max_tokens: 1000
+      })
+    }).then(function(r){return r.json()}).then(function(d){
+      if(d.error) throw new Error(d.error.message);
+      resolve(d.choices[0].message.content);
+    }).catch(function(e){reject(e.message||e)});
+  });
+}
+
+/* ═══ HELPERS ═══ */
 function fmt(s){return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")}
-function fT(ts){return new Date(ts).toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit",second:"2-digit"})}
 
-function App(){
-var _t=us("rec"),tab=_t[0],sT=_t[1];
-var _p=us("idle"),ph=_p[0],sP=_p[1];
-var _e=us(0),el=_e[0],sE=_e[1];
-var _tr=us([]),tr=_tr[0],sTr=_tr[1];
-var _im=us(""),im=_im[0],sIm=_im[1];
-var _su=us([]),su=_su[0],sSu=_su[1];
-var _sl=us(false),sl=_sl[0],sSl=_sl[1];
-var _ti=us(""),ti=_ti[0],sTi=_ti[1];
-var _an=us(null),an=_an[0],sAn=_an[1];
-var _pa=us(false),pa=_pa[0],sPa=_pa[1];
-var _ss=us(""),ss=_ss[0],sSs=_ss[1];
-var _em=us(""),em=_em[0],sEm=_em[1];
-var _fc=us(0),fc=_fc[0],sfc=_fc[1];
-var tmR=ur(null),smR=ur(null),acR=ur(null),msR=ur(null),trR=ur([]),lsR=ur(0),phR=ur("idle"),paR=ur(false),scR=ur(null),srR=ur(null),saR=ur(false),rtR=ur(null),suR=ur([]);
-ue(function(){trR.current=tr},[tr]);ue(function(){phR.current=ph},[ph]);ue(function(){paR.current=pa},[pa]);ue(function(){suR.current=su},[su]);
-ue(function(){return function(){clearInterval(tmR.current);clearInterval(smR.current);clearTimeout(rtR.current);kSR();if(msR.current)msR.current.getTracks().forEach(function(t){t.stop()});if(acR.current&&acR.current.state!=="closed")acR.current.close()}},[]);
-ue(function(){if(scR.current)scR.current.scrollTop=scR.current.scrollHeight},[tr,im]);
+/* ═══════════════════════════════════════
+   TAB: REKAM — using proven SR pattern
+   ═══════════════════════════════════════ */
+function RecTab(p){
+  var set = p.set;
+  var _rec=us(false), isRec=_rec[0], setRec=_rec[1];
+  var _fin=us(""), fin=_fin[0], setFin=_fin[1];
+  var _int=us(""), int=_int[0], setInt=_int[1];
+  var _notes=us([]), notes=_notes[0], setNotes=_notes[1];
+  var _time=us(0), time=_time[0], setTime=_time[1];
+  var _aiLd=us(false), aiLd=_aiLd[0], setAiLd=_aiLd[1];
+  var _title=us(""), title=_title[0], setTitle=_title[1];
+  var _saved=us(false), saved=_saved[0], setSaved=_saved[1];
 
-function kSR(){saR.current=false;clearTimeout(rtR.current);if(srR.current){try{srR.current.onend=null;srR.current.onerror=null;srR.current.onresult=null;srR.current.onstart=null;srR.current.onspeechstart=null;srR.current.onspeechend=null;srR.current.abort()}catch(e){}srR.current=null}}
+  var srRef = ur(null);
+  var tmRef = ur(null);
+  var aiTmRef = ur(null);
+  var lastSumLen = ur(0);
+  var scrollRef = ur(null);
 
-function bSR(){kSR();var SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){sEm("Browser tidak support. Pakai Chrome/Safari terbaru.");sSs("x");return}var ln=ST.gs().ln||"id-ID",r=new SR();r.continuous=true;r.interimResults=true;r.lang=ln;r.maxAlternatives=1;
-r.onstart=function(){saR.current=true;sSs("on")};
-r.onspeechstart=function(){sSs("sp")};
-r.onspeechend=function(){sSs("on")};
-r.onresult=function(e){if(paR.current)return;var fn="",tp="";for(var i=e.resultIndex;i<e.results.length;i++){var t=e.results[i][0].transcript;if(e.results[i].isFinal)fn+=t;else tp+=t}if(fn.trim()){sTr(function(p){return p.concat([{id:Date.now()+"_"+Math.random().toString(36).substr(2,4),text:fn.trim(),ts:Date.now()}])});sIm("")}else if(tp){sIm(tp)}};
-r.onerror=function(e){saR.current=false;if(e.error==="not-allowed"){sEm("Izin mikrofon ditolak. Refresh halaman.");sSs("no");return}if(e.error==="network"){sEm("Speech Recognition butuh internet. Pastikan online.");sSs("net")}if(e.error==="no-speech")sSs("sil")};
-r.onend=function(){saR.current=false;if(phR.current==="recording"&&!paR.current){sSs("re");clearTimeout(rtR.current);rtR.current=setTimeout(function(){if(phR.current==="recording"&&!paR.current)bSR()},400)}};
-srR.current=r;sSs("st");try{r.start()}catch(ex){setTimeout(function(){if(phR.current==="recording"&&!paR.current)bSR()},800)}}
+  /* ── KEY: Initialize SR in useEffect with isRec dependency ── */
+  ue(function(){
+    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if(!SR) return;
 
-function doS(){var al=trR.current,fr=lsR.current,nw=al.slice(fr);if(nw.length<2)return;sSl(true);var bk=nw.map(function(t,i){return(fr+i+1)+". "+t.text}).join("\n"),fl=al.map(function(t){return t.text}).join("\n");aiCall("Transkrip rapat (baris "+(fr+1)+" s/d "+al.length+"):\n\n"+bk+"\n\nKonteks:\n"+fl.substring(0,2000)+"\n\nRingkasan poin penting bernomor, singkat. Identifikasi keputusan, action item, topik utama.","Anda asisten notulen profesional. Bahasa Indonesia. JANGAN markdown bold/italic.").then(function(txt){sSl(false);sSu(function(p){return p.concat([{id:Date.now(),ts:Date.now(),fl:fr+1,tl:al.length,text:txt}])});lsR.current=al.length})}
+    var sr = new SR();
+    sr.continuous = true;
+    sr.interimResults = true;
+    sr.lang = set.lang;
+    sr.maxAlternatives = 1;
 
-function stR(){
-    var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-    if(!SR){alert("Browser tidak support Speech Recognition.\nGunakan Chrome atau Safari terbaru.");return}
-    sEm("");sTr([]);sSu([]);sE(0);sIm("");lsR.current=0;
-    
-    // Paksa sinkron state dan ref
-    sPa(false); paR.current=false;
-    sP("recording"); phR.current="recording";
-    sSs("");
-    
-    // 1. LANGSUNG JALANKAN SPEECH RECOGNITION (Synchronous)
-    bSR();
-    
-    // 2. Set timer durasi & AI
-    tmR.current=setInterval(function(){sE(function(e){return e+1})},1000);
-    var ms=(ST.gs().iv||2)*60*1000;
-    smR.current=setInterval(function(){if(!paR.current&&phR.current==="recording")doS()},ms);
-    
-    // 3. Jalankan visualizer audio di latar belakang (Asynchronous)
-    if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
-        navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}})
-        .then(function(st){
-            msR.current=st;
-            var ac=new(window.AudioContext||window.webkitAudioContext)();
-            acR.current=ac;
-            var src=ac.createMediaStreamSource(st),na=ac.createAnalyser();
-            na.fftSize=2048;na.smoothingTimeConstant=0.8;
-            src.connect(na);
-            sAn(na);
-        }).catch(function(e){
-            console.log("Visualizer mic info:", e.message); // Jangan throw error, biarkan transkrip tetap jalan
-        });
+    sr.onresult = function(e){
+      var f = "", i = "";
+      for(var j = e.resultIndex; j < e.results.length; j++){
+        if(e.results[j].isFinal){
+          f += e.results[j][0].transcript + " ";
+        } else {
+          i += e.results[j][0].transcript;
+        }
+      }
+      if(f) setFin(function(prev){ return prev + f; });
+      setInt(i);
+    };
+
+    sr.onerror = function(e){
+      console.log("SR Error:", e.error);
+      if(e.error === "not-allowed"){
+        alert("Izin mikrofon ditolak. Refresh halaman dan izinkan akses.");
+        stopRec();
+      }
+    };
+
+    sr.onend = function(){
+      // Auto restart if still recording
+      if(isRec){
+        try{ sr.start(); } catch(ex){}
+      }
+    };
+
+    srRef.current = sr;
+
+    // Cleanup: stop SR when component re-renders with new isRec
+    return function(){
+      try{ sr.stop(); } catch(e){}
+    };
+  }, [set.lang, isRec]);
+
+  // Auto-scroll transcript
+  ue(function(){
+    if(scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+  }, [fin, int]);
+
+  /* ── Trigger AI Summary ── */
+  function triggerAI(){
+    if(!window.__AK) return;
+    setFin(function(currFin){
+      var textToSum = currFin.slice(lastSumLen.current);
+      if(textToSum.trim().length > 30){
+        setAiLd(true);
+        aiSummarize(textToSum, set.lang, window.__AK)
+          .then(function(res){
+            setNotes(function(prev){ return [{time:time, text:res, id:Date.now()}].concat(prev); });
+            lastSumLen.current = currFin.length;
+          })
+          .catch(function(err){ console.error("AI Error:", err); })
+          .finally(function(){ setAiLd(false); });
+      }
+      return currFin;
+    });
+  }
+
+  /* ── Start Recording ── */
+  function startRec(){
+    if(!window.__AK){
+      alert("Silakan isi API Key Groq di tab Pengaturan terlebih dahulu.");
+      return;
     }
+    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if(!SR){
+      alert("Browser tidak mendukung Speech Recognition.\nGunakan Chrome atau Edge.");
+      return;
+    }
+
+    setFin(""); setInt(""); setNotes([]); setTime(0); setSaved(false);
+    lastSumLen.current = 0;
+    setRec(true); // This triggers useEffect to create & start SR
+
+    // Start after a tick to let useEffect run
+    setTimeout(function(){
+      if(srRef.current){
+        try{ srRef.current.start(); } catch(e){ console.log("Start error:", e); }
+      }
+    }, 100);
+
+    tmRef.current = setInterval(function(){ setTime(function(t){ return t+1; }); }, 1000);
+    aiTmRef.current = setInterval(function(){ triggerAI(); }, set.interval * 60000);
+  }
+
+  /* ── Stop Recording ── */
+  function stopRec(){
+    setRec(false); // This triggers useEffect cleanup → sr.stop()
+    clearInterval(tmRef.current);
+    clearInterval(aiTmRef.current);
+    // Final AI trigger
+    setTimeout(function(){ triggerAI(); }, 500);
+  }
+
+  /* ── Save to History ── */
+  function saveMeeting(){
+    if(!fin && notes.length===0) return;
+    DB.addHist({
+      id: Date.now().toString(),
+      date: new Date().toISOString(),
+      duration: time,
+      title: title || ("Rapat " + new Date().toLocaleDateString("id-ID",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"})),
+      transcript: fin,
+      notes: notes
+    });
+    setSaved(true);
+    alert("Notulen berhasil disimpan!");
+  }
+
+  /* ── Copy All ── */
+  function copyAll(){
+    var text = "NOTULEN RAPAT\n" + (title||"Rapat") + "\n" +
+      new Date().toLocaleDateString("id-ID",{weekday:"long",day:"numeric",month:"long",year:"numeric"}) +
+      "\nDurasi: " + fmt(time) + "\n\n" +
+      "=== RINGKASAN AI ===\n\n" +
+      notes.map(function(n,i){ return "[Menit " + Math.floor(n.time/60) + "]\n" + n.text; }).join("\n\n") +
+      "\n\n=== TRANSKRIP ===\n\n" + fin;
+    navigator.clipboard.writeText(text).then(function(){ alert("Tersalin ke clipboard!"); });
+  }
+
+  /* ── Reset ── */
+  function resetAll(){
+    setFin(""); setInt(""); setNotes([]); setTime(0); setTitle(""); setSaved(false);
+    lastSumLen.current = 0;
+  }
+
+  return h`<div>
+    <div style=${{textAlign:"center",padding:"32px 16px 8px"}}>
+      <div className="pill" style=${{background:"rgba(88,86,214,0.1)",color:"#5856D6",marginBottom:10}}>
+        <${Ic} name="bot" size=${12} color="#5856D6"/>NOTULEN AI
+      </div>
+      <h1 style=${{fontWeight:800,fontSize:24,letterSpacing:"-0.5px",lineHeight:1.1}}>Smart Meeting Notes</h1>
+      <p style=${{fontSize:12,color:"#8E8E93",marginTop:5}}>Transkrip otomatis + Ringkasan AI</p>
+    </div>
+
+    <div style=${{maxWidth:480,margin:"0 auto",padding:"0 16px 16px"}}>
+
+      <!-- STATUS CARD -->
+      <div className="gl" style=${{padding:20,textAlign:"center",marginBottom:14}}>
+        <div style=${{display:"inline-flex",justifyContent:"center",alignItems:"center",width:80,height:80,borderRadius:40,background:isRec?"rgba(255,69,58,0.1)":"rgba(88,86,214,0.1)",color:isRec?"#FF453A":"#5856D6",animation:isRec?"ripple 2s infinite":"none",marginBottom:12}}>
+          <${Ic} name=${isRec?"mic":"play"} size=${36}/>
+        </div>
+
+        <div style=${{fontSize:28,fontWeight:800,fontFamily:"'SF Mono',monospace",letterSpacing:-1,color:isRec?"#FF453A":"inherit",marginBottom:4}}>
+          ${fmt(time)}
+        </div>
+
+        ${isRec && h`<div className="pill" style=${{background:"rgba(50,215,75,0.1)",color:"#32D74B",marginBottom:8}}>
+          <div style=${{width:5,height:5,borderRadius:3,background:"#32D74B",animation:"pulse 1.2s infinite"}}/>
+          Mendengarkan...
+        </div>`}
+
+        ${!isRec && time===0 && h`<div style=${{marginBottom:10}}>
+          <div style=${{fontSize:10,fontWeight:600,color:"#8E8E93",marginBottom:4}}>Judul Rapat (opsional)</div>
+          <input class="fi" value=${title} onInput=${function(e){setTitle(e.target.value)}} placeholder="Cth: Weekly Standup" style=${{textAlign:"center"}}/>
+        </div>`}
+
+        <div style=${{display:"flex",gap:8}}>
+          ${!isRec && time===0 ? h`<button onClick=${startRec} style=${{flex:1,padding:"14px",borderRadius:14,background:"linear-gradient(135deg,#5856D6,#7B79E8)",color:"#FFF",border:"none",fontSize:15,fontWeight:600,boxShadow:"0 6px 20px rgba(88,86,214,0.25)"}}>
+            <span style=${{display:"flex",alignItems:"center",justifyContent:"center",gap:6}}><${Ic} name="mic" size=${18} color="#FFF"/>Mulai Rapat</span>
+          </button>` : null}
+
+          ${isRec ? h`<button onClick=${stopRec} style=${{flex:1,padding:"14px",borderRadius:14,background:"#FF453A",color:"#FFF",border:"none",fontSize:15,fontWeight:600}}>
+            <span style=${{display:"flex",alignItems:"center",justifyContent:"center",gap:6}}><${Ic} name="stop" size=${18} color="#FFF"/>Akhiri Rapat</span>
+          </button>` : null}
+
+          ${!isRec && time>0 && !saved ? h`<button onClick=${saveMeeting} style=${{flex:1,padding:"14px",borderRadius:14,background:"#32D74B",color:"#FFF",border:"none",fontSize:15,fontWeight:600}}>
+            <span style=${{display:"flex",alignItems:"center",justifyContent:"center",gap:6}}><${Ic} name="check" size=${18} color="#FFF"/>Simpan</span>
+          </button>` : null}
+
+          ${!isRec && time>0 ? h`<button onClick=${resetAll} style=${{padding:"14px 18px",borderRadius:14,background:"rgba(0,0,0,0.04)",color:"#8E8E93",border:"1px solid rgba(0,0,0,0.06)",fontSize:15,fontWeight:600}}>
+            Baru
+          </button>` : null}
+        </div>
+
+        ${!isRec && time===0 && h`<div style=${{display:"flex",gap:6,marginTop:12,justifyContent:"center"}}>
+          <div className="pill" style=${{background:"rgba(0,0,0,0.04)",color:"#8E8E93",fontSize:10}}>
+            <${Ic} name="globe" size=${10} color="#8E8E93"/>${set.lang==="id-ID"?"Indonesia":"English"}
+          </div>
+          <div className="pill" style=${{background:"rgba(0,0,0,0.04)",color:"#8E8E93",fontSize:10}}>
+            <${Ic} name="clock" size=${10} color="#8E8E93"/>AI tiap ${set.interval}m
+          </div>
+        </div>`}
+      </div>
+
+      <!-- LIVE TRANSCRIPT -->
+      ${(fin || int) ? h`<div style=${{marginBottom:14}}>
+        <div style=${{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
+          <div className="pill" style=${{background:"rgba(88,86,214,0.1)",color:"#5856D6"}}>
+            <${Ic} name="text" size=${11} color="#5856D6"/>Transkrip Live
+          </div>
+          <div style=${{display:"flex",alignItems:"center",gap:8}}>
+            ${aiLd ? h`<div style=${{fontSize:11,color:"#BF5AF2",display:"flex",alignItems:"center",gap:4}}>
+              <div style=${{width:5,height:5,borderRadius:3,background:"#BF5AF2",animation:"pulse 1s infinite"}}/>AI Merangkum...
+            </div>` : null}
+            ${!isRec && fin ? h`<button onClick=${copyAll} style=${{display:"flex",alignItems:"center",gap:3,padding:"4px 10px",borderRadius:8,border:"1px solid rgba(0,0,0,0.08)",background:"transparent",fontSize:10,fontWeight:600,color:"#5856D6",fontFamily:"inherit"}}>
+              <${Ic} name="copy" size=${11} color="#5856D6"/>Salin
+            </button>` : null}
+          </div>
+        </div>
+        <div ref=${scrollRef} className="gl" style=${{padding:16,maxHeight:200,overflowY:"auto",background:"rgba(255,255,255,0.9)"}}>
+          <span style=${{fontSize:14,lineHeight:1.6,color:"#1C1C1E"}}>${fin}</span>
+          <span style=${{fontSize:14,lineHeight:1.6,color:"#8E8E93",fontStyle:"italic"}}>${int ? " " + int : ""}</span>
+        </div>
+      </div>` : null}
+
+      <!-- MANUAL TRIGGER -->
+      ${isRec && fin.length > 50 ? h`<button onClick=${triggerAI} disabled=${aiLd} style=${{width:"100%",padding:"10px",borderRadius:12,border:"1px solid rgba(191,90,242,0.15)",background:"rgba(191,90,242,0.06)",color:aiLd?"#8E8E93":"#BF5AF2",fontSize:12,fontWeight:600,marginBottom:12,display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
+        <${Ic} name="zap" size=${14} color=${aiLd?"#8E8E93":"#BF5AF2"}/>${aiLd?"Merangkum...":"Rangkum Sekarang"}
+      </button>` : null}
+
+      <!-- AI NOTES -->
+      ${notes.length > 0 ? h`<div>
+        <div className="pill" style=${{background:"rgba(191,90,242,0.1)",color:"#BF5AF2",marginBottom:10}}>
+          <${Ic} name="sparkle" size=${11} color="#BF5AF2"/>Poin Notulen AI
+        </div>
+        ${notes.map(function(n){
+          return h`<div key=${n.id} className="card-note">
+            <div style=${{fontSize:11,color:"#8E8E93",marginBottom:6,display:"flex",alignItems:"center",gap:4}}>
+              <${Ic} name="sparkle" size=${12} color="#BF5AF2"/>Menit ${Math.floor(n.time/60)}
+            </div>
+            <div style=${{fontSize:13,lineHeight:1.6,color:"#1C1C1E",whiteSpace:"pre-wrap"}}>${n.text}</div>
+          </div>`;
+        })}
+      </div>` : null}
+
+      <!-- NO API KEY WARNING -->
+      ${!window.__AK && !isRec && time===0 ? h`<div className="gl" style=${{padding:14,marginTop:6,background:"rgba(255,159,10,0.05)",border:"1px solid rgba(255,159,10,0.12)"}}>
+        <div style=${{display:"flex",alignItems:"center",gap:8}}>
+          <${Ic} name="alert" size=${16} color="#FF9F0A"/>
+          <div>
+            <div style=${{fontSize:12,fontWeight:600,color:"#FF9F0A"}}>API Key Groq belum diatur</div>
+            <div style=${{fontSize:11,color:"#8E8E93",marginTop:1}}>Buka tab Pengaturan untuk memasukkan API Key.</div>
+          </div>
+        </div>
+      </div>` : null}
+
+      <!-- REQUIREMENTS -->
+      ${!isRec && time===0 ? h`<div style=${{marginTop:10,padding:12,borderRadius:14,background:"rgba(0,0,0,0.02)",border:"1px solid rgba(0,0,0,0.04)"}}>
+        <div style=${{fontSize:10,fontWeight:600,color:"#8E8E93",marginBottom:4}}>Persyaratan</div>
+        <div style=${{fontSize:11,color:"#636366",lineHeight:1.6}}>
+          • Chrome atau Edge (desktop/mobile)
+          • Koneksi internet (SR via server Google)
+          • Izinkan akses mikrofon saat diminta
+          • API Key Groq (gratis) untuk ringkasan AI
+        </div>
+      </div>` : null}
+    </div>
+  </div>`;
 }
 
-function tgP(){var nx=!paR.current;sPa(nx);paR.current=nx;if(nx){kSR();sSs("pa")}else bSR()}
+/* ═══════════════════════
+   TAB: RIWAYAT
+   ═══════════════════════ */
+function HistTab(){
+  var _h=us(DB.get().history), hist=_h[0], setH=_h[1];
+  var _open=us(null), openId=_open[0], setOpen=_open[1];
 
-function spR(){clearInterval(tmR.current);clearInterval(smR.current);sP("done");phR.current="done";kSR();sSs("");if(msR.current){msR.current.getTracks().forEach(function(t){t.stop()});msR.current=null}if(acR.current&&acR.current.state!=="closed")acR.current.close();sAn(null);sIm("");if(trR.current.length>lsR.current&&trR.current.length>=2)doS();var ttl=ti||("Rapat "+new Date().toLocaleDateString("id-ID",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}));ST.as({id:Date.now()+"",title:ttl,ts:Date.now(),dur:el,tr:trR.current,su:suR.current.concat([]),ln:ST.gs().ln})}
+  function refresh(){setH(DB.get().history)}
+  function del(id){if(confirm("Hapus notulen ini?")){DB.delHist(id);refresh()}}
+  function copyItem(item){
+    var text="NOTULEN RAPAT\n"+(item.title||"Rapat")+"\n"+
+      new Date(item.date).toLocaleDateString("id-ID",{weekday:"long",day:"numeric",month:"long",year:"numeric"})+
+      "\nDurasi: "+fmt(item.duration)+"\n\n=== RINGKASAN ===\n\n"+
+      item.notes.map(function(n){return n.text}).join("\n\n")+
+      "\n\n=== TRANSKRIP ===\n\n"+item.transcript;
+    navigator.clipboard.writeText(text).then(function(){alert("Tersalin!")});
+  }
 
-function rsR(){sP("idle");phR.current="idle";sTr([]);sSu([]);sE(0);sIm("");sTi("");sEm("");sSs("");lsR.current=0}
+  if(!hist.length) return h`<div style=${{padding:"60px 20px",textAlign:"center"}}>
+    <${Ic} name="file" size=${48} color="#C7C7CC" sw=${1}/>
+    <div style=${{fontSize:16,fontWeight:600,color:"#8E8E93",marginTop:16}}>Belum ada notulen</div>
+    <div style=${{fontSize:13,color:"#C7C7CC",marginTop:4}}>Rapat yang disimpan muncul di sini.</div>
+  </div>`;
 
-function cpA(){var tx="NOTULEN RAPAT\n"+(ti||"Rapat")+"\n"+new Date().toLocaleDateString("id-ID",{weekday:"long",day:"numeric",month:"long",year:"numeric"})+"\nDurasi: "+fmt(el)+"\n\n=== RINGKASAN ===\n\n"+su.map(function(s,i){return"[Bagian "+(i+1)+"]\n"+s.text}).join("\n\n")+"\n\n=== TRANSKRIP ===\n\n"+tr.map(function(t){return"["+fT(t.ts)+"] "+t.text}).join("\n");navigator.clipboard.writeText(tx).then(function(){alert("Tersalin!")})}
+  return h`<div style=${{padding:"16px"}}>
+    <h2 style=${{fontSize:20,fontWeight:800,marginBottom:14}}>Riwayat Rapat</h2>
+    ${hist.map(function(item){
+      var isOpen = openId===item.id;
+      return h`<div key=${item.id} className="gl" style=${{marginBottom:10,overflow:"hidden",background:"#FFF"}}>
+        <div onClick=${function(){setOpen(isOpen?null:item.id)}} style=${{padding:"14px 16px",cursor:"pointer",display:"flex",alignItems:"center",gap:10}}>
+          <div style=${{width:38,height:38,borderRadius:10,background:"rgba(88,86,214,0.08)",display:"flex",alignItems:"center",justifyContent:"center",color:"#5856D6",flexShrink:0}}><${Ic} name="file" size=${18}/></div>
+          <div style=${{flex:1,minWidth:0}}>
+            <div style=${{fontWeight:600,fontSize:14,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>${item.title||"Rapat"}</div>
+            <div style=${{fontSize:11,color:"#8E8E93",marginTop:1}}>
+              ${new Date(item.date).toLocaleDateString("id-ID",{day:"numeric",month:"short",year:"numeric"})} · ${fmt(item.duration)} · ${item.notes.length} poin
+            </div>
+          </div>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C7C7CC" strokeWidth="2" style=${{transform:isOpen?"rotate(90deg)":"none",transition:"0.2s"}}><path d="M9 18l6-6-6-6"/></svg>
+        </div>
 
-function srB(){var mp={"st":["#FF9F0A","Memulai..."],"on":["#5856D6","Mendengarkan"],"sp":["#32D74B","Suara terdeteksi"],"sil":["#FF9F0A","Tidak ada suara"],"re":["#FF9F0A","Restart..."],"pa":["#8E8E93","Dijeda"],"no":["#FF453A","Izin ditolak"],"net":["#FF453A","Error jaringan"],"x":["#FF453A","Tidak didukung"]};var nf=mp[ss];if(!nf)return null;return h`<div className="pill" style=${{display:"inline-flex",alignItems:"center",gap:4,background:nf[0]+"12",border:"1px solid "+nf[0]+"25",padding:"2px 10px",marginTop:6}}><div style=${{width:5,height:5,borderRadius:3,background:nf[0],animation:ss==="on"||ss==="sp"?"pulseRec 1.2s infinite":"none"}}/><span style=${{fontSize:9,fontWeight:700,color:nf[0]}}>${nf[1]}</span></div>`}
+        ${isOpen ? h`<div style=${{padding:"0 16px 16px",animation:"fadeIn .2s"}}>
+          <div style=${{display:"flex",gap:4,marginBottom:12,flexWrap:"wrap"}}>
+            <button onClick=${function(e){e.stopPropagation();copyItem(item)}} style=${{display:"inline-flex",alignItems:"center",gap:4,padding:"6px 12px",borderRadius:8,border:"1px solid rgba(0,0,0,0.08)",background:"rgba(88,86,214,0.04)",color:"#5856D6",fontSize:11,fontWeight:600,fontFamily:"inherit"}}>
+              <${Ic} name="copy" size=${12} color="#5856D6"/>Salin Semua
+            </button>
+            <button onClick=${function(e){e.stopPropagation();del(item.id)}} style=${{display:"inline-flex",alignItems:"center",gap:4,padding:"6px 12px",borderRadius:8,border:"1px solid rgba(255,69,58,0.12)",background:"rgba(255,69,58,0.04)",color:"#FF453A",fontSize:11,fontWeight:600,fontFamily:"inherit"}}>
+              <${Ic} name="trash" size=${12} color="#FF453A"/>Hapus
+            </button>
+          </div>
 
-var sg=ST.gs();
+          ${item.notes.length>0 ? h`<div style=${{marginBottom:12}}>
+            <div style=${{fontSize:10,fontWeight:700,color:"#BF5AF2",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:6,display:"flex",alignItems:"center",gap:4}}>
+              <${Ic} name="sparkle" size=${12} color="#BF5AF2"/>Ringkasan AI
+            </div>
+            ${item.notes.map(function(n,i){
+              return h`<div key=${i} className="card-note">
+                <div style=${{fontSize:11,color:"#8E8E93",marginBottom:4}}>Menit ${Math.floor(n.time/60)}</div>
+                <div style=${{fontSize:13,lineHeight:1.6,whiteSpace:"pre-wrap"}}>${n.text}</div>
+              </div>`;
+            })}
+          </div>` : null}
 
-/* RENDER TABS */
-return h`<div>
-<div style=${{display:tab==="rec"?"block":"none"}}>
-<div style=${{textAlign:"center",padding:"40px 16px 8px"}}>
-<div className="pill" style=${{display:"inline-flex",alignItems:"center",gap:4,background:"rgba(88,86,214,0.1)",border:"1px solid rgba(88,86,214,0.12)",padding:"3px 10px",marginBottom:10}}><span style=${{fontSize:9,fontWeight:700,color:"#5856D6"}}>NOTULEN AI</span></div>
-<h1 style=${{fontWeight:800,fontSize:26,letterSpacing:"-0.8px"}}>Smart Meeting Notes</h1>
-<p style=${{fontSize:12,color:"#8E8E93",marginTop:5}}>Transkrip otomatis + Ringkasan AI</p></div>
-<div style=${{maxWidth:480,margin:"0 auto",padding:"0 16px 16px"}}>
-
-${ph==="idle"?h`<div>
-<div className="gl" style=${{padding:16,marginBottom:12}}><div style=${{fontSize:10,fontWeight:600,color:"#8E8E93",marginBottom:4}}>Judul Rapat (opsional)</div><input class="fi" value=${ti} onInput=${function(e){sTi(e.target.value)}} placeholder="Cth: Weekly Standup"/></div>
-<div className="gl" style=${{padding:16,marginBottom:12}}><div style=${{display:"flex",alignItems:"center",gap:8,marginBottom:10}}><div style=${{width:28,height:28,borderRadius:8,background:"rgba(88,86,214,0.1)",display:"flex",alignItems:"center",justifyContent:"center",color:"#5856D6"}}><${Ic} name="settings" size=${15}/></div><span style=${{fontWeight:600,fontSize:13}}>Pengaturan Cepat</span></div>
-<div style=${{display:"flex",gap:8}}><div style=${{flex:1}}><div style=${{fontSize:10,fontWeight:600,color:"#8E8E93",marginBottom:4}}>Bahasa</div><div style=${{display:"flex",gap:4}}>${[["id-ID","ID"],["en-US","EN"]].map(function(l){var on=sg.ln===l[0];return h`<button key=${l[0]} onClick=${function(){ST.ss({ln:l[0]});sfc(fc+1)}} style=${{flex:1,padding:"8px",borderRadius:8,border:"1px solid "+(on?"rgba(88,86,214,0.3)":"rgba(0,0,0,0.08)"),background:on?"rgba(88,86,214,0.08)":"rgba(255,255,255,0.5)",fontSize:12,fontWeight:600,color:on?"#5856D6":"#8E8E93"}}>${l[1]}</button>`})}</div></div>
-<div style=${{flex:1}}><div style=${{fontSize:10,fontWeight:600,color:"#8E8E93",marginBottom:4}}>Interval AI</div><div style=${{display:"flex",gap:4}}>${[[1,"1m"],[2,"2m"],[5,"5m"]].map(function(v){var on=sg.iv===v[0];return h`<button key=${v[0]} onClick=${function(){ST.ss({iv:v[0]});sfc(fc+1)}} style=${{flex:1,padding:"8px",borderRadius:8,border:"1px solid "+(on?"rgba(88,86,214,0.3)":"rgba(0,0,0,0.08)"),background:on?"rgba(88,86,214,0.08)":"rgba(255,255,255,0.5)",fontSize:12,fontWeight:600,color:on?"#5856D6":"#8E8E93"}}>${v[1]}</button>`})}</div></div></div></div>
-<div style=${{textAlign:"center",marginTop:12}}><button onClick=${stR} style=${{width:90,height:90,borderRadius:45,border:"none",background:"linear-gradient(135deg,#5856D6,#7B79E8)",color:"#FFF",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 8px 32px rgba(88,86,214,0.25)",margin:"0 auto"}}><${Ic} name="mic" size=${28} color="#FFF"/></button><div style=${{fontSize:12,fontWeight:600,color:"#5856D6",marginTop:8}}>Mulai Rekam</div></div>
-${!sg.ak?h`<div className="gl" style=${{padding:14,marginTop:16,background:"rgba(255,159,10,0.05)",border:"1px solid rgba(255,159,10,0.12)"}}><div style=${{display:"flex",alignItems:"center",gap:8}}><${Ic} name="alert" size=${16} color="#FF9F0A"/><div><div style=${{fontSize:12,fontWeight:600,color:"#FF9F0A"}}>API Key belum diatur</div><div style=${{fontSize:11,color:"#8E8E93",marginTop:1}}>Tab Pengaturan → masukkan API Key.</div></div></div></div>`:null}
-<div style=${{marginTop:12,padding:12,borderRadius:14,background:"rgba(0,0,0,0.02)",border:"1px solid rgba(0,0,0,0.04)"}}><div style=${{fontSize:10,fontWeight:600,color:"#8E8E93",marginBottom:4}}>Persyaratan</div><div style=${{fontSize:11,color:"#636366",lineHeight:1.6}}>• Chrome atau Edge (desktop/mobile)
-• Koneksi internet (SR via Google)
-• Izinkan akses mikrofon</div></div></div>`:null}
-
-${ph==="recording"?h`<div>
-<div style=${{textAlign:"center",marginBottom:6}}><div className="gl" style=${{display:"inline-flex",alignItems:"center",gap:10,padding:"10px 20px",position:"relative"}}>${!pa?h`<div style=${{position:"absolute",inset:-4,borderRadius:28,border:"2px solid rgba(88,86,214,0.15)",animation:"breathe 2s infinite"}}/>`:null}<div style=${{width:8,height:8,borderRadius:4,background:pa?"#FF9F0A":"#FF453A",animation:pa?"none":"pulseRec 1.2s infinite"}}/><span style=${{fontSize:18,fontWeight:700,fontVariantNumeric:"tabular-nums",color:pa?"#FF9F0A":"#5856D6"}}>${fmt(el)}</span><div style=${{width:1,height:16,background:"rgba(0,0,0,0.08)"}}/><span style=${{fontSize:11,color:"#8E8E93"}}>${tr.length} kalimat</span></div>${srB()}</div>
-${an?h`<div style=${{marginBottom:8}}><${LevelMeter} an=${an}/></div>`:null}
-${em?h`<div className="gl" style=${{padding:12,marginBottom:10,background:"rgba(255,69,58,0.05)",border:"1px solid rgba(255,69,58,0.12)"}}><div style=${{display:"flex",alignItems:"flex-start",gap:8}}><${Ic} name="alert" size=${14} color="#FF453A"/><div style=${{fontSize:12,color:"#FF453A",lineHeight:1.4,flex:1}}>${em}</div></div></div>`:null}
-<div style=${{display:"flex",gap:6,marginBottom:10}}><button onClick=${tgP} style=${{flex:1,padding:"12px",borderRadius:14,border:"none",background:pa?"rgba(50,215,75,0.1)":"rgba(255,159,10,0.1)",color:pa?"#32D74B":"#FF9F0A",fontSize:14,fontWeight:600,display:"flex",alignItems:"center",justifyContent:"center",gap:6}}><${Ic} name=${pa?"play":"pause"} size=${16} color=${pa?"#32D74B":"#FF9F0A"}/>${pa?"Lanjut":"Jeda"}</button>
-<button onClick=${spR} style=${{flex:1,padding:"12px",borderRadius:14,border:"none",background:"#FF453A",color:"#FFF",fontSize:14,fontWeight:600,display:"flex",alignItems:"center",justifyContent:"center",gap:6}}><${Ic} name="stop" size=${16} color="#FFF"/>Selesai</button></div>
-<button onClick=${doS} disabled=${sl||tr.length<2} style=${{width:"100%",padding:"10px",borderRadius:12,border:"1px solid rgba(88,86,214,0.15)",background:"rgba(88,86,214,0.06)",color:sl?"#8E8E93":"#5856D6",fontSize:12,fontWeight:600,marginBottom:12,display:"flex",alignItems:"center",justifyContent:"center",gap:6,opacity:sl||tr.length<2?0.5:1}}><${Ic} name="zap" size=${14} color=${sl?"#8E8E93":"#5856D6"}/>${sl?"Meringkas...":"Ringkas Sekarang"}</button></div>`:null}
-
-${(ph==="recording"||ph==="done")&&su.length>0?h`<div style=${{marginBottom:12}}><div style=${{fontSize:11,fontWeight:700,color:"#5856D6",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:6,display:"flex",alignItems:"center",gap:4}}><${Ic} name="list" size=${13} color="#5856D6"/>Ringkasan AI</div>${su.map(function(s,i){return h`<div key=${s.id} class="sb"><div style=${{display:"flex",justifyContent:"space-between",marginBottom:6}}><span style=${{fontSize:10,fontWeight:600,color:"#5856D6"}}>Bagian ${i+1}</span><span style=${{fontSize:9,color:"#8E8E93"}}>${fT(s.ts)}</span></div><p style=${{fontSize:13,lineHeight:1.6,margin:0,whiteSpace:"pre-wrap"}}>${s.text}</p></div>`})}${sl?h`<div class="sb" style=${{display:"flex",alignItems:"center",gap:8}}><div style=${{width:5,height:5,borderRadius:3,background:"#5856D6",animation:"blink 1s infinite"}}/><span style=${{fontSize:12,color:"#8E8E93"}}>Meringkas...</span></div>`:null}</div>`:null}
-
-${ph==="recording"||ph==="done"?h`<div style=${{marginBottom:8}}><div style=${{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}><span style=${{fontSize:11,fontWeight:700,color:"#8E8E93",textTransform:"uppercase",letterSpacing:"0.5px",display:"flex",alignItems:"center",gap:4}}><${Ic} name="text" size=${13} color="#8E8E93"/>Transkrip</span>${ph==="done"&&tr.length>0?h`<button onClick=${cpA} class="ob" style=${{background:"rgba(88,86,214,0.06)",color:"#5856D6",border:"1px solid rgba(88,86,214,0.12)"}}><${Ic} name="copy" size=${12} color="#5856D6"/>Salin</button>`:null}</div>
-<div ref=${scR} className="gl" style=${{maxHeight:ph==="recording"?240:400,overflowY:"auto",padding:8}}>${tr.length===0&&!im?h`<div style=${{textAlign:"center",padding:"24px 0"}}><${Ic} name="vol" size=${24} color="#C7C7CC" sw=${1.5}/><div style=${{color:"#C7C7CC",fontSize:12,marginTop:6}}>Menunggu suara...</div><div style=${{color:"#D1D1D6",fontSize:10,marginTop:2}}>Bicara dengan jelas ke mikrofon</div></div>`:null}${tr.map(function(t){return h`<div key=${t.id} class="tl f"><span style=${{fontSize:9,color:"#C7C7CC",marginRight:6}}>${fT(t.ts)}</span>${t.text}</div>`})}${im?h`<div class="tl i"><span style=${{fontSize:9,color:"#C7C7CC",marginRight:6}}>...</span>${im}</div>`:null}</div></div>`:null}
-
-${ph==="done"?h`<button onClick=${rsR} style=${{width:"100%",padding:"12px",borderRadius:14,border:"none",background:"rgba(88,86,214,0.08)",color:"#5856D6",fontSize:14,fontWeight:600,marginTop:12}}>Rapat Baru</button>`:null}
-</div></div>
-
-<div style=${{display:tab==="notes"?"block":"none",paddingTop:40}}><${NotesTab}/></div>
-<div style=${{display:tab==="settings"?"block":"none",paddingTop:40}}><${SetTab}/></div>
-
-${ph==="recording"&&tab!=="rec"?h`<div onClick=${function(){sT("rec")}} style=${{position:"fixed",top:0,left:0,right:0,zIndex:99,background:"rgba(88,86,214,0.95)",backdropFilter:"blur(20px)",padding:"8px 16px",display:"flex",alignItems:"center",justifyContent:"space-between",cursor:"pointer",paddingTop:"max(8px, env(safe-area-inset-top))"}}><div style=${{display:"flex",alignItems:"center",gap:8}}><div style=${{width:6,height:6,borderRadius:3,background:"#FF453A",animation:"pulseRec 1.2s infinite"}}/><span style=${{color:"#FFF",fontSize:12,fontWeight:600}}>Merekam · ${fmt(el)} · ${tr.length} kalimat</span></div><span style=${{color:"rgba(255,255,255,0.7)",fontSize:11}}>Tap kembali</span></div>`:null}
-
-<div className="btab">${[["rec","mic","Rekam"],["notes","file","Catatan"],["settings","settings","Pengaturan"]].map(function(t){return h`<button key=${t[0]} className=${tab===t[0]?"on":""} onClick=${function(){sT(t[0])}}><${Ic} name=${t[1]} size=${18} color=${tab===t[0]?"#5856D6":"#8E8E93"}/>${t[2]}</button>`})}</div>
-</div>`;
+          <div>
+            <div style=${{fontSize:10,fontWeight:700,color:"#8E8E93",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:4}}>Transkrip</div>
+            <div style=${{maxHeight:250,overflowY:"auto",background:"rgba(0,0,0,0.02)",borderRadius:12,padding:12,fontSize:13,lineHeight:1.5,color:"#48484A"}}>
+              ${item.transcript || "(kosong)"}
+            </div>
+          </div>
+        </div>` : null}
+      </div>`;
+    })}
+  </div>`;
 }
 
-/* NOTES TAB */
-function NotesTab(){var _s=us(ST.gl()),ss=_s[0],sS=_s[1],_o=us(null),oi=_o[0],sO=_o[1],_q=us(""),q=_q[0],sQ=_q[1],_g=us(null),gi=_g[0],sG=_g[1],_f=us({}),fs=_f[0],sF=_f[1];
-function dl(id){ST.ds(id);sS(ST.gl())}
-function gn(s){sG(s.id);var t=s.tr.map(function(x){return x.text}).join("\n"),es=(s.su||[]).map(function(x){return x.text}).join("\n\n");aiCall("RINGKASAN:\n"+es+"\n\nTRANSKRIP:\n"+t.substring(0,4000)+"\n\nNotulen final: 1.TOPIK 2.KEPUTUSAN 3.ACTION ITEMS 4.CATATAN","Notulen profesional. Indonesia. JANGAN markdown.").then(function(x){sF(function(p){var n=Object.assign({},p);n[s.id]=x;return n});sG(null)})}
-function cp(s){var t="NOTULEN\n"+s.title+"\n"+new Date(s.ts).toLocaleDateString("id-ID",{weekday:"long",day:"numeric",month:"long",year:"numeric"})+"\n\n";if(fs[s.id])t+="=== NOTULEN FINAL ===\n\n"+fs[s.id]+"\n\n";t+="=== RINGKASAN ===\n\n"+(s.su||[]).map(function(x,i){return"[Bagian "+(i+1)+"]\n"+x.text}).join("\n\n")+"\n\n=== TRANSKRIP ===\n\n"+s.tr.map(function(x){return"["+fT(x.ts)+"] "+x.text}).join("\n");navigator.clipboard.writeText(t).then(function(){alert("Tersalin!")})}
-var fl=ss.filter(function(s){if(!q)return true;var w=q.toLowerCase();return s.title.toLowerCase().indexOf(w)>-1||s.tr.some(function(t){return t.text.toLowerCase().indexOf(w)>-1})});
-if(!ss.length)return h`<div style=${{padding:"60px 20px",textAlign:"center"}}><${Ic} name="file" size=${40} color="#C7C7CC" sw=${1.5}/><p style=${{fontSize:14,color:"#8E8E93",marginTop:10}}>Belum ada catatan.</p></div>`;
-return h`<div style=${{padding:"10px 16px"}}><div style=${{display:"flex",justifyContent:"space-between",marginBottom:10}}><span style=${{fontWeight:700,fontSize:17}}>Catatan Rapat</span><span style=${{fontSize:11,color:"#8E8E93"}}>${ss.length}</span></div>
-<div style=${{position:"relative",marginBottom:10}}><input class="fi" value=${q} onInput=${function(e){sQ(e.target.value)}} placeholder="Cari..." style=${{paddingLeft:34}}/><div style=${{position:"absolute",left:10,top:"50%",transform:"translateY(-50%)",pointerEvents:"none"}}><${Ic} name="search" size=${14} color="#C7C7CC"/></div></div>
-${fl.map(function(s){var io=oi===s.id;return h`<div key=${s.id} className="gl" style=${{marginBottom:8,overflow:"hidden"}}><div onClick=${function(){sO(io?null:s.id)}} style=${{padding:"12px 14px",cursor:"pointer",display:"flex",alignItems:"center",gap:10}}><div style=${{width:36,height:36,borderRadius:10,background:"rgba(88,86,214,0.08)",display:"flex",alignItems:"center",justifyContent:"center",color:"#5856D6",flexShrink:0}}><${Ic} name="file" size=${17}/></div><div style=${{flex:1,minWidth:0}}><div style=${{fontWeight:600,fontSize:14,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>${s.title}</div><div style=${{fontSize:11,color:"#8E8E93"}}>${new Date(s.ts).toLocaleDateString("id-ID",{day:"numeric",month:"short"})} · ${fmt(s.dur)} · ${s.tr.length} kalimat</div></div><span style=${{transform:io?"rotate(90deg)":"none",transition:"0.2s",flexShrink:0}}><${Ic} name="chevR" size=${14} color="#C7C7CC"/></span></div>
-${io?h`<div style=${{padding:"0 14px 14px",animation:"fadeIn .2s"}}><div style=${{display:"flex",gap:4,marginBottom:10,flexWrap:"wrap"}}><button onClick=${function(e){e.stopPropagation();gn(s)}} disabled=${gi===s.id} class="ob" style=${{background:"rgba(88,86,214,0.06)",color:"#5856D6",border:"1px solid rgba(88,86,214,0.12)",opacity:gi===s.id?0.5:1}}><${Ic} name="bot" size=${12} color="#5856D6"/>${gi===s.id?"Membuat...":"Notulen Final AI"}</button><button onClick=${function(e){e.stopPropagation();cp(s)}} class="ob" style=${{background:"rgba(0,0,0,0.03)",color:"#48484A",border:"1px solid rgba(0,0,0,0.08)"}}><${Ic} name="copy" size=${12}/>Salin</button><button onClick=${function(e){e.stopPropagation();if(confirm("Hapus?"))dl(s.id)}} class="ob" style=${{background:"rgba(255,69,58,0.04)",color:"#FF453A",border:"1px solid rgba(255,69,58,0.12)"}}><${Ic} name="trash" size=${12} color="#FF453A"/>Hapus</button></div>
-${fs[s.id]?h`<div style=${{padding:14,borderRadius:14,background:"rgba(88,86,214,0.04)",border:"1px solid rgba(88,86,214,0.1)",marginBottom:10}}><div style=${{display:"flex",alignItems:"center",gap:6,marginBottom:8}}><${Ic} name="bot" size=${14} color="#5856D6"/><span style=${{fontWeight:600,fontSize:12,color:"#5856D6"}}>Notulen Final</span></div><p style=${{fontSize:13,lineHeight:1.6,margin:0,whiteSpace:"pre-wrap"}}>${fs[s.id]}</p></div>`:null}
-${(s.su||[]).length>0?h`<div style=${{marginBottom:10}}><div style=${{fontSize:10,fontWeight:700,color:"#5856D6",marginBottom:4}}>RINGKASAN</div>${s.su.map(function(x,i){return h`<div key=${i} style=${{padding:"8px 10px",borderRadius:10,background:"rgba(88,86,214,0.03)",border:"1px solid rgba(88,86,214,0.06)",marginBottom:4}}><p style=${{fontSize:12,lineHeight:1.5,margin:0,whiteSpace:"pre-wrap"}}>${x.text}</p></div>`})}</div>`:null}
-<div><div style=${{fontSize:10,fontWeight:700,color:"#8E8E93",marginBottom:4}}>TRANSKRIP</div><div style=${{maxHeight:300,overflowY:"auto",background:"rgba(255,255,255,0.3)",borderRadius:12,padding:6}}>${s.tr.map(function(t,i){return h`<div key=${i} style=${{padding:"4px 8px",fontSize:12,lineHeight:1.4,borderBottom:"1px solid rgba(0,0,0,0.03)"}}><span style=${{fontSize:9,color:"#C7C7CC",marginRight:4}}>${fT(t.ts)}</span>${t.text}</div>`})}</div></div></div>`:null}</div>`})}</div>`}
+/* ═══════════════════════
+   TAB: PENGATURAN
+   ═══════════════════════ */
+function SetTab(p){
+  var set=p.set, updSet=p.updSet;
+  var _sk=us(false), sk=_sk[0], sSk=_sk[1];
 
-/* SETTINGS TAB */
-function SetTab(){var _s=us(ST.gs()),sg=_s[0],sG=_s[1],_k=us(false),sk=_k[0],sK=_k[1];function sv(k,v){var n=Object.assign({},sg);n[k]=v;sG(n);ST.ss(n)}
-return h`<div style=${{padding:"10px 16px"}}><div style=${{fontWeight:700,fontSize:17,marginBottom:12}}>Pengaturan</div>
-<div className="gl" style=${{padding:16,marginBottom:12}}><div style=${{display:"flex",alignItems:"center",gap:8,marginBottom:12}}><div style=${{width:28,height:28,borderRadius:8,background:"rgba(88,86,214,0.1)",display:"flex",alignItems:"center",justifyContent:"center",color:"#5856D6"}}><${Ic} name="key" size=${15}/></div><span style=${{fontWeight:600,fontSize:14}}>API Key</span></div>
-<div style=${{marginBottom:10}}><div style=${{fontSize:10,fontWeight:600,color:"#8E8E93",marginBottom:4}}>Provider</div><div style=${{display:"flex",gap:4}}>${[["groq","Groq (gratis)"],["anthropic","Anthropic"]].map(function(p){var on=sg.ap===p[0];return h`<button key=${p[0]} onClick=${function(){sv("ap",p[0])}} style=${{flex:1,padding:"9px",borderRadius:10,border:"1px solid "+(on?"rgba(88,86,214,0.3)":"rgba(0,0,0,0.08)"),background:on?"rgba(88,86,214,0.06)":"rgba(255,255,255,0.5)",fontSize:12,fontWeight:600,color:on?"#5856D6":"#8E8E93"}}>${p[1]}</button>`})}</div></div>
-<div><div style=${{fontSize:10,fontWeight:600,color:"#8E8E93",marginBottom:3}}>${sg.ap==="groq"?"Groq API Key":"Anthropic API Key"}</div><div style=${{position:"relative"}}><input class="fi" type=${sk?"text":"password"} value=${sg.ak||""} onInput=${function(e){sv("ak",e.target.value)}} placeholder=${sg.ap==="groq"?"gsk_...":"sk-ant-..."} style=${{paddingRight:40}}/><button onClick=${function(){sK(!sk)}} style=${{position:"absolute",right:6,top:"50%",transform:"translateY(-50%)",border:"none",background:"transparent",padding:4}}><${Ic} name="eye" size=${14} color="#C7C7CC"/></button></div>${sg.ak?h`<div style=${{fontSize:10,color:"#32D74B",marginTop:4,display:"flex",alignItems:"center",gap:3}}><${Ic} name="check" size=${10} color="#32D74B"/>Tersimpan</div>`:null}</div></div>
-<div className="gl" style=${{padding:16,marginBottom:12}}><div style=${{display:"flex",alignItems:"center",gap:8,marginBottom:12}}><div style=${{width:28,height:28,borderRadius:8,background:"rgba(48,176,199,0.1)",display:"flex",alignItems:"center",justifyContent:"center",color:"#30B0C7"}}><${Ic} name="globe" size=${15}/></div><span style=${{fontWeight:600,fontSize:14}}>Bahasa</span></div><div style=${{display:"flex",flexDirection:"column",gap:4}}>${[["id-ID","Bahasa Indonesia"],["en-US","English (US)"],["en-GB","English (UK)"]].map(function(l){var on=sg.ln===l[0];return h`<button key=${l[0]} onClick=${function(){sv("ln",l[0])}} style=${{padding:"10px 12px",borderRadius:12,border:"1px solid "+(on?"rgba(48,176,199,0.3)":"rgba(0,0,0,0.06)"),background:on?"rgba(48,176,199,0.06)":"rgba(255,255,255,0.5)",fontSize:13,fontWeight:on?600:400,color:on?"#30B0C7":"#48484A",textAlign:"left",display:"flex",alignItems:"center",justifyContent:"space-between"}}>${l[1]}${on?h`<${Ic} name="check" size=${14} color="#30B0C7"/>`:null}</button>`})}</div></div>
-<div className="gl" style=${{padding:16,marginBottom:12}}><div style=${{display:"flex",alignItems:"center",gap:8,marginBottom:12}}><div style=${{width:28,height:28,borderRadius:8,background:"rgba(255,159,10,0.1)",display:"flex",alignItems:"center",justifyContent:"center",color:"#FF9F0A"}}><${Ic} name="clock" size=${15}/></div><span style=${{fontWeight:600,fontSize:14}}>Interval Ringkasan</span></div><div style=${{fontSize:11,color:"#8E8E93",marginBottom:8}}>AI meringkas setiap interval ini.</div><div style=${{display:"flex",gap:4}}>${[[1,"1m"],[2,"2m"],[3,"3m"],[5,"5m"]].map(function(v){var on=sg.iv===v[0];return h`<button key=${v[0]} onClick=${function(){sv("iv",v[0])}} style=${{flex:1,padding:"10px 4px",borderRadius:10,border:"1px solid "+(on?"rgba(255,159,10,0.3)":"rgba(0,0,0,0.08)"),background:on?"rgba(255,159,10,0.06)":"rgba(255,255,255,0.5)",fontSize:12,fontWeight:600,color:on?"#FF9F0A":"#8E8E93"}}>${v[1]}</button>`})}</div></div>
-<div className="gl" style=${{padding:16}}><div style=${{fontSize:12,color:"#636366"}}>Notulen AI v3</div><div style=${{marginTop:6,padding:"8px 10px",borderRadius:8,background:"rgba(255,69,58,0.04)",border:"1px solid rgba(255,69,58,0.08)",fontSize:11,color:"#FF453A"}}>Data di localStorage. Bukan pengganti notulen resmi.</div></div></div>`}
+  return h`<div style=${{padding:"16px"}}>
+    <h2 style=${{fontSize:20,fontWeight:800,marginBottom:14}}>Pengaturan</h2>
+
+    <div className="gl" style=${{padding:16,marginBottom:14,background:"#FFF"}}>
+      <div style=${{display:"flex",alignItems:"center",gap:8,marginBottom:12}}>
+        <div style=${{width:30,height:30,borderRadius:8,background:"rgba(255,159,10,0.1)",color:"#FF9F0A",display:"flex",alignItems:"center",justifyContent:"center"}}><${Ic} name="key" size=${16}/></div>
+        <div style=${{fontWeight:600,fontSize:15}}>API Key Groq</div>
+      </div>
+      <p style=${{fontSize:12,color:"#8E8E93",marginBottom:10}}>Dibutuhkan untuk AI Summarizer. Daftar gratis di console.groq.com</p>
+      <div style=${{position:"relative"}}>
+        <input class="fi" type=${sk?"text":"password"} placeholder="gsk_..." value=${set.key} onInput=${function(e){updSet("key",e.target.value)}} style=${{paddingRight:40}}/>
+        <button onClick=${function(){sSk(!sk)}} style=${{position:"absolute",right:8,top:"50%",transform:"translateY(-50%)",border:"none",background:"transparent",padding:4,cursor:"pointer"}}>
+          <${Ic} name="eye" size=${14} color="#C7C7CC"/>
+        </button>
+      </div>
+      ${set.key ? h`<div style=${{fontSize:10,color:"#32D74B",marginTop:4,display:"flex",alignItems:"center",gap:3}}>
+        <${Ic} name="check" size=${10} color="#32D74B"/>Key tersimpan
+      </div>` : null}
+    </div>
+
+    <div className="gl" style=${{padding:16,marginBottom:14,background:"#FFF"}}>
+      <div style=${{display:"flex",alignItems:"center",gap:8,marginBottom:14}}>
+        <div style=${{width:30,height:30,borderRadius:8,background:"rgba(50,215,75,0.1)",color:"#32D74B",display:"flex",alignItems:"center",justifyContent:"center"}}><${Ic} name="settings" size=${16}/></div>
+        <div style=${{fontWeight:600,fontSize:15}}>Preferensi Rapat</div>
+      </div>
+
+      <div style=${{marginBottom:14}}>
+        <div style=${{fontSize:12,fontWeight:600,color:"#8E8E93",marginBottom:6}}>Bahasa Percakapan</div>
+        <select class="fi" value=${set.lang} onChange=${function(e){updSet("lang",e.target.value)}}>
+          <option value="id-ID">Bahasa Indonesia</option>
+          <option value="en-US">English (US)</option>
+          <option value="en-GB">English (UK)</option>
+        </select>
+      </div>
+
+      <div>
+        <div style=${{fontSize:12,fontWeight:600,color:"#8E8E93",marginBottom:6}}>Interval AI Merangkum</div>
+        <select class="fi" value=${set.interval} onChange=${function(e){updSet("interval",parseInt(e.target.value))}}>
+          <option value="1">Setiap 1 Menit</option>
+          <option value="2">Setiap 2 Menit</option>
+          <option value="3">Setiap 3 Menit</option>
+          <option value="5">Setiap 5 Menit</option>
+        </select>
+        <p style=${{fontSize:11,color:"#C7C7CC",marginTop:6}}>AI akan merangkum poin penting dari percakapan baru setiap interval ini.</p>
+      </div>
+    </div>
+
+    <div className="gl" style=${{padding:16,background:"#FFF"}}>
+      <div style=${{fontSize:12,color:"#636366",lineHeight:1.6}}>Notulen AI v4 — Speech Recognition + LLM Summarizer</div>
+      <div style=${{marginTop:8,padding:"8px 10px",borderRadius:8,background:"rgba(255,69,58,0.04)",border:"1px solid rgba(255,69,58,0.08)",fontSize:11,color:"#FF453A"}}>Data tersimpan di perangkat (localStorage). Bukan pengganti notulen resmi.</div>
+    </div>
+  </div>`;
+}
+
+/* ═══════════════════════
+   MAIN APP
+   ═══════════════════════ */
+function App(){
+  var _tab=us("rec"), tab=_tab[0], setTab=_tab[1];
+  var _set=us(DB.getSet()), settings=_set[0], setSettings=_set[1];
+
+  ue(function(){ window.__AK = settings.key; }, [settings.key]);
+
+  function updSet(k,v){
+    DB.updSet(k,v);
+    setSettings(DB.getSet());
+  }
+
+  return h`<div>
+    <div style=${{paddingTop:10}}>
+      ${tab==="rec" ? h`<${RecTab} set=${settings}/>` : null}
+      ${tab==="hist" ? h`<${HistTab}/>` : null}
+      ${tab==="set" ? h`<${SetTab} set=${settings} updSet=${updSet}/>` : null}
+    </div>
+
+    <div className="btab">
+      ${[["rec","mic","Rekam"],["hist","file","Riwayat"],["set","settings","Pengaturan"]].map(function(t){
+        return h`<button key=${t[0]} className=${tab===t[0]?"on":""} onClick=${function(){setTab(t[0])}}>
+          <${Ic} name=${t[1]} size=${20} color=${tab===t[0]?"#5856D6":"#8E8E93"}/>${t[2]}
+        </button>`;
+      })}
+    </div>
+  </div>`;
+}
 
 ReactDOM.createRoot(document.getElementById("root")).render(h`<${App}/>`);
 </script>
