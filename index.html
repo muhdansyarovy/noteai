@@ -3,349 +3,786 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>NotulenAI — Smart Notes</title>
+<title>Notulen AI — Smart Meeting Notes</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <style>
-:root { --bg: #F2F2F7; --tx: #1C1C1E; --txm: #8E8E93; --gl: rgba(255,255,255,0.65); --gb: rgba(255,255,255,0.8); --blue: #0A84FF; --red: #FF453A; --purple: #BF5AF2; --green: #32D74B; --orange: #FF9F0A; --cyan: #5AC8FA; }
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif; min-height: 100vh; background: var(--bg); background-image: radial-gradient(at 0% 0%, rgba(10,132,255,0.06) 0px, transparent 50%), radial-gradient(at 100% 0%, rgba(50,215,75,0.06) 0px, transparent 50%); color: var(--tx); -webkit-font-smoothing: antialiased; padding-bottom: 72px; }
-@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-@keyframes ripple { 0% { box-shadow: 0 0 0 0 rgba(255,69,58,0.4); } 70% { box-shadow: 0 0 0 15px rgba(255,69,58,0); } 100% { box-shadow: 0 0 0 0 rgba(255,69,58,0); } }
-.gl { background: var(--gl); -webkit-backdrop-filter: blur(40px) saturate(200%); backdrop-filter: blur(40px) saturate(200%); border: 1px solid var(--gb); border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.04); }
-.pill { border-radius: 100px; padding: 4px 12px; display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; }
-button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; transition: transform 0.15s, opacity 0.15s; cursor: pointer; font-family: inherit; }
-button:active { transform: scale(0.96); }
-button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-.btab { position: fixed; bottom: 0; left: 0; right: 0; display: flex; background: rgba(255,255,255,0.85); -webkit-backdrop-filter: blur(30px) saturate(180%); backdrop-filter: blur(30px) saturate(180%); border-top: 1px solid rgba(0,0,0,0.06); padding: 6px 0 env(safe-area-inset-bottom, 6px); z-index: 100; }
-.btab button { flex: 1; border: none; background: none; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 0; font-size: 10px; font-weight: 600; color: #8E8E93; }
-.btab button.on { color: var(--blue); }
-.fi { font-family: inherit; font-size: 14px; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.08); background: rgba(0,0,0,0.02); outline: none; width: 100%; transition: border-color 0.2s; }
-.fi:focus { border-color: rgba(10,132,255,0.5); background: #FFF; }
-select.fi { appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238E8E93' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; }
-.txt-live { font-size: 15px; line-height: 1.5; color: var(--tx); }
-.txt-interim { color: var(--txm); font-style: italic; }
-.card-note { background: #FFF; border-radius: 14px; padding: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); margin-bottom: 10px; animation: slideUp 0.3s ease-out; border: 1px solid rgba(0,0,0,0.04); }
+:root{--bg:#F2F2F7;--tx:#1C1C1E;--txm:#8E8E93;--txs:#636366;--gl:rgba(255,255,255,0.65);--gb:rgba(255,255,255,0.8);--blue:#0A84FF;--red:#FF453A;--purple:#BF5AF2;--green:#32D74B;--orange:#FF9F0A;--cyan:#5AC8FA;--teal:#30B0C7;--indigo:#5856D6}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif;min-height:100vh;min-height:100dvh;background:var(--bg);background-image:radial-gradient(at 20% 0%,rgba(88,86,214,0.07) 0,transparent 50%),radial-gradient(at 80% 10%,rgba(48,176,199,0.06) 0,transparent 50%);color:var(--tx);-webkit-font-smoothing:antialiased;padding-bottom:72px;overflow-x:hidden}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+@keyframes breathe{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(88,86,214,.12)}50%{transform:scale(1.03);box-shadow:0 0 0 18px rgba(88,86,214,0)}}
+@keyframes pulseRec{0%,100%{opacity:.7;transform:scale(.9)}50%{opacity:1;transform:scale(1.1)}}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes typeIn{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:translateX(0)}}
+.gl{background:var(--gl);-webkit-backdrop-filter:blur(48px) saturate(200%);backdrop-filter:blur(48px) saturate(200%);border:1px solid var(--gb);border-radius:22px;box-shadow:0 8px 32px rgba(0,0,0,.04),inset 0 1px 1px rgba(255,255,255,.8)}
+.gi{background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.6);border-radius:14px}
+.pill{border-radius:100px}
+button{-webkit-tap-highlight-color:transparent;touch-action:manipulation;transition:transform .15s;font-family:inherit}
+button:active{transform:scale(.96)}
+canvas{display:block}
+.seg{flex:1;padding:8px 0;border-radius:10px;border:none;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;transition:all .2s}
+.seg.on{color:var(--tx);background:rgba(255,255,255,.95);box-shadow:0 2px 6px rgba(0,0,0,.06)}
+.seg:not(.on){color:var(--txm);background:transparent}
+.btab{position:fixed;bottom:0;left:0;right:0;display:flex;background:rgba(255,255,255,0.88);-webkit-backdrop-filter:blur(40px) saturate(180%);backdrop-filter:blur(40px) saturate(180%);border-top:1px solid rgba(0,0,0,0.06);padding:4px 0 env(safe-area-inset-bottom,4px);z-index:100}
+.btab button{flex:1;border:none;background:none;display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 0;cursor:pointer;font-family:inherit;font-size:9px;font-weight:600;color:#8E8E93}
+.btab button.on{color:#5856D6}
+.btab button:active{transform:none}
+.fi{font-family:inherit;font-size:14px;padding:10px 12px;border-radius:12px;border:1px solid rgba(0,0,0,0.08);background:rgba(0,0,0,0.02);outline:none;width:100%}
+.fi:focus{border-color:rgba(88,86,214,0.4)}
+select.fi{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238E8E93' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+.transcript-line{animation:typeIn .3s ease both;padding:8px 12px;border-radius:12px;margin-bottom:4px;font-size:13px;line-height:1.5}
+.transcript-line.final{background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.6)}
+.transcript-line.interim{background:rgba(88,86,214,.04);border:1px solid rgba(88,86,214,.08);color:var(--txs);font-style:italic}
+.summary-block{animation:slideUp .4s ease both;padding:14px 16px;border-radius:16px;margin-bottom:8px;background:rgba(88,86,214,.04);border:1px solid rgba(88,86,214,.08)}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-thumb{background:rgba(0,0,0,.1);border-radius:3px}
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-<script src="https://unpkg.com/htm@3.1.1/dist/htm.js"></script>
 </head>
 <body>
 <div id="root"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/htm@3.1.1/dist/htm.js"></script>
 <script>
-const h = htm.bind(React.createElement), us = React.useState, ur = React.useRef, ue = React.useEffect;
+var h=htm.bind(React.createElement),us=React.useState,ur=React.useRef,ue=React.useEffect,uc=React.useCallback,um=React.useMemo;
 
-/* DATABASE & SETTINGS */
-const DB = {
-  get: function() {
-    try { return JSON.parse(localStorage.getItem("notulen_app") || "null") || this.def(); } 
-    catch(e) { return this.def(); }
-  },
-  def: function() { return { history: [], set: { lang: "id-ID", interval: 1, key: "" } }; },
-  save: function(d) { localStorage.setItem("notulen_app", JSON.stringify(d)); },
-  addHist: function(r) { let d = this.get(); d.history.unshift(r); this.save(d); },
-  delHist: function(id) { let d = this.get(); d.history = d.history.filter(x => x.id !== id); this.save(d); },
-  updateSet: function(k, v) { let d = this.get(); d.set[k] = v; this.save(d); window.__API = d.set.key; }
+/* ─── STORAGE ─── */
+var ST={
+_d:null,
+_l:function(){if(!this._d){try{this._d=JSON.parse(localStorage.getItem("notulen_v1")||"null")}catch(e){}if(!this._d)this._d={sessions:[],settings:{interval:2,lang:"id-ID",apiKey:"",apiProvider:"groq"}};}return this._d;},
+_s:function(){try{localStorage.setItem("notulen_v1",JSON.stringify(this._d))}catch(e){}},
+gs:function(){return this._l().settings;},
+ss:function(s){this._l();this._d.settings=Object.assign({},this._d.settings,s);this._s();},
+gl:function(){return this._l().sessions||[];},
+as:function(s){this._l();this._d.sessions.unshift(s);if(this._d.sessions.length>100)this._d.sessions=this._d.sessions.slice(0,100);this._s();},
+us:function(id,data){this._l();var x=this._d.sessions.find(function(s){return s.id===id;});if(x)Object.assign(x,data);this._s();},
+ds:function(id){this._l();this._d.sessions=this._d.sessions.filter(function(s){return s.id!==id;});this._s();}
 };
 
-/* ICONS SVG (No Emojis) */
-function Ic({ name, size = 20, color = "currentColor", sw = 2 }) {
-  const p = {
-    mic: "M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z M19 10v2a7 7 0 0 1-14 0v-2 M12 19v4 M8 23h8",
-    stop: "M6 6h12v12H6z",
-    play: "M5 3l14 9-14 9V3z",
-    file: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M14 2v6h6 M16 13H8 M16 17H8 M10 9H8",
-    settings: "M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z",
-    clock: "M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z M12 6v6l4 2",
-    check: "M20 6L9 17l-5-5",
-    trash: "M3 6h18 M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2 M10 11v6 M14 11v6",
-    key: "M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4",
-    sparkle: "M12 2l3 6 6 3-6 3-3 6-3-6-6-3 6-3z"
-  };
-  return h`<svg width=${size} height=${size} viewBox="0 0 24 24" fill="none" stroke=${color} strokeWidth=${sw} strokeLinecap="round" strokeLinejoin="round"><path d=${p[name]||""}/></svg>`;
+/* ─── ICON ─── */
+function Ic(p){var s=p.size||20,c=p.color||"currentColor";
+var d={
+mic:"M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3ZM19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8",
+stop:"M6 4h4v16H6zM14 4h4v16h-4z",
+file:"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M16 13H8M16 17H8M10 9H8",
+settings:"M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2zM12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z",
+clock:"M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 6v6l4 2",
+check:"M22 11.08V12a10 10 0 1 1-5.93-9.14M22 4L12 14.01l-3-3",
+trash:"M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6",
+copy:"M20 9h-9a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2zM5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 0 2 2v1",
+key:"M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4",
+bot:"M12 8V4M8 4h8M2 14h2M20 14h2M15 13v2M9 13v2M4 8h16v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z",
+list:"M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01",
+play:"M5 3l14 9-14 9V3z",
+globe:"M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z",
+edit:"M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z",
+download:"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3",
+search:"M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.35-4.35",
+user:"M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2M12 3a4 4 0 1 0 0 8 4 4 0 1 0 0-8z",
+users:"M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75",
+zap:"M13 2L3 14h9l-1 8 10-12h-9l1-8z",
+alert:"M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4M12 17h.01",
+grid:"M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z",
+bar:"M12 20V10M18 20V4M6 20v-4",
+tag:"M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82zM7 7h.01",
+share:"M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13",
+refresh:"M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15",
+pause:"M6 4h4v16H6zM14 4h4v16h-4z",
+chevDown:"M6 9l6 6 6-6",
+chevRight:"M9 18l6-6-6-6",
+x:"M18 6L6 18M6 6l12 12",
+hash:"M4 9h16M4 15h16M10 3v18M14 3v18",
+text:"M4 7V4h16v3M9 20h6M12 4v16",
+eye:"M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"
+};
+return h`<svg width=${s} height=${s} viewBox="0 0 24 24" fill="none" stroke=${c} strokeWidth=${p.sw||2} strokeLinecap="round" strokeLinejoin="round"><path d=${d[p.name]||"M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z"}/></svg>`;}
+
+/* ─── AI CALL ─── */
+function aiCall(prompt,sysPrompt){
+return new Promise(function(res){
+var settings=ST.gs();
+var key=settings.apiKey;
+if(!key){res("[Atur API Key di tab Pengaturan]");return;}
+var provider=settings.apiProvider||"groq";
+var url,model,headers,body;
+if(provider==="groq"){
+url="https://api.groq.com/openai/v1/chat/completions";
+model="llama-3.3-70b-versatile";
+headers={"Content-Type":"application/json","Authorization":"Bearer "+key};
+body=JSON.stringify({model:model,messages:[{role:"system",content:sysPrompt||"Anda adalah asisten notulen rapat. Bahasa Indonesia. Ringkas, padat, terstruktur. JANGAN gunakan markdown formatting."},{role:"user",content:prompt}],temperature:0.3,max_tokens:800});
+}else{
+url="https://api.anthropic.com/v1/messages";
+model="claude-sonnet-4-20250514";
+headers={"Content-Type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"};
+body=JSON.stringify({model:model,system:sysPrompt||"Anda adalah asisten notulen rapat. Bahasa Indonesia. Ringkas, padat, terstruktur. JANGAN gunakan markdown formatting.",messages:[{role:"user",content:prompt}],max_tokens:800});
+}
+fetch(url,{method:"POST",headers:headers,body:body}).then(function(r){return r.json();}).then(function(d){
+if(provider==="groq"){
+if(d.error)throw new Error(d.error.message);
+res(d.choices[0].message.content);
+}else{
+if(d.error)throw new Error(d.error.message);
+res(d.content[0].text);
+}
+}).catch(function(e){res("Error: "+e.message);});
+});
 }
 
-/* AI SUMMARIZER (GROQ) */
-function autoSummarize(text, lang, key) {
-  return new Promise((resolve, reject) => {
-    if (!key) return reject("API Key kosong");
-    const promptId = "Ekstrak poin-poin notulen penting dari transkrip rapat ini. Singkat, padat, profesional. Format sebagai list poin (tanpa pembukaan/penutup). Transkrip: " + text;
-    const promptEn = "Extract key meeting notes from this transcript. Professional and concise bullet points. No intro/outro. Transcript: " + text;
-    
-    fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + key },
-      body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
-        messages: [{ role: "system", content: "You are an AI assistant that writes clean, concise meeting minutes." }, { role: "user", content: lang === 'id-ID' ? promptId : promptEn }],
-        temperature: 0.3,
-        max_tokens: 1000
-      })
-    }).then(r => r.json()).then(d => {
-      if (d.error) throw new Error(d.error.message);
-      resolve(d.choices[0].message.content);
-    }).catch(e => reject(e.message));
-  });
+/* ─── WAVEFORM VISUALIZER ─── */
+function WaveVis(p){
+var cvs=ur(null),raf=ur(null);
+ue(function(){
+if(!p.active||!p.analyser||!cvs.current)return;
+var c=cvs.current,x=c.getContext("2d");
+var data=new Uint8Array(p.analyser.fftSize);
+function draw(){
+raf.current=requestAnimationFrame(draw);
+p.analyser.getByteTimeDomainData(data);
+var dp=devicePixelRatio||1,rc=c.getBoundingClientRect();
+c.width=rc.width*dp;c.height=rc.height*dp;
+x.scale(dp,dp);
+var W=rc.width,H=rc.height;
+x.clearRect(0,0,W,H);
+// Draw center line
+x.strokeStyle="rgba(88,86,214,0.1)";x.lineWidth=1;
+x.beginPath();x.moveTo(0,H/2);x.lineTo(W,H/2);x.stroke();
+// Draw waveform
+x.lineWidth=2;x.strokeStyle="#5856D6";x.beginPath();
+var sw=W/data.length,px=0;
+for(var i=0;i<data.length;i++){
+var v=data[i]/128,y=(v*H)/2;
+i===0?x.moveTo(px,y):x.lineTo(px,y);px+=sw;
+}x.stroke();
+// Glow
+x.lineWidth=6;x.strokeStyle="rgba(88,86,214,0.08)";x.beginPath();px=0;
+for(var i=0;i<data.length;i++){
+var v=data[i]/128,y=(v*H)/2;
+i===0?x.moveTo(px,y):x.lineTo(px,y);px+=sw;
+}x.stroke();
+}
+draw();
+return function(){cancelAnimationFrame(raf.current);};
+},[p.active,p.analyser]);
+return h`<canvas ref=${cvs} style=${{width:"100%",height:p.h||36,borderRadius:12,background:"rgba(255,255,255,0.4)"}}/>`;
 }
 
-/* TAB: RECORD & AI AUTO NOTES */
-function RecordTab({ set }) {
-  const [isRec, setRec] = us(false);
-  const [fin, setFin] = us(""); // Finalized text
-  const [int, setInt] = us(""); // Interim text
-  const [notes, setNotes] = us([]); // Array of summaries
-  const [time, setTime] = us(0);
-  const [aiLoad, setAiLoad] = us(false);
-  
-  const srRef = ur(null);
-  const tmRef = ur(null);
-  const aiTmRef = ur(null);
-  const lastSumLen = ur(0); // track char length of last summarized point
-
-  // Initialize Speech Recognition
-  ue(() => {
-    const Sr = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (Sr) {
-      srRef.current = new Sr();
-      srRef.current.continuous = true;
-      srRef.current.interimResults = true;
-      srRef.current.lang = set.lang;
-      
-      srRef.current.onresult = (e) => {
-        let f = "", i = "";
-        for (let j = e.resultIndex; j < e.results.length; j++) {
-          if (e.results[j].isFinal) f += e.results[j][0].transcript + " ";
-          else i += e.results[j][0].transcript;
-        }
-        if (f) setFin(prev => prev + f);
-        setInt(i);
-      };
-      
-      srRef.current.onerror = (e) => {
-        console.error("Speech Error:", e.error);
-        if(e.error === 'not-allowed') stopRec();
-      };
-      
-      srRef.current.onend = () => {
-        // Auto restart if still supposed to record (hack for Web Speech API timeout)
-        if (isRec) {
-            try { srRef.current.start(); } catch(e){}
-        }
-      };
-    }
-  }, [set.lang, isRec]);
-
-  const triggerAI = (forceAll = false) => {
-    if (!window.__API) return;
-    setFin(currFin => {
-      const textToSummarize = forceAll ? currFin : currFin.slice(lastSumLen.current);
-      if (textToSummarize.trim().length > 30) {
-        setAiLoad(true);
-        autoSummarize(textToSummarize, set.lang, window.__API)
-          .then(res => {
-            setNotes(p => [{ time: time, text: res }, ...p]);
-            lastSumLen.current = currFin.length;
-          })
-          .catch(err => console.error("AI Error:", err))
-          .finally(() => setAiLoad(false));
-      }
-      return currFin;
-    });
-  };
-
-  const startRec = () => {
-    if (!window.__API) return alert("Silakan isi API Key Groq di Pengaturan terlebih dahulu.");
-    if (!srRef.current) return alert("Browser tidak mendukung Web Speech API (Gunakan Chrome/Safari).");
-    
-    setFin(""); setInt(""); setNotes([]); setTime(0); lastSumLen.current = 0;
-    try { srRef.current.start(); } catch(e){}
-    setRec(true);
-    
-    tmRef.current = setInterval(() => setTime(t => t + 1), 1000);
-    // Auto-summary interval
-    aiTmRef.current = setInterval(() => {
-      triggerAI(false);
-    }, set.interval * 60000);
-  };
-
-  const stopRec = () => {
-    setRec(false);
-    if(srRef.current) srRef.current.stop();
-    clearInterval(tmRef.current);
-    clearInterval(aiTmRef.current);
-    
-    // Final trigger for remaining text
-    setTimeout(() => triggerAI(false), 500);
-  };
-
-  const saveMeeting = () => {
-    if (!fin && notes.length === 0) return;
-    DB.addHist({
-      id: Date.now().toString(),
-      date: new Date().toISOString(),
-      duration: time,
-      transcript: fin,
-      notes: notes
-    });
-    setFin(""); setInt(""); setNotes([]); setTime(0); lastSumLen.current = 0;
-    alert("Notulen berhasil disimpan ke Riwayat.");
-  };
-
-  const fmt = (s) => `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
-
-  return h`<div>
-    <div className="gl" style=${{ margin: "16px", padding: "20px", textAlign: "center", position: "relative" }}>
-      <div style=${{ fontSize: 13, fontWeight: 700, color: "#8E8E93", marginBottom: 16 }}>STATUS</div>
-      
-      <div style=${{ display: "inline-flex", justifyContent: "center", alignItems: "center", width: 80, height: 80, borderRadius: 40, background: isRec ? "rgba(255,69,58,0.1)" : "rgba(10,132,255,0.1)", color: isRec ? "#FF453A" : "#0A84FF", animation: isRec ? "ripple 2s infinite" : "none", marginBottom: 12 }}>
-        <${Ic} name=${isRec ? "mic" : "play"} size=${36} />
-      </div>
-      
-      <div style=${{ fontSize: 28, fontWeight: 800, fontFamily: "monospace", letterSpacing: -1, color: isRec ? "#FF453A" : "inherit" }}>
-        ${fmt(time)}
-      </div>
-      
-      <div style=${{ display: "flex", gap: 10, marginTop: 20 }}>
-        ${!isRec ? 
-          h`<button onClick=${startRec} style=${{ flex: 1, padding: "14px", borderRadius: 14, background: "#0A84FF", color: "#FFF", border: "none", fontSize: 15, fontWeight: 600 }}>Mulai Rapat</button>` :
-          h`<button onClick=${stopRec} style=${{ flex: 1, padding: "14px", borderRadius: 14, background: "#FF453A", color: "#FFF", border: "none", fontSize: 15, fontWeight: 600 }}>Akhiri Rapat</button>`
-        }
-      </div>
-    </div>
-
-    ${(fin || int) && h`<div style=${{ padding: "0 16px" }}>
-      <div style=${{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-        <div className="pill" style=${{ background: "rgba(10,132,255,0.1)", color: "#0A84FF" }}>Transkrip Live</div>
-        ${aiLoad && h`<div style=${{ fontSize: 11, color: "#BF5AF2", display: "flex", alignItems: "center", gap: 4 }}><div style=${{width:6,height:6,borderRadius:3,background:"#BF5AF2",animation:"pulse 1s infinite"}}/> AI Merangkum...</div>`}
-      </div>
-      <div className="gl" style=${{ padding: "16px", maxHeight: "180px", overflowY: "auto", marginBottom: 16, background: "rgba(255,255,255,0.9)" }}>
-        <span className="txt-live">${fin}</span>
-        <span className="txt-interim"> ${int}</span>
-      </div>
-    </div>`}
-
-    ${notes.length > 0 && h`<div style=${{ padding: "0 16px" }}>
-      <div className="pill" style=${{ background: "rgba(191,90,242,0.1)", color: "#BF5AF2", marginBottom: 10 }}>Poin Notulen AI</div>
-      ${notes.map((n, i) => h`<div key=${i} className="card-note">
-        <div style=${{ fontSize: 11, color: "#8E8E93", marginBottom: 6, display: "flex", alignItems: "center", gap: 4 }}><${Ic} name="sparkle" size=${12} color="#BF5AF2"/> Menit ${Math.floor(n.time/60)}</div>
-        <div style=${{ fontSize: 14, lineHeight: 1.6, color: "#1C1C1E", whiteSpace: "pre-wrap" }}>${n.text}</div>
-      </div>`)}
-      
-      ${!isRec && h`<button onClick=${saveMeeting} style=${{ width: "100%", padding: "14px", borderRadius: 14, background: "#32D74B", color: "#FFF", border: "none", fontSize: 15, fontWeight: 600, marginTop: 10 }}>Simpan ke Riwayat</button>`}
-    </div>`}
-  </div>`;
+/* ─── AMPLITUDE BARS ─── */
+function AmpBars(p){
+var cvs=ur(null),raf=ur(null);
+ue(function(){
+if(!p.active||!p.analyser||!cvs.current)return;
+var c=cvs.current,x=c.getContext("2d");
+var fData=new Uint8Array(p.analyser.frequencyBinCount);
+function draw(){
+raf.current=requestAnimationFrame(draw);
+p.analyser.getByteFrequencyData(fData);
+var dp=devicePixelRatio||1,rc=c.getBoundingClientRect();
+c.width=rc.width*dp;c.height=rc.height*dp;
+x.scale(dp,dp);
+var W=rc.width,H=rc.height,bars=40,gap=2;
+var bw=(W-(bars-1)*gap)/bars;
+x.clearRect(0,0,W,H);
+for(var i=0;i<bars;i++){
+var idx=Math.floor(i*(fData.length/bars));
+var val=fData[idx]/255;
+var bh=Math.max(2,val*H*0.9);
+var xx=i*(bw+gap);
+var r=Math.round(88+(val*80));
+var g=Math.round(86+(val*60));
+var b=Math.round(214-(val*20));
+x.fillStyle="rgba("+r+","+g+","+b+","+(0.3+val*0.7)+")";
+x.beginPath();
+x.roundRect(xx,H-bh,bw,bh,bw/2);
+x.fill();
+}
+}
+draw();
+return function(){cancelAnimationFrame(raf.current);};
+},[p.active,p.analyser]);
+return h`<canvas ref=${cvs} style=${{width:"100%",height:p.h||50,borderRadius:12,background:"rgba(255,255,255,0.4)"}}/>`;
 }
 
-/* TAB: HISTORY */
-function HistoryTab() {
-  const [hist, setHist] = us(DB.get().history);
-  
-  const refresh = () => setHist(DB.get().history);
-  const del = (id) => { if(confirm("Hapus notulen ini?")) { DB.delHist(id); refresh(); } };
+/* ─── RECORD TAB ─── */
+function RecTab(p){
+var _ph=us("idle"),ph=_ph[0],sPh=_ph[1];
+var _el=us(0),el=_el[0],sEl=_el[1];
+var _trans=us([]),trans=_trans[0],sTrans=_trans[1];
+var _interim=us(""),interim=_interim[0],sInterim=_interim[1];
+var _sums=us([]),sums=_sums[0],sSums=_sums[1];
+var _sumLoading=us(false),sumLd=_sumLoading[0],sSumLd=_sumLoading[1];
+var _title=us(""),title=_title[0],sTitle=_title[1];
+var _analyser=us(null),analyser=_analyser[0],sAnalyser=_analyser[1];
+var _paused=us(false),paused=_paused[0],sPaused=_paused[1];
+var _lastSumIdx=us(0),lastSumIdx=_lastSumIdx[0],sLastSumIdx=_lastSumIdx[1];
 
-  if (hist.length === 0) return h`<div style=${{ padding: "60px 20px", textAlign: "center" }}>
-    <${Ic} name="file" size=${48} color="#C7C7CC" sw=${1}/>
-    <div style=${{ fontSize: 16, fontWeight: 600, color: "#8E8E93", marginTop: 16 }}>Belum ada notulen</div>
-    <div style=${{ fontSize: 13, color: "#C7C7CC", marginTop: 4 }}>Rapat yang Anda simpan akan muncul di sini.</div>
-  </div>`;
+var recogRef=ur(null),timerRef=ur(null),sumTimerRef=ur(null);
+var acRef=ur(null),msRef=ur(null);
+var transRef=ur([]);transRef.current=trans;
+var lastSumIdxRef=ur(0);lastSumIdxRef.current=lastSumIdx;
+var phRef=ur("idle");phRef.current=ph;
+var pausedRef=ur(false);pausedRef.current=paused;
+var scrollRef=ur(null);
+var settings=ST.gs();
 
-  return h`<div style=${{ padding: "16px" }}>
-    <h2 style=${{ fontSize: 22, fontWeight: 800, marginBottom: 16 }}>Riwayat Rapat</h2>
-    <div style=${{ display: "flex", flexDirection: "column", gap: 12 }}>
-      ${hist.map(hItem => h`<div key=${hItem.id} className="gl" style=${{ padding: "16px", background: "#FFF" }}>
-        <div style=${{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
-          <div>
-            <div style=${{ fontSize: 14, fontWeight: 700, marginBottom: 2 }}>Rapat ${new Date(hItem.date).toLocaleDateString('id-ID', {day:'numeric', month:'long', year:'numeric'})}</div>
-            <div style=${{ fontSize: 12, color: "#8E8E93" }}>${new Date(hItem.date).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})} · Durasi: ${Math.floor(hItem.duration/60)}m ${hItem.duration%60}s</div>
-          </div>
-          <button onClick=${()=>del(hItem.id)} style=${{ background: "rgba(255,69,58,0.1)", border: "none", width: 32, height: 32, borderRadius: 10, color: "#FF453A", display: "flex", alignItems: "center", justifyContent: "center" }}><${Ic} name="trash" size=${16}/></button>
-        </div>
-        
-        <div style=${{ background: "rgba(191,90,242,0.04)", border: "1px solid rgba(191,90,242,0.1)", borderRadius: 12, padding: "12px" }}>
-          <div style=${{ fontSize: 11, fontWeight: 700, color: "#BF5AF2", marginBottom: 6, display: "flex", alignItems: "center", gap: 4 }}><${Ic} name="sparkle" size=${14}/> RANGKUMAN KESELURUHAN</div>
-          <div style=${{ fontSize: 13, lineHeight: 1.6, color: "#48484A", whiteSpace: "pre-wrap" }}>
-            ${hItem.notes.map(n => n.text).join('\n\n')}
-          </div>
-        </div>
-      </div>`)}
-    </div>
-  </div>`;
+ue(function(){
+return function(){
+clearInterval(timerRef.current);
+clearInterval(sumTimerRef.current);
+if(recogRef.current){try{recogRef.current.abort();}catch(e){}}
+if(msRef.current)msRef.current.getTracks().forEach(function(t){t.stop();});
+if(acRef.current&&acRef.current.state!=="closed")acRef.current.close();
+};
+},[]);
+
+// Auto-scroll transcript
+ue(function(){
+if(scrollRef.current){scrollRef.current.scrollTop=scrollRef.current.scrollHeight;}
+},[trans,interim]);
+
+function doSummarize(){
+var allTrans=transRef.current;
+var fromIdx=lastSumIdxRef.current;
+var newLines=allTrans.slice(fromIdx);
+if(newLines.length<2)return;
+sSumLd(true);
+var textBlock=newLines.map(function(t,i){return(fromIdx+i+1)+". "+t.text;}).join("\n");
+var totalText=allTrans.map(function(t){return t.text;}).join("\n");
+aiCall(
+"Berikut adalah transkrip percakapan rapat terbaru (baris "+
+(fromIdx+1)+" sampai "+allTrans.length+"):\n\n"+textBlock+
+"\n\nKonteks keseluruhan rapat:\n"+totalText.substring(0,2000)+
+"\n\nBuatlah ringkasan poin-poin penting dari bagian terbaru ini. "+
+"Tulis dalam bentuk poin bernomor. Setiap poin harus singkat (1-2 kalimat). "+
+"Identifikasi: keputusan, tugas/action item, topik diskusi utama. "+
+"Jika ada nama yang disebutkan, sertakan.",
+"Anda adalah asisten notulen rapat profesional. Bahasa Indonesia. Tulis ringkasan singkat dan terstruktur. JANGAN gunakan markdown bold/italic. Gunakan nomor biasa untuk poin."
+).then(function(summary){
+sSumLd(false);
+sSums(function(prev){return prev.concat([{
+id:Date.now(),
+ts:Date.now(),
+fromLine:fromIdx+1,
+toLine:allTrans.length,
+text:summary
+}]);});
+sLastSumIdx(allTrans.length);
+lastSumIdxRef.current=allTrans.length;
+});
 }
 
-/* TAB: SETTINGS */
-function SettingsTab({ set, updateSet }) {
-  return h`<div style=${{ padding: "16px" }}>
-    <h2 style=${{ fontSize: 22, fontWeight: 800, marginBottom: 16 }}>Pengaturan</h2>
-    
-    <div className="gl" style=${{ padding: "16px", marginBottom: 16, background: "#FFF" }}>
-      <div style=${{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-        <div style=${{ width: 30, height: 30, borderRadius: 8, background: "rgba(255,159,10,0.1)", color: "#FF9F0A", display: "flex", alignItems: "center", justifyContent: "center" }}><${Ic} name="key" size=${16}/></div>
-        <div style=${{ fontWeight: 600, fontSize: 15 }}>API Key Groq</div>
-      </div>
-      <p style=${{ fontSize: 12, color: "#8E8E93", marginBottom: 10 }}>Dibutuhkan untuk menjalankan AI Summarizer.</p>
-      <input class="fi" type="password" placeholder="gsk_..." value=${set.key} onInput=${e => updateSet('key', e.target.value)} />
-    </div>
+function startRecording(){
+if(!("webkitSpeechRecognition" in window)&&!("SpeechRecognition" in window)){
+alert("Browser tidak mendukung Speech Recognition. Gunakan Chrome/Edge.");return;
+}
+sTrans([]);sSums([]);sEl(0);sLastSumIdx(0);lastSumIdxRef.current=0;sInterim("");
+sPaused(false);pausedRef.current=false;
+var SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+var recog=new SpeechRecognition();
+recog.continuous=true;
+recog.interimResults=true;
+recog.lang=settings.lang||"id-ID";
+recog.maxAlternatives=1;
 
-    <div className="gl" style=${{ padding: "16px", marginBottom: 16, background: "#FFF" }}>
-      <div style=${{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
-        <div style=${{ width: 30, height: 30, borderRadius: 8, background: "rgba(50,215,75,0.1)", color: "#32D74B", display: "flex", alignItems: "center", justifyContent: "center" }}><${Ic} name="settings" size=${16}/></div>
-        <div style=${{ fontWeight: 600, fontSize: 15 }}>Preferensi Rapat</div>
-      </div>
-      
-      <div style=${{ marginBottom: 14 }}>
-        <div style=${{ fontSize: 12, fontWeight: 600, color: "#8E8E93", marginBottom: 6 }}>Bahasa Percakapan</div>
-        <select class="fi" value=${set.lang} onChange=${e => updateSet('lang', e.target.value)}>
-          <option value="id-ID">Bahasa Indonesia</option>
-          <option value="en-US">English (US)</option>
-        </select>
-      </div>
+recog.onresult=function(e){
+if(pausedRef.current)return;
+var finalText="",interimText="";
+for(var i=e.resultIndex;i<e.results.length;i++){
+var t=e.results[i][0].transcript;
+if(e.results[i].isFinal){finalText+=t;}
+else{interimText+=t;}
+}
+if(finalText.trim()){
+sTrans(function(prev){
+var next=prev.concat([{id:Date.now(),text:finalText.trim(),ts:Date.now()}]);
+transRef.current=next;
+return next;
+});
+sInterim("");
+}else{
+sInterim(interimText);
+}
+};
 
-      <div>
-        <div style=${{ fontSize: 12, fontWeight: 600, color: "#8E8E93", marginBottom: 6 }}>Interval AI Merangkum</div>
-        <select class="fi" value=${set.interval} onChange=${e => updateSet('interval', parseInt(e.target.value))}>
-          <option value="1">Setiap 1 Menit</option>
-          <option value="2">Setiap 2 Menit</option>
-          <option value="5">Setiap 5 Menit</option>
-        </select>
-        <p style=${{ fontSize: 11, color: "#C7C7CC", marginTop: 6 }}>AI akan mengekstrak poin penting dari percakapan baru setiap interval ini.</p>
-      </div>
-    </div>
-  </div>`;
+recog.onerror=function(e){
+if(e.error==="not-allowed"){alert("Izin mikrofon ditolak.");}
+if(e.error!=="no-speech"&&e.error!=="aborted"){
+// Try restart
+if(phRef.current==="recording"){
+try{recog.start();}catch(ex){}
+}
+}
+};
+
+recog.onend=function(){
+if(phRef.current==="recording"&&!pausedRef.current){
+try{recog.start();}catch(e){}
+}
+};
+
+// Get audio context for visualization
+navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
+msRef.current=stream;
+var ac=new(window.AudioContext||window.webkitAudioContext)();
+acRef.current=ac;
+var src=ac.createMediaStreamSource(stream);
+var an=ac.createAnalyser();
+an.fftSize=2048;an.smoothingTimeConstant=0.8;
+src.connect(an);
+sAnalyser(an);
+
+recog.start();
+recogRef.current=recog;
+sPh("recording");phRef.current="recording";
+
+timerRef.current=setInterval(function(){sEl(function(e){return e+1;});},1000);
+
+var intervalMs=(settings.interval||2)*60*1000;
+sumTimerRef.current=setInterval(function(){
+if(!pausedRef.current)doSummarize();
+},intervalMs);
+
+}).catch(function(e){alert("Gagal akses mikrofon: "+e.message);});
 }
 
-/* MAIN APP COMPONENT */
-function App() {
-  const [tab, setTab] = us("rec");
-  const [settings, setSettings] = us(DB.get().set);
+function togglePause(){
+sPaused(function(prev){
+var next=!prev;
+pausedRef.current=next;
+if(next){
+try{recogRef.current.stop();}catch(e){}
+}else{
+try{recogRef.current.start();}catch(e){}
+}
+return next;
+});
+}
 
-  ue(() => { window.__API = settings.key; }, [settings.key]);
+function stopRecording(){
+clearInterval(timerRef.current);
+clearInterval(sumTimerRef.current);
+if(recogRef.current){try{recogRef.current.stop();}catch(e){}}
+if(msRef.current)msRef.current.getTracks().forEach(function(t){t.stop();});
+if(acRef.current&&acRef.current.state!=="closed")acRef.current.close();
+sAnalyser(null);
 
-  const updateSet = (k, v) => {
-    DB.updateSet(k, v);
-    setSettings(DB.get().set);
-  };
+// Final summarization
+if(transRef.current.length>lastSumIdxRef.current){
+doSummarize();
+}
 
-  return h`<div>
-    <div style=${{ paddingTop: 20 }}>
-      ${tab === "rec" && h`<${RecordTab} set=${settings} />`}
-      ${tab === "hist" && h`<${HistoryTab} />`}
-      ${tab === "set" && h`<${SettingsTab} set=${settings} updateSet=${updateSet} />`}
-    </div>
+// Save session
+var sessionTitle=title||("Rapat "+new Date().toLocaleDateString("id-ID",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}));
+ST.as({
+id:Date.now()+"",
+title:sessionTitle,
+ts:Date.now(),
+duration:el,
+transcript:transRef.current,
+summaries:sums.concat([]),
+lang:settings.lang
+});
 
-    <div className="btab">
-      ${[
-        ["rec", "mic", "Rekam"],
-        ["hist", "file", "Riwayat"],
-        ["set", "settings", "Pengaturan"]
-      ].map(t => h`<button key=${t[0]} className=${tab === t[0] ? "on" : ""} onClick=${() => setTab(t[0])}>
-        <${Ic} name=${t[1]} size=${22} color=${tab === t[0] ? "#0A84FF" : "#8E8E93"}/>
-        ${t[2]}
-      </button>`)}
-    </div>
-  </div>`;
+sPh("done");phRef.current="done";
+}
+
+function reset(){
+sPh("idle");phRef.current="idle";
+sTrans([]);sSums([]);sEl(0);sInterim("");sTitle("");sLastSumIdx(0);
+}
+
+function fmt(s){return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");}
+function fmtTs(ts){return new Date(ts).toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit",second:"2-digit"});}
+
+function copyAll(){
+var text="NOTULEN RAPAT\n"+
+(title||"Rapat")+"\n"+
+new Date().toLocaleDateString("id-ID",{weekday:"long",day:"numeric",month:"long",year:"numeric"})+"\n"+
+"Durasi: "+fmt(el)+"\n\n"+
+"═══ RINGKASAN ═══\n\n"+
+sums.map(function(s,i){return"[Bagian "+(i+1)+"]\n"+s.text;}).join("\n\n")+
+"\n\n═══ TRANSKRIP LENGKAP ═══\n\n"+
+trans.map(function(t){return"["+fmtTs(t.ts)+"] "+t.text;}).join("\n");
+navigator.clipboard.writeText(text).then(function(){alert("Tersalin!");});
+}
+
+return h`<div>
+<div style=${{textAlign:"center",padding:"40px 16px 8px"}}>
+<div className="pill" style=${{display:"inline-flex",alignItems:"center",gap:4,background:"rgba(88,86,214,0.1)",border:"1px solid rgba(88,86,214,0.12)",padding:"3px 10px",marginBottom:10}}>
+<span style=${{fontSize:9,fontWeight:700,color:"#5856D6"}}>NOTULEN AI</span>
+</div>
+<h1 style=${{fontWeight:800,fontSize:26,letterSpacing:"-0.8px",lineHeight:1.1}}>Smart Meeting Notes</h1>
+<p style=${{fontSize:12,color:"#8E8E93",marginTop:5}}>Transkrip otomatis + Ringkasan AI</p>
+</div>
+
+<div style=${{maxWidth:480,margin:"0 auto",padding:"0 16px 16px"}}>
+
+${ph==="idle"&&h`<div>
+<div className="gl" style=${{padding:16,marginBottom:12}}>
+<div style=${{fontSize:10,fontWeight:600,color:"#8E8E93",marginBottom:4}}>Judul Rapat (opsional)</div>
+<input class="fi" value=${title} onInput=${function(e){sTitle(e.target.value);}} placeholder="Cth: Weekly Standup 27 Mar"/>
+</div>
+
+<div className="gl" style=${{padding:16,marginBottom:12}}>
+<div style=${{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
+<div style=${{width:28,height:28,borderRadius:8,background:"rgba(88,86,214,0.1)",display:"flex",alignItems:"center",justifyContent:"center",color:"#5856D6"}}><${Ic} name="settings" size=${15}/></div>
+<span style=${{fontWeight:600,fontSize:13}}>Pengaturan Cepat</span>
+</div>
+<div style=${{display:"flex",gap:8,marginBottom:8}}>
+<div style=${{flex:1}}>
+<div style=${{fontSize:10,fontWeight:600,color:"#8E8E93",marginBottom:3}}>Bahasa</div>
+<div style=${{display:"flex",gap:4}}>
+${[["id-ID","ID"],["en-US","EN"]].map(function(l){
+return h`<button key=${l[0]} onClick=${function(){ST.ss({lang:l[0]});}} style=${{flex:1,padding:"7px",borderRadius:8,border:"1px solid "+(settings.lang===l[0]?"rgba(88,86,214,0.3)":"rgba(0,0,0,0.08)"),background:settings.lang===l[0]?"rgba(88,86,214,0.06)":"transparent",fontSize:12,fontWeight:600,color:settings.lang===l[0]?"#5856D6":"#8E8E93",cursor:"pointer",fontFamily:"inherit"}}>${l[1]}</button>`;
+})}
+</div>
+</div>
+<div style=${{flex:1}}>
+<div style=${{fontSize:10,fontWeight:600,color:"#8E8E93",marginBottom:3}}>Interval AI</div>
+<div style=${{display:"flex",gap:4}}>
+${[[1,"1m"],[2,"2m"],[5,"5m"]].map(function(v){
+return h`<button key=${v[0]} onClick=${function(){ST.ss({interval:v[0]});}} style=${{flex:1,padding:"7px",borderRadius:8,border:"1px solid "+(settings.interval===v[0]?"rgba(88,86,214,0.3)":"rgba(0,0,0,0.08)"),background:settings.interval===v[0]?"rgba(88,86,214,0.06)":"transparent",fontSize:12,fontWeight:600,color:settings.interval===v[0]?"#5856D6":"#8E8E93",cursor:"pointer",fontFamily:"inherit"}}>${v[1]}</button>`;
+})}
+</div>
+</div>
+</div>
+</div>
+
+<div style=${{textAlign:"center",marginTop:8}}>
+<div style=${{display:"inline-flex",flexDirection:"column",alignItems:"center",gap:8}}>
+<button onClick=${startRecording} style=${{width:90,height:90,borderRadius:45,border:"none",background:"linear-gradient(135deg,#5856D6,#7B79E8)",color:"#FFF",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:3,boxShadow:"0 8px 32px rgba(88,86,214,0.25)"}}>
+<${Ic} name="mic" size=${28} color="#FFF"/>
+</button>
+<span style=${{fontSize:12,fontWeight:600,color:"#5856D6"}}>Mulai Rekam</span>
+</div>
+</div>
+
+${!settings.apiKey&&h`<div className="gl" style=${{padding:14,marginTop:16,background:"rgba(255,159,10,0.05)",border:"1px solid rgba(255,159,10,0.12)"}}>
+<div style=${{display:"flex",alignItems:"center",gap:8}}>
+<${Ic} name="alert" size=${16} color="#FF9F0A"/>
+<div><div style=${{fontSize:12,fontWeight:600,color:"#FF9F0A"}}>API Key belum diatur</div>
+<div style=${{fontSize:11,color:"#8E8E93",marginTop:1}}>Buka tab Pengaturan untuk memasukkan API Key.</div></div>
+</div>
+</div>`}
+</div>`}
+
+${(ph==="recording"||ph==="done")&&h`<div>
+${ph==="recording"&&h`<div style=${{textAlign:"center",marginBottom:14}}>
+<div className="gl" style=${{display:"inline-flex",alignItems:"center",gap:10,padding:"10px 20px",position:"relative"}}>
+${!paused&&h`<div style=${{position:"absolute",inset:-4,borderRadius:28,border:"2px solid rgba(88,86,214,0.15)",animation:"breathe 2s infinite"}}/>`}
+<div style=${{width:8,height:8,borderRadius:4,background:paused?"#FF9F0A":"#FF453A",animation:paused?"none":"pulseRec 1.2s infinite"}}/> 
+<span style=${{fontSize:18,fontWeight:700,fontVariantNumeric:"tabular-nums",color:paused?"#FF9F0A":"#5856D6"}}>${fmt(el)}</span>
+<div style=${{width:1,height:16,background:"rgba(0,0,0,0.08)"}}/> 
+<span style=${{fontSize:11,color:"#8E8E93"}}>${trans.length} kalimat</span>
+</div>
+</div>`}
+
+${ph==="recording"&&analyser&&h`<div style=${{marginBottom:8}}>
+<${AmpBars} active=${!paused} analyser=${analyser} h=${44}/>
+</div>`}
+
+${ph==="recording"&&h`<div style=${{display:"flex",gap:6,marginBottom:14}}>
+<button onClick=${togglePause} style=${{flex:1,padding:"12px",borderRadius:14,border:"none",background:paused?"rgba(50,215,75,0.1)":"rgba(255,159,10,0.1)",color:paused?"#32D74B":"#FF9F0A",fontSize:14,fontWeight:600,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
+<${Ic} name=${paused?"play":"pause"} size=${16} color=${paused?"#32D74B":"#FF9F0A"}/>
+${paused?"Lanjut":"Jeda"}
+</button>
+<button onClick=${stopRecording} style=${{flex:1,padding:"12px",borderRadius:14,border:"none",background:"#FF453A",color:"#FFF",fontSize:14,fontWeight:600,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
+<${Ic} name="stop" size=${16} color="#FFF"/>
+Selesai
+</button>
+</div>`}
+
+${ph==="recording"&&h`<button onClick=${doSummarize} disabled=${sumLd||trans.length<2} style=${{width:"100%",padding:"10px",borderRadius:12,border:"1px solid rgba(88,86,214,0.15)",background:sumLd?"rgba(88,86,214,0.03)":"rgba(88,86,214,0.06)",color:sumLd?"#8E8E93":"#5856D6",fontSize:12,fontWeight:600,cursor:sumLd?"wait":"pointer",marginBottom:12,display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
+<${Ic} name="zap" size=${14} color=${sumLd?"#8E8E93":"#5856D6"}/>
+${sumLd?"Meringkas...":"Ringkas Sekarang"}
+</button>`}
+
+${sums.length>0&&h`<div style=${{marginBottom:12}}>
+<div style=${{fontSize:11,fontWeight:700,color:"#5856D6",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:6,display:"flex",alignItems:"center",gap:4}}>
+<${Ic} name="list" size=${13} color="#5856D6"/>Ringkasan AI
+</div>
+${sums.map(function(s,i){
+return h`<div key=${s.id} class="summary-block" style=${{animationDelay:i*0.05+"s"}}>
+<div style=${{display:"flex",justifyContent:"space-between",marginBottom:6}}>
+<span style=${{fontSize:10,fontWeight:600,color:"#5856D6"}}>Bagian ${i+1}</span>
+<span style=${{fontSize:9,color:"#8E8E93"}}>${fmtTs(s.ts)} · baris ${s.fromLine}-${s.toLine}</span>
+</div>
+<p style=${{fontSize:13,lineHeight:1.6,margin:0,color:"#1C1C1E",whiteSpace:"pre-wrap"}}>${s.text}</p>
+</div>`;
+})}
+${sumLd&&h`<div class="summary-block" style=${{display:"flex",alignItems:"center",gap:8}}>
+<div style=${{width:5,height:5,borderRadius:3,background:"#5856D6",animation:"blink 1s infinite"}}/>
+<span style=${{fontSize:12,color:"#8E8E93"}}>Sedang meringkas...</span>
+</div>`}
+</div>`}
+
+<div style=${{marginBottom:8}}>
+<div style=${{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
+<span style=${{fontSize:11,fontWeight:700,color:"#8E8E93",textTransform:"uppercase",letterSpacing:"0.5px",display:"flex",alignItems:"center",gap:4}}>
+<${Ic} name="text" size=${13} color="#8E8E93"/>Transkrip
+</span>
+${ph==="done"&&h`<button onClick=${copyAll} style=${{display:"flex",alignItems:"center",gap:3,padding:"4px 10px",borderRadius:8,border:"1px solid rgba(0,0,0,0.08)",background:"transparent",fontSize:10,fontWeight:600,cursor:"pointer",color:"#5856D6",fontFamily:"inherit"}}>
+<${Ic} name="copy" size=${12} color="#5856D6"/>Salin Semua
+</button>`}
+</div>
+<div ref=${scrollRef} style=${{maxHeight:ph==="recording"?200:400,overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
+${trans.length===0&&!interim&&h`<div style=${{textAlign:"center",padding:"20px 0",color:"#C7C7CC",fontSize:12}}>Menunggu suara...</div>`}
+${trans.map(function(t){
+return h`<div key=${t.id} class="transcript-line final">
+<span style=${{fontSize:9,color:"#C7C7CC",marginRight:6}}>${fmtTs(t.ts)}</span>
+${t.text}
+</div>`;
+})}
+${interim&&h`<div class="transcript-line interim">${interim}</div>`}
+</div>
+</div>
+
+${ph==="done"&&h`<div style=${{display:"flex",gap:6,marginTop:12}}>
+<button onClick=${reset} style=${{flex:1,padding:"12px",borderRadius:14,border:"none",background:"rgba(88,86,214,0.08)",color:"#5856D6",fontSize:14,fontWeight:600,cursor:"pointer"}}>Rapat Baru</button>
+</div>`}
+
+</div>`}
+
+</div></div>`;
+}
+
+/* ─── NOTES / HISTORY TAB ─── */
+function NotesTab(){
+var _sessions=us(ST.gl()),sessions=_sessions[0],sSessions=_sessions[1];
+var _open=us(null),openId=_open[0],sOpen=_open[1];
+var _search=us(""),search=_search[0],sSearch=_search[1];
+var _genLoading=us(null),genId=_genLoading[0],sGenId=_genLoading[1];
+var _fullSum=us({}),fullSums=_fullSum[0],sFull=_fullSum[1];
+
+function del(id){ST.ds(id);sSessions(ST.gl());}
+function fmt(s){return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");}
+function fmtTs(ts){return new Date(ts).toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit",second:"2-digit"});}
+
+function genFullSummary(sess){
+sGenId(sess.id);
+var allText=sess.transcript.map(function(t){return t.text;}).join("\n");
+var existingSums=(sess.summaries||[]).map(function(s){return s.text;}).join("\n\n");
+aiCall(
+"Berikut notulen rapat.\n\nRINGKASAN SEGMEN:\n"+existingSums+"\n\nTRANSKRIP LENGKAP:\n"+allText.substring(0,4000)+
+"\n\nBuat notulen rapat final yang mencakup:\n"+
+"1. TOPIK UTAMA — apa saja yang dibahas\n"+
+"2. KEPUTUSAN — apa yang disepakati\n"+
+"3. ACTION ITEMS — siapa melakukan apa, kapan\n"+
+"4. CATATAN PENTING — hal lain yang perlu dicatat\n\n"+
+"Tulis profesional, ringkas, terstruktur. Gunakan poin bernomor biasa.",
+"Anda adalah asisten notulen rapat profesional. Bahasa Indonesia. Tulis notulen akhir yang lengkap dan terstruktur. JANGAN gunakan markdown bold/italic/heading."
+).then(function(text){
+sFull(function(p){var n=Object.assign({},p);n[sess.id]=text;return n;});
+sGenId(null);
+});
+}
+
+function copySession(sess){
+var text="NOTULEN RAPAT\n"+sess.title+"\n"+
+new Date(sess.ts).toLocaleDateString("id-ID",{weekday:"long",day:"numeric",month:"long",year:"numeric"})+"\n"+
+"Durasi: "+fmt(sess.duration)+"\n\n";
+if(fullSums[sess.id]){text+="═══ NOTULEN FINAL ═══\n\n"+fullSums[sess.id]+"\n\n";}
+text+="═══ RINGKASAN ═══\n\n"+
+(sess.summaries||[]).map(function(s,i){return"[Bagian "+(i+1)+"]\n"+s.text;}).join("\n\n")+
+"\n\n═══ TRANSKRIP ═══\n\n"+
+sess.transcript.map(function(t){return"["+fmtTs(t.ts)+"] "+t.text;}).join("\n");
+navigator.clipboard.writeText(text).then(function(){alert("Tersalin!");});
+}
+
+var filtered=sessions.filter(function(s){
+if(!search)return true;
+return s.title.toLowerCase().indexOf(search.toLowerCase())>-1||
+s.transcript.some(function(t){return t.text.toLowerCase().indexOf(search.toLowerCase())>-1;});
+});
+
+if(!sessions.length)return h`<div style=${{padding:"60px 20px",textAlign:"center"}}><${Ic} name="file" size=${40} color="#C7C7CC" sw=${1.5}/><p style=${{fontSize:14,color:"#8E8E93",marginTop:10}}>Belum ada catatan rapat.</p><p style=${{fontSize:12,color:"#C7C7CC",marginTop:4}}>Mulai rekam di tab Rekam.</p></div>`;
+
+return h`<div style=${{padding:"10px 16px"}}>
+<div style=${{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+<span style=${{fontWeight:700,fontSize:17}}>Catatan Rapat</span>
+<span style=${{fontSize:11,color:"#8E8E93"}}>${sessions.length} rapat</span>
+</div>
+<div style=${{position:"relative",marginBottom:10}}>
+<${Ic} name="search" size=${14} color="#C7C7CC"/>
+<input class="fi" value=${search} onInput=${function(e){sSearch(e.target.value);}} placeholder="Cari..." style=${{paddingLeft:32,fontSize:13}}/>
+<div style=${{position:"absolute",left:10,top:"50%",transform:"translateY(-50%)",pointerEvents:"none"}}><${Ic} name="search" size=${14} color="#C7C7CC"/></div>
+</div>
+
+${filtered.map(function(sess){
+var isOpen=openId===sess.id;
+return h`<div key=${sess.id} className="gl" style=${{marginBottom:8,overflow:"hidden",animation:"slideUp .3s ease both"}}>
+<div onClick=${function(){sOpen(isOpen?null:sess.id);}} style=${{padding:"12px 14px",cursor:"pointer",display:"flex",alignItems:"center",gap:10}}>
+<div style=${{width:36,height:36,borderRadius:10,background:"rgba(88,86,214,0.08)",display:"flex",alignItems:"center",justifyContent:"center",color:"#5856D6"}}><${Ic} name="file" size=${17}/></div>
+<div style=${{flex:1}}>
+<div style=${{fontWeight:600,fontSize:14}}>${sess.title}</div>
+<div style=${{fontSize:11,color:"#8E8E93",marginTop:1}}>
+${new Date(sess.ts).toLocaleDateString("id-ID",{day:"numeric",month:"short",year:"numeric"})} · ${fmt(sess.duration)} · ${sess.transcript.length} kalimat
+</div>
+</div>
+<span style=${{fontSize:11,color:"#C7C7CC",transform:isOpen?"rotate(90deg)":"none",transition:"0.2s"}}><${Ic} name="chevRight" size=${14} color="#C7C7CC"/></span>
+</div>
+
+${isOpen&&h`<div style=${{padding:"0 14px 14px",animation:"fadeIn .2s"}}>
+<div style=${{display:"flex",gap:4,marginBottom:10,flexWrap:"wrap"}}>
+<button onClick=${function(){genFullSummary(sess);}} disabled=${genId===sess.id} style=${{display:"flex",alignItems:"center",gap:4,padding:"6px 12px",borderRadius:8,border:"1px solid rgba(88,86,214,0.15)",background:"rgba(88,86,214,0.06)",color:"#5856D6",fontSize:11,fontWeight:600,cursor:genId===sess.id?"wait":"pointer",fontFamily:"inherit"}}>
+<${Ic} name="bot" size=${12} color="#5856D6"/>${genId===sess.id?"Membuat...":"Notulen Final AI"}
+</button>
+<button onClick=${function(){copySession(sess);}} style=${{display:"flex",alignItems:"center",gap:4,padding:"6px 12px",borderRadius:8,border:"1px solid rgba(0,0,0,0.08)",background:"transparent",color:"#48484A",fontSize:11,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}>
+<${Ic} name="copy" size=${12}/>Salin
+</button>
+<button onClick=${function(){if(confirm("Hapus catatan ini?"))del(sess.id);}} style=${{display:"flex",alignItems:"center",gap:4,padding:"6px 12px",borderRadius:8,border:"1px solid rgba(255,69,58,0.15)",background:"rgba(255,69,58,0.04)",color:"#FF453A",fontSize:11,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}>
+<${Ic} name="trash" size=${12} color="#FF453A"/>Hapus
+</button>
+</div>
+
+${fullSums[sess.id]&&h`<div style=${{padding:14,borderRadius:14,background:"rgba(88,86,214,0.04)",border:"1px solid rgba(88,86,214,0.1)",marginBottom:10}}>
+<div style=${{display:"flex",alignItems:"center",gap:6,marginBottom:8}}>
+<div style=${{width:22,height:22,borderRadius:6,background:"rgba(88,86,214,0.1)",display:"flex",alignItems:"center",justifyContent:"center"}}><${Ic} name="bot" size=${12} color="#5856D6"/></div>
+<span style=${{fontWeight:600,fontSize:12,color:"#5856D6"}}>Notulen Final</span>
+</div>
+<p style=${{fontSize:13,lineHeight:1.6,margin:0,whiteSpace:"pre-wrap"}}>${fullSums[sess.id]}</p>
+</div>`}
+
+${(sess.summaries||[]).length>0&&h`<div style=${{marginBottom:10}}>
+<div style=${{fontSize:10,fontWeight:700,color:"#5856D6",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:4}}>Ringkasan</div>
+${sess.summaries.map(function(s,i){
+return h`<div key=${s.id||i} style=${{padding:"8px 10px",borderRadius:10,background:"rgba(88,86,214,0.03)",border:"1px solid rgba(88,86,214,0.06)",marginBottom:4}}>
+<div style=${{fontSize:9,color:"#8E8E93",marginBottom:3}}>Bagian ${i+1} · baris ${s.fromLine}-${s.toLine}</div>
+<p style=${{fontSize:12,lineHeight:1.5,margin:0,whiteSpace:"pre-wrap"}}>${s.text}</p>
+</div>`;
+})}
+</div>`}
+
+<div>
+<div style=${{fontSize:10,fontWeight:700,color:"#8E8E93",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:4}}>Transkrip</div>
+<div style=${{maxHeight:300,overflowY:"auto"}}>
+${sess.transcript.map(function(t){
+return h`<div key=${t.id} style=${{padding:"4px 8px",fontSize:12,lineHeight:1.4,borderBottom:"1px solid rgba(0,0,0,0.03)"}}>
+<span style=${{fontSize:9,color:"#C7C7CC",marginRight:4}}>${new Date(t.ts).toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit",second:"2-digit"})}</span>
+${t.text}
+</div>`;
+})}
+</div>
+</div>
+</div>`}
+</div>`;
+})}
+</div>`;
+}
+
+/* ─── SETTINGS TAB ─── */
+function SettingsTab(){
+var _s=us(ST.gs()),settings=_s[0],sS=_s[1];
+var _showKey=us(false),showKey=_showKey[0],sShow=_showKey[1];
+
+function save(k,v){
+var n=Object.assign({},settings);n[k]=v;
+sS(n);ST.ss(n);
+if(k==="apiKey"&&v)window.__NK=v;
+}
+
+return h`<div style=${{padding:"10px 16px"}}>
+<div style=${{fontWeight:700,fontSize:17,marginBottom:12}}>Pengaturan</div>
+
+<div className="gl" style=${{padding:16,marginBottom:12}}>
+<div style=${{display:"flex",alignItems:"center",gap:8,marginBottom:12}}>
+<div style=${{width:28,height:28,borderRadius:8,background:"rgba(88,86,214,0.1)",display:"flex",alignItems:"center",justifyContent:"center",color:"#5856D6"}}><${Ic} name="key" size=${15}/></div>
+<span style=${{fontWeight:600,fontSize:14}}>API Key</span>
+</div>
+
+<div style=${{marginBottom:10}}>
+<div style=${{fontSize:10,fontWeight:600,color:"#8E8E93",marginBottom:3}}>Provider</div>
+<div style=${{display:"flex",gap:4}}>
+${[["groq","Groq (gratis)"],["anthropic","Anthropic"]].map(function(pr){
+return h`<button key=${pr[0]} onClick=${function(){save("apiProvider",pr[0]);}} style=${{flex:1,padding:"8px",borderRadius:10,border:"1px solid "+(settings.apiProvider===pr[0]?"rgba(88,86,214,0.3)":"rgba(0,0,0,0.08)"),background:settings.apiProvider===pr[0]?"rgba(88,86,214,0.06)":"transparent",fontSize:12,fontWeight:600,color:settings.apiProvider===pr[0]?"#5856D6":"#8E8E93",cursor:"pointer",fontFamily:"inherit"}}>${pr[1]}</button>`;
+})}
+</div>
+</div>
+
+<div>
+<div style=${{fontSize:10,fontWeight:600,color:"#8E8E93",marginBottom:3}}>
+${settings.apiProvider==="groq"?"Groq API Key":"Anthropic API Key"}
+</div>
+<div style=${{display:"flex",gap:4}}>
+<div style=${{flex:1,position:"relative"}}>
+<input class="fi" type=${showKey?"text":"password"} value=${settings.apiKey||""} onInput=${function(e){save("apiKey",e.target.value);}} placeholder=${settings.apiProvider==="groq"?"gsk_...":"sk-ant-..."} style=${{paddingRight:36}}/>
+<button onClick=${function(){sShow(!showKey);}} style=${{position:"absolute",right:6,top:"50%",transform:"translateY(-50%)",border:"none",background:"transparent",cursor:"pointer",padding:4}}>
+<${Ic} name=${showKey?"eye":"eye"} size=${14} color="#C7C7CC"/>
+</button>
+</div>
+</div>
+${settings.apiKey&&h`<div style=${{fontSize:10,color:"#32D74B",marginTop:4,display:"flex",alignItems:"center",gap:3}}>
+<${Ic} name="check" size=${10} color="#32D74B"/>Key tersimpan
+</div>`}
+</div>
+</div>
+
+<div className="gl" style=${{padding:16,marginBottom:12}}>
+<div style=${{display:"flex",alignItems:"center",gap:8,marginBottom:12}}>
+<div style=${{width:28,height:28,borderRadius:8,background:"rgba(48,176,199,0.1)",display:"flex",alignItems:"center",justifyContent:"center",color:"#30B0C7"}}><${Ic} name="globe" size=${15}/></div>
+<span style=${{fontWeight:600,fontSize:14}}>Bahasa Transkripsi</span>
+</div>
+<div style=${{display:"flex",flexDirection:"column",gap:4}}>
+${[["id-ID","Bahasa Indonesia"],["en-US","English (US)"],["en-GB","English (UK)"]].map(function(l){
+return h`<button key=${l[0]} onClick=${function(){save("lang",l[0]);}} style=${{padding:"10px 12px",borderRadius:12,border:"1px solid "+(settings.lang===l[0]?"rgba(48,176,199,0.3)":"rgba(0,0,0,0.06)"),background:settings.lang===l[0]?"rgba(48,176,199,0.06)":"transparent",fontSize:13,fontWeight:settings.lang===l[0]?600:400,color:settings.lang===l[0]?"#30B0C7":"#48484A",cursor:"pointer",textAlign:"left",fontFamily:"inherit",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+${l[1]}
+${settings.lang===l[0]&&h`<${Ic} name="check" size=${14} color="#30B0C7"/>`}
+</button>`;
+})}
+</div>
+</div>
+
+<div className="gl" style=${{padding:16,marginBottom:12}}>
+<div style=${{display:"flex",alignItems:"center",gap:8,marginBottom:12}}>
+<div style=${{width:28,height:28,borderRadius:8,background:"rgba(255,159,10,0.1)",display:"flex",alignItems:"center",justifyContent:"center",color:"#FF9F0A"}}><${Ic} name="clock" size=${15}/></div>
+<span style=${{fontWeight:600,fontSize:14}}>Interval Ringkasan AI</span>
+</div>
+<div style=${{fontSize:11,color:"#8E8E93",marginBottom:8}}>AI akan otomatis meringkas percakapan setiap interval ini.</div>
+<div style=${{display:"flex",gap:4}}>
+${[[1,"1 menit"],[2,"2 menit"],[3,"3 menit"],[5,"5 menit"]].map(function(v){
+return h`<button key=${v[0]} onClick=${function(){save("interval",v[0]);}} style=${{flex:1,padding:"10px 4px",borderRadius:10,border:"1px solid "+(settings.interval===v[0]?"rgba(255,159,10,0.3)":"rgba(0,0,0,0.08)"),background:settings.interval===v[0]?"rgba(255,159,10,0.06)":"transparent",fontSize:12,fontWeight:600,color:settings.interval===v[0]?"#FF9F0A":"#8E8E93",cursor:"pointer",fontFamily:"inherit"}}>${v[1]}</button>`;
+})}
+</div>
+</div>
+
+<div className="gl" style=${{padding:16,marginBottom:12}}>
+<div style=${{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
+<div style=${{width:28,height:28,borderRadius:8,background:"rgba(88,86,214,0.1)",display:"flex",alignItems:"center",justifyContent:"center",color:"#5856D6"}}><${Ic} name="hash" size=${15}/></div>
+<span style=${{fontWeight:600,fontSize:14}}>Tentang</span>
+</div>
+<div style=${{fontSize:12,color:"#636366",lineHeight:1.6}}>
+Notulen AI mentranskripsi percakapan secara real-time menggunakan Web Speech API dan meringkas poin-poin penting menggunakan AI.
+</div>
+<div style=${{marginTop:8,fontSize:11,color:"#8E8E93"}}>
+Versi 1.0 · Speech Recognition + LLM
+</div>
+<div style=${{marginTop:6,padding:"8px 10px",borderRadius:8,background:"rgba(255,69,58,0.04)",border:"1px solid rgba(255,69,58,0.08)",fontSize:11,color:"#FF453A"}}>
+Data tersimpan di perangkat (localStorage). Bukan pengganti notulen resmi.
+</div>
+</div>
+</div>`;
+}
+
+/* ─── MAIN APP ─── */
+function App(){
+var _tab=us("rec"),tab=_tab[0],sTab=_tab[1];
+
+return h`<div>
+${tab==="rec"&&h`<div style=${{paddingTop:0}}><${RecTab}/></div>`}
+${tab==="notes"&&h`<div style=${{paddingTop:40}}><${NotesTab}/></div>`}
+${tab==="settings"&&h`<div style=${{paddingTop:40}}><${SettingsTab}/></div>`}
+
+<div className="btab">
+${[["rec","mic","Rekam"],["notes","file","Catatan"],["settings","settings","Pengaturan"]].map(function(t){
+return h`<button key=${t[0]} className=${tab===t[0]?"on":""} onClick=${function(){sTab(t[0]);}}>
+<${Ic} name=${t[1]} size=${18} color=${tab===t[0]?"#5856D6":"#8E8E93"}/>${t[2]}
+</button>`;
+})}
+</div>
+</div>`;
 }
 
 ReactDOM.createRoot(document.getElementById("root")).render(h`<${App}/>`);
