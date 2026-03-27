@@ -5,29 +5,29 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Notulen AI — Smart Meeting Notes</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <style>
-:root{--bg:#F2F2F7;--tx:#1C1C1E;--txm:#8E8E93;--gl:rgba(255,255,255,0.65);--gb:rgba(255,255,255,0.8);--blue:#0A84FF;--red:#FF453A;--purple:#BF5AF2;--green:#32D74B;--orange:#FF9F0A;--teal:#30B0C7;--indigo:#5856D6}
+:root{--bg:#F2F2F7;--tx:#1C1C1E;--txm:#8E8E93;--gl:rgba(255,255,255,0.65);--gb:rgba(255,255,255,0.8);--indigo:#5856D6;--red:#FF453A;--green:#32D74B;--orange:#FF9F0A;--teal:#30B0C7;--purple:#BF5AF2}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif;min-height:100vh;background:var(--bg);background-image:radial-gradient(at 20% 0%,rgba(88,86,214,0.07) 0,transparent 50%),radial-gradient(at 80% 10%,rgba(48,176,199,0.06) 0,transparent 50%);color:var(--tx);-webkit-font-smoothing:antialiased;padding-bottom:72px;overflow-x:hidden}
 @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 @keyframes ripple{0%{box-shadow:0 0 0 0 rgba(255,69,58,0.3)}70%{box-shadow:0 0 0 16px rgba(255,69,58,0)}100%{box-shadow:0 0 0 0 rgba(255,69,58,0)}}
-@keyframes breathe{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(88,86,214,.12)}50%{transform:scale(1.03);box-shadow:0 0 0 18px rgba(88,86,214,0)}}
 .gl{background:var(--gl);-webkit-backdrop-filter:blur(48px) saturate(200%);backdrop-filter:blur(48px) saturate(200%);border:1px solid var(--gb);border-radius:22px;box-shadow:0 8px 32px rgba(0,0,0,.04),inset 0 1px 1px rgba(255,255,255,.8)}
 .pill{border-radius:100px;padding:3px 10px;display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700}
 button{-webkit-tap-highlight-color:transparent;touch-action:manipulation;transition:transform .12s;font-family:inherit;cursor:pointer}
 button:active{transform:scale(.96)}
 button:disabled{opacity:.5;cursor:not-allowed;transform:none}
 .btab{position:fixed;bottom:0;left:0;right:0;display:flex;background:rgba(255,255,255,0.88);-webkit-backdrop-filter:blur(40px) saturate(180%);backdrop-filter:blur(40px) saturate(180%);border-top:1px solid rgba(0,0,0,0.06);padding:4px 0 env(safe-area-inset-bottom,4px);z-index:100}
-.btab button{flex:1;border:none;background:none;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;font-family:inherit;font-size:9px;font-weight:600;color:#8E8E93}
+.btab button{flex:1;border:none;background:none;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;font-size:9px;font-weight:600;color:#8E8E93}
 .btab button.on{color:#5856D6}
 .btab button:active{transform:none}
 .fi{font-family:inherit;font-size:14px;padding:12px 14px;border-radius:12px;border:1px solid rgba(0,0,0,0.08);background:rgba(0,0,0,0.02);outline:none;width:100%;transition:border-color .2s}
 .fi:focus{border-color:rgba(88,86,214,0.5);background:#FFF}
-select.fi{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238E8E93' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
 .card-note{background:#FFF;border-radius:14px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,0.03);margin-bottom:10px;animation:slideUp .3s ease-out;border:1px solid rgba(0,0,0,0.04)}
+.sbtn{padding:8px;border-radius:8;font-size:12px;font-weight:600;font-family:inherit;border:1px solid rgba(0,0,0,0.08);background:rgba(255,255,255,0.5);color:#8E8E93;flex:1}
+.sbtn.on{border-color:rgba(88,86,214,0.3);background:rgba(88,86,214,0.08);color:#5856D6}
+.dbg{position:fixed;top:4px;right:4px;font-size:9px;padding:2px 6px;border-radius:6px;z-index:999;font-weight:700;pointer-events:none}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
@@ -38,652 +38,354 @@ select.fi{appearance:none;-webkit-appearance:none;background-image:url("data:ima
 <script>
 var h=htm.bind(React.createElement),us=React.useState,ur=React.useRef,ue=React.useEffect;
 
-/* ═══ STORAGE ═══ */
+/* ═══ DB ═══ */
 var DB={
-  get:function(){try{return JSON.parse(localStorage.getItem("notulen_v4")||"null")||this.def()}catch(e){return this.def()}},
-  def:function(){return{history:[],set:{lang:"id-ID",interval:1,key:"",provider:"groq"}}},
-  save:function(d){localStorage.setItem("notulen_v4",JSON.stringify(d))},
-  addHist:function(r){var d=this.get();d.history.unshift(r);if(d.history.length>50)d.history.length=50;this.save(d)},
-  delHist:function(id){var d=this.get();d.history=d.history.filter(function(x){return x.id!==id});this.save(d)},
-  getSet:function(){return this.get().set},
-  updSet:function(k,v){var d=this.get();d.set[k]=v;this.save(d);window.__AK=d.set.key}
+  get:function(){try{return JSON.parse(localStorage.getItem("notulen5")||"null")||this.def()}catch(e){return this.def()}},
+  def:function(){return{history:[],set:{lang:"id-ID",interval:1,key:""}}},
+  save:function(d){localStorage.setItem("notulen5",JSON.stringify(d))},
+  addH:function(r){var d=this.get();d.history.unshift(r);if(d.history.length>50)d.history.length=50;this.save(d)},
+  delH:function(id){var d=this.get();d.history=d.history.filter(function(x){return x.id!==id});this.save(d)},
+  gS:function(){return this.get().set},
+  uS:function(k,v){var d=this.get();d.set[k]=v;this.save(d);window.__AK=d.set.key}
 };
 
 /* ═══ ICON ═══ */
-function Ic(p){
-  var s=p.size||20,c=p.color||"currentColor",paths={
-    mic:"M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z M19 10v2a7 7 0 0 1-14 0v-2 M12 19v4 M8 23h8",
-    stop:"M6 6h12v12H6z",
-    play:"M5 3l14 9-14 9V3z",
-    pause:"M6 4h4v16H6zM14 4h4v16h-4z",
-    file:"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M14 2v6h6 M16 13H8 M16 17H8 M10 9H8",
-    settings:"M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z",
-    clock:"M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z M12 6v6l4 2",
-    check:"M20 6L9 17l-5-5",
-    trash:"M3 6h18 M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2 M10 11v6 M14 11v6",
-    key:"M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4",
-    sparkle:"M12 2l3 6 6 3-6 3-3 6-3-6-6-3 6-3z",
-    copy:"M20 9h-9a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2z M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1",
-    zap:"M13 2L3 14h9l-1 8 10-12h-9l1-8z",
-    alert:"M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z M12 9v4 M12 17h.01",
-    globe:"M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z M2 12h20 M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z",
-    eye:"M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z",
-    list:"M8 6h13 M8 12h13 M8 18h13 M3 6h.01 M3 12h.01 M3 18h.01",
-    text:"M4 7V4h16v3 M9 20h6 M12 4v16",
-    bot:"M12 8V4 M8 4h8 M2 14h2 M20 14h2 M15 13v2 M9 13v2 M4 8h16v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"
-  };
-  return h`<svg width=${s} height=${s} viewBox="0 0 24 24" fill="none" stroke=${c} strokeWidth=${p.sw||2} strokeLinecap="round" strokeLinejoin="round"><path d=${paths[p.name]||"M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z"}/></svg>`;
-}
+function Ic(p){var s=p.size||20,c=p.color||"currentColor",W={
+mic:"M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z M19 10v2a7 7 0 0 1-14 0v-2 M12 19v4 M8 23h8",
+stop:"M6 6h12v12H6z",play:"M5 3l14 9-14 9V3z",pause:"M6 4h4v16H6zM14 4h4v16h-4z",
+file:"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M14 2v6h6 M16 13H8 M16 17H8 M10 9H8",
+settings:"M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z",
+clock:"M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z M12 6v6l4 2",
+check:"M20 6L9 17l-5-5",
+trash:"M3 6h18 M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2 M10 11v6 M14 11v6",
+key:"M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4",
+sparkle:"M12 2l3 6 6 3-6 3-3 6-3-6-6-3 6-3z",
+copy:"M20 9h-9a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2z M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1",
+zap:"M13 2L3 14h9l-1 8 10-12h-9l1-8z",
+alert:"M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z M12 9v4 M12 17h.01",
+globe:"M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z M2 12h20 M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z",
+eye:"M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z",
+list:"M8 6h13 M8 12h13 M8 18h13 M3 6h.01 M3 12h.01 M3 18h.01",
+text:"M4 7V4h16v3 M9 20h6 M12 4v16",
+bot:"M12 8V4 M8 4h8 M2 14h2 M20 14h2 M15 13v2 M9 13v2 M4 8h16v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z",
+chevR:"M9 18l6-6-6-6"
+};return h`<svg width=${s} height=${s} viewBox="0 0 24 24" fill="none" stroke=${c} strokeWidth=${p.sw||2} strokeLinecap="round" strokeLinejoin="round"><path d=${W[p.name]||""}/></svg>`;}
 
-/* ═══ AI SUMMARIZE ═══ */
-function aiSummarize(text, lang, key){
-  return new Promise(function(resolve, reject){
-    if(!key) return reject("API Key kosong");
-    var prompt = lang==="id-ID"
-      ? "Ekstrak poin-poin notulen penting dari transkrip rapat ini. Singkat, padat, profesional. Format sebagai list poin bernomor (tanpa pembukaan/penutup). Transkrip:\n\n" + text
-      : "Extract key meeting notes from this transcript. Professional concise numbered points. No intro/outro. Transcript:\n\n" + text;
+/* ═══ AI ═══ */
+function aiSum(text,lang,key){
+return new Promise(function(res,rej){
+if(!key)return rej("No key");
+var pr=lang==="id-ID"?"Ekstrak poin notulen penting dari transkrip rapat ini. Singkat, padat, profesional. Poin bernomor tanpa pembukaan/penutup. Transkrip:\n\n"+text:"Extract key meeting notes. Numbered points, no intro/outro. Transcript:\n\n"+text;
+fetch("https://api.groq.com/openai/v1/chat/completions",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+key},body:JSON.stringify({model:"llama-3.3-70b-versatile",messages:[{role:"system",content:"You write clean concise meeting minutes."},{role:"user",content:pr}],temperature:0.3,max_tokens:1000})}).then(function(r){return r.json()}).then(function(d){if(d.error)throw new Error(d.error.message);res(d.choices[0].message.content)}).catch(function(e){rej(e.message||e)});
+});}
 
-    fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {"Content-Type":"application/json","Authorization":"Bearer "+key},
-      body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
-        messages: [{role:"system",content:"You write clean, concise meeting minutes."},{role:"user",content:prompt}],
-        temperature: 0.3,
-        max_tokens: 1000
-      })
-    }).then(function(r){return r.json()}).then(function(d){
-      if(d.error) throw new Error(d.error.message);
-      resolve(d.choices[0].message.content);
-    }).catch(function(e){reject(e.message||e)});
-  });
-}
-
-/* ═══ HELPERS ═══ */
 function fmt(s){return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")}
 
-/* ═══ LEVEL METER ═══ */
-function LevelMeter(p){
-  var cv=ur(null),rf=ur(null);
-  ue(function(){
-    if(!p.an||!cv.current) return;
-    var c=cv.current,x=c.getContext("2d"),da=new Uint8Array(p.an.frequencyBinCount);
-    function draw(){
-      rf.current=requestAnimationFrame(draw);
-      p.an.getByteFrequencyData(da);
-      var dp=devicePixelRatio||1,rc=c.getBoundingClientRect();
-      c.width=rc.width*dp;c.height=rc.height*dp;x.scale(dp,dp);
-      var W=rc.width,H=rc.height;x.clearRect(0,0,W,H);
-      var sm=0;for(var i=0;i<da.length;i++)sm+=da[i];
-      var av=sm/da.length/255,bs=36,gp=3,bw=(W-(bs-1)*gp)/bs;
-      for(var i=0;i<bs;i++){
-        var th=(i+1)/bs,on=av>=th*0.6;
-        var bh=H*0.75,yy=(H-bh)/2,xx=i*(bw+gp);
-        if(on){var it=Math.min(1,(av-th*0.4)*3);
-          x.fillStyle=i/bs>0.75?"rgba(255,69,58,"+(0.5+it*0.5)+")":i/bs>0.45?"rgba(255,159,10,"+(0.4+it*0.6)+")":"rgba(88,86,214,"+(0.3+it*0.7)+")";
-        }else{x.fillStyle="rgba(0,0,0,0.04)";}
-        x.fillRect(xx,yy,bw,bh);
-      }
-    }
-    draw();
-    return function(){cancelAnimationFrame(rf.current)};
-  },[p.an]);
-  return h`<canvas ref=${cv} style=${{width:"100%",height:36,borderRadius:12,background:"rgba(255,255,255,0.4)",display:"block"}}/>`;
-}
-
-/* ═══════════════════════════════════════
-   TAB: REKAM — using proven SR pattern
-   ═══════════════════════════════════════ */
+/* ═══════════════════════════
+   RECORD TAB
+   Uses EXACT pattern that worked before.
+   SR created inside useEffect with [lang, isRec].
+   onend auto-restarts via closure isRec.
+   NO getUserMedia. NO audio visualizer.
+   ═══════════════════════════ */
 function RecTab(p){
-  var set = p.set;
-  var updSet = p.updSet;
-  var _rec=us(false), isRec=_rec[0], setRec=_rec[1];
-  var _fin=us(""), fin=_fin[0], setFin=_fin[1];
-  var _int=us(""), int=_int[0], setInt=_int[1];
-  var _notes=us([]), notes=_notes[0], setNotes=_notes[1];
-  var _time=us(0), time=_time[0], setTime=_time[1];
-  var _aiLd=us(false), aiLd=_aiLd[0], setAiLd=_aiLd[1];
-  var _title=us(""), title=_title[0], setTitle=_title[1];
-  var _saved=us(false), saved=_saved[0], setSaved=_saved[1];
-  var _an=us(null), analyser=_an[0], setAn=_an[1];
+  var set=p.set,updSet=p.updSet;
+  var _r=us(false),isRec=_r[0],setRec=_r[1];
+  var _f=us(""),fin=_f[0],setFin=_f[1];
+  var _i=us(""),interim=_i[0],setInt=_i[1];
+  var _n=us([]),notes=_n[0],setNotes=_n[1];
+  var _t=us(0),time=_t[0],setTime=_t[1];
+  var _al=us(false),aiLd=_al[0],setAiLd=_al[1];
+  var _ti=us(""),title=_ti[0],setTitle=_ti[1];
+  var _sv=us(false),saved=_sv[0],setSaved=_sv[1];
+  var _dbg=us("idle"),dbg=_dbg[0],setDbg=_dbg[1];
 
-  var srRef = ur(null);
-  var tmRef = ur(null);
-  var aiTmRef = ur(null);
-  var lastSumLen = ur(0);
-  var scrollRef = ur(null);
-  var acRef = ur(null);
-  var msRef = ur(null);
-  var isRecRef = ur(false); // ref mirror — survives closures
+  var srRef=ur(null),tmRef=ur(null),aiTmRef=ur(null),lastSumLen=ur(0),scrollRef=ur(null);
 
-  // Keep ref in sync with state
-  isRecRef.current = isRec;
-
-  /* ── Create SR Engine (Self-Healing) ── */
+  /* SR setup — the exact pattern that previously worked */
   ue(function(){
-    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if(!SR) return;
+    var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+    if(!SR){setDbg("no-SR");return;}
 
-    function initSR() {
-      var sr = new SR();
-      sr.continuous = true;
-      sr.interimResults = true;
-      sr.lang = set.lang;
-      sr.maxAlternatives = 1;
+    var sr=new SR();
+    sr.continuous=true;
+    sr.interimResults=true;
+    sr.lang=set.lang;
+    sr.maxAlternatives=1;
 
-      sr.onresult = function(e){
-        var f = "", i = "";
-        for(var j = e.resultIndex; j < e.results.length; j++){
-          if(e.results[j].isFinal){
-            f += e.results[j][0].transcript + " ";
-          } else {
-            i += e.results[j][0].transcript;
-          }
-        }
-        if(f) setFin(function(prev){ return prev + f; });
-        setInt(i);
-      };
+    sr.onstart=function(){setDbg("listening")};
 
-      sr.onerror = function(e){
-        console.log("SR Error:", e.error);
-      };
+    sr.onresult=function(e){
+      var f="",i="";
+      for(var j=e.resultIndex;j<e.results.length;j++){
+        if(e.results[j].isFinal) f+=e.results[j][0].transcript+" ";
+        else i+=e.results[j][0].transcript;
+      }
+      if(f){setFin(function(prev){return prev+f});setDbg("got-text")}
+      setInt(i);
+    };
 
-      sr.onend = function(){
-        // Auto restart jika isRec masih true
-        if(isRecRef.current){
-          setTimeout(function(){
-            if(isRecRef.current){
-              srRef.current = initSR(); // Buat instance baru yang bersih
-              try{ srRef.current.start(); } catch(ex){ console.log("Restart fail:", ex); }
-            }
-          }, 300);
-        }
-      };
+    sr.onerror=function(e){
+      setDbg("err:"+e.error);
+      if(e.error==="not-allowed") setRec(false);
+    };
 
-      return sr;
-    }
-
-    srRef.current = initSR();
-
-    // Cleanup saat ganti bahasa atau pindah tab
-    return function(){
-      if(srRef.current){
-        srRef.current.onend = null; // Mencegah infinite loop start/stop
-        try{ srRef.current.stop(); } catch(e){}
+    sr.onend=function(){
+      setDbg("ended");
+      // isRec from closure — if still true, auto-restart
+      if(isRec){
+        setDbg("restarting");
+        try{sr.start()}catch(ex){setDbg("restart-fail")}
       }
     };
-  }, [set.lang]);
 
-  // Auto-scroll transcript
-  ue(function(){
-    if(scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-  }, [fin, int]);
+    srRef.current=sr;
+    return function(){try{sr.stop()}catch(e){}};
+  },[set.lang,isRec]);
 
-  /* ── Trigger AI Summary ── */
+  // Auto-scroll
+  ue(function(){if(scrollRef.current)scrollRef.current.scrollTop=scrollRef.current.scrollHeight},[fin,interim]);
+
   function triggerAI(){
-    if(!window.__AK) return;
-    setFin(function(currFin){
-      var textToSum = currFin.slice(lastSumLen.current);
-      if(textToSum.trim().length > 30){
+    if(!window.__AK)return;
+    setFin(function(cur){
+      var chunk=cur.slice(lastSumLen.current);
+      if(chunk.trim().length>30){
         setAiLd(true);
-        aiSummarize(textToSum, set.lang, window.__AK)
-          .then(function(res){
-            setNotes(function(prev){ return [{time:time, text:res, id:Date.now()}].concat(prev); });
-            lastSumLen.current = currFin.length;
-          })
-          .catch(function(err){ console.error("AI Error:", err); })
-          .finally(function(){ setAiLd(false); });
+        aiSum(chunk,set.lang,window.__AK).then(function(res){
+          setNotes(function(prev){return[{time:time,text:res,id:Date.now()}].concat(prev)});
+          lastSumLen.current=cur.length;
+        }).catch(function(e){console.error("AI:",e)}).finally(function(){setAiLd(false)});
       }
-      return currFin;
+      return cur;
     });
   }
 
-  /* ── Start Recording ── */
   function startRec(){
-    if(!window.__AK){
-      alert("Silakan isi API Key Groq di tab Pengaturan terlebih dahulu.");
-      return;
-    }
-    if(!srRef.current){
-      alert("Browser tidak mendukung Speech Recognition.\nGunakan Chrome atau Edge.");
-      return;
-    }
+    if(!window.__AK){alert("Isi API Key Groq di tab Pengaturan dulu.");return}
+    if(!(window.SpeechRecognition||window.webkitSpeechRecognition)){alert("Browser tidak support Speech Recognition.\nGunakan Chrome/Edge.");return}
 
-    // Reset state
-    setFin(""); setInt(""); setNotes([]); setTime(0); setSaved(false);
-    lastSumLen.current = 0;
-    
+    setFin("");setInt("");setNotes([]);setTime(0);setSaved(false);setDbg("starting");
+    lastSumLen.current=0;
+
+    // Set isRec=true → triggers useEffect → creates fresh SR
     setRec(true);
 
-    // Start SR directly — no setTimeout race condition
-    try{
-      srRef.current.start();
-    } catch(e){
-      console.log("SR start error, wait for onend or recreate:", e);
-      // Fallback in case instance is bugged before start
-      var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-      var sr = new SR();
-      sr.continuous = true; sr.interimResults = true; sr.lang = set.lang;
-      sr.onresult = srRef.current.onresult;
-      sr.onerror = srRef.current.onerror;
-      sr.onend = srRef.current.onend; // Salin fungsi self-healing
-      srRef.current = sr;
-      try{ sr.start(); } catch(e2){ alert("Gagal memulai Speech Recognition: " + e2.message); return; }
-    }
+    // Start SR after React renders + useEffect runs
+    setTimeout(function(){
+      if(srRef.current){
+        try{srRef.current.start();setDbg("started")}
+        catch(e){setDbg("start-err:"+e.message)}
+      } else {setDbg("no-sr-ref")}
+    },200);
 
-    // Timer & AI interval
-    tmRef.current = setInterval(function(){ setTime(function(t){ return t+1; }); }, 1000);
-    aiTmRef.current = setInterval(function(){ triggerAI(); }, set.interval * 60000);
-
-    // Audio visualizer (optional — failure won't affect recording)
-    if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
-      navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
-        msRef.current = stream;
-        var ac = new (window.AudioContext||window.webkitAudioContext)();
-        acRef.current = ac;
-        var src = ac.createMediaStreamSource(stream);
-        var an = ac.createAnalyser();
-        an.fftSize = 2048; an.smoothingTimeConstant = 0.8;
-        src.connect(an);
-        setAn(an);
-      }).catch(function(e){ console.log("Visualizer unavailable:", e.message); });
-    }
+    tmRef.current=setInterval(function(){setTime(function(t){return t+1})},1000);
+    aiTmRef.current=setInterval(function(){triggerAI()},set.interval*60000);
   }
 
-  /* ── Stop Recording ── */
   function stopRec(){
-    setRec(false); // isRecRef.current becomes false → onend won't restart
-    if(srRef.current){ try{ srRef.current.stop(); } catch(e){} }
-    clearInterval(tmRef.current);
-    clearInterval(aiTmRef.current);
-    // Clean up audio visualizer
-    if(msRef.current){msRef.current.getTracks().forEach(function(t){t.stop()});msRef.current=null;}
-    if(acRef.current&&acRef.current.state!=="closed"){acRef.current.close();}
-    setAn(null);
-    // Final AI trigger
-    setTimeout(function(){ triggerAI(); }, 500);
+    setRec(false);setDbg("stopped");
+    clearInterval(tmRef.current);clearInterval(aiTmRef.current);
+    setTimeout(function(){triggerAI()},500);
   }
 
-  /* ── Save to History ── */
   function saveMeeting(){
-    if(!fin && notes.length===0) return;
-    DB.addHist({
-      id: Date.now().toString(),
-      date: new Date().toISOString(),
-      duration: time,
-      title: title || ("Rapat " + new Date().toLocaleDateString("id-ID",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"})),
-      transcript: fin,
-      notes: notes
-    });
-    setSaved(true);
-    alert("Notulen berhasil disimpan!");
+    if(!fin&&notes.length===0)return;
+    DB.addH({id:Date.now()+"",date:new Date().toISOString(),duration:time,
+      title:title||("Rapat "+new Date().toLocaleDateString("id-ID",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"})),
+      transcript:fin,notes:notes});
+    setSaved(true);alert("Notulen tersimpan!");
   }
 
-  /* ── Copy All ── */
   function copyAll(){
-    var text = "NOTULEN RAPAT\n" + (title||"Rapat") + "\n" +
-      new Date().toLocaleDateString("id-ID",{weekday:"long",day:"numeric",month:"long",year:"numeric"}) +
-      "\nDurasi: " + fmt(time) + "\n\n" +
-      "=== RINGKASAN AI ===\n\n" +
-      notes.map(function(n,i){ return "[Menit " + Math.floor(n.time/60) + "]\n" + n.text; }).join("\n\n") +
-      "\n\n=== TRANSKRIP ===\n\n" + fin;
-    navigator.clipboard.writeText(text).then(function(){ alert("Tersalin ke clipboard!"); });
+    var t="NOTULEN RAPAT\n"+(title||"Rapat")+"\n"+new Date().toLocaleDateString("id-ID",{weekday:"long",day:"numeric",month:"long",year:"numeric"})+"\nDurasi: "+fmt(time)+"\n\n=== RINGKASAN ===\n\n"+notes.map(function(n){return"[Menit "+Math.floor(n.time/60)+"]\n"+n.text}).join("\n\n")+"\n\n=== TRANSKRIP ===\n\n"+fin;
+    navigator.clipboard.writeText(t).then(function(){alert("Tersalin!")});
   }
 
-  /* ── Reset ── */
-  function resetAll(){
-    setFin(""); setInt(""); setNotes([]); setTime(0); setTitle(""); setSaved(false);
-    lastSumLen.current = 0;
-    if(msRef.current){msRef.current.getTracks().forEach(function(t){t.stop()});msRef.current=null;}
-    if(acRef.current&&acRef.current.state!=="closed"){acRef.current.close();}
-    setAn(null);
-  }
+  function resetAll(){setFin("");setInt("");setNotes([]);setTime(0);setTitle("");setSaved(false);setDbg("idle");lastSumLen.current=0}
 
   return h`<div>
+    <!-- DEBUG BADGE -->
+    <div class="dbg" style=${{background:dbg==="listening"||dbg==="got-text"?"rgba(50,215,75,0.15)":dbg.indexOf("err")>-1?"rgba(255,69,58,0.15)":"rgba(0,0,0,0.06)",color:dbg==="listening"||dbg==="got-text"?"#32D74B":dbg.indexOf("err")>-1?"#FF453A":"#8E8E93"}}>${dbg}</div>
+
     <div style=${{textAlign:"center",padding:"32px 16px 8px"}}>
-      <div className="pill" style=${{background:"rgba(88,86,214,0.1)",color:"#5856D6",marginBottom:10}}>
-        <${Ic} name="bot" size=${12} color="#5856D6"/>NOTULEN AI
-      </div>
-      <h1 style=${{fontWeight:800,fontSize:24,letterSpacing:"-0.5px",lineHeight:1.1}}>Smart Meeting Notes</h1>
+      <div class="pill" style=${{background:"rgba(88,86,214,0.1)",color:"#5856D6",marginBottom:10}}>
+        <${Ic} name="bot" size=${12} color="#5856D6"/>NOTULEN AI</div>
+      <h1 style=${{fontWeight:800,fontSize:24,letterSpacing:"-0.5px"}}>Smart Meeting Notes</h1>
       <p style=${{fontSize:12,color:"#8E8E93",marginTop:5}}>Transkrip otomatis + Ringkasan AI</p>
     </div>
 
     <div style=${{maxWidth:480,margin:"0 auto",padding:"0 16px 16px"}}>
 
-      <!-- STATUS CARD -->
-      <div className="gl" style=${{padding:20,textAlign:"center",marginBottom:14}}>
+      <!-- STATUS -->
+      <div class="gl" style=${{padding:20,textAlign:"center",marginBottom:14}}>
         <div style=${{display:"inline-flex",justifyContent:"center",alignItems:"center",width:80,height:80,borderRadius:40,background:isRec?"rgba(255,69,58,0.1)":"rgba(88,86,214,0.1)",color:isRec?"#FF453A":"#5856D6",animation:isRec?"ripple 2s infinite":"none",marginBottom:12}}>
-          <${Ic} name=${isRec?"mic":"play"} size=${36}/>
-        </div>
+          <${Ic} name=${isRec?"mic":"play"} size=${36}/></div>
 
-        <div style=${{fontSize:28,fontWeight:800,fontFamily:"'SF Mono',monospace",letterSpacing:-1,color:isRec?"#FF453A":"inherit",marginBottom:4}}>
-          ${fmt(time)}
-        </div>
+        <div style=${{fontSize:28,fontWeight:800,fontFamily:"'SF Mono',monospace",letterSpacing:-1,color:isRec?"#FF453A":"inherit",marginBottom:4}}>${fmt(time)}</div>
 
-        ${isRec && h`<div className="pill" style=${{background:"rgba(50,215,75,0.1)",color:"#32D74B",marginBottom:8}}>
-          <div style=${{width:5,height:5,borderRadius:3,background:"#32D74B",animation:"pulse 1.2s infinite"}}/>
-          Mendengarkan...
-        </div>`}
+        ${isRec?h`<div class="pill" style=${{background:"rgba(50,215,75,0.1)",color:"#32D74B",marginBottom:8}}>
+          <div style=${{width:5,height:5,borderRadius:3,background:"#32D74B",animation:"pulse 1.2s infinite"}}/>Mendengarkan...</div>`:null}
 
-        ${isRec && analyser ? h`<div style=${{marginBottom:10,padding:"0 4px"}}><${LevelMeter} an=${analyser}/></div>` : null}
-
-        ${!isRec && time===0 && h`<div style=${{marginBottom:10}}>
+        ${!isRec&&time===0?h`<div style=${{marginBottom:10}}>
           <div style=${{fontSize:10,fontWeight:600,color:"#8E8E93",marginBottom:4}}>Judul Rapat (opsional)</div>
-          <input class="fi" value=${title} onInput=${function(e){setTitle(e.target.value)}} placeholder="Cth: Weekly Standup" style=${{textAlign:"center"}}/>
-        </div>`}
+          <input class="fi" value=${title} onInput=${function(e){setTitle(e.target.value)}} placeholder="Cth: Weekly Standup" style=${{textAlign:"center"}}/></div>`:null}
 
         <div style=${{display:"flex",gap:8}}>
-          ${!isRec && time===0 ? h`<button onClick=${startRec} style=${{flex:1,padding:"14px",borderRadius:14,background:"linear-gradient(135deg,#5856D6,#7B79E8)",color:"#FFF",border:"none",fontSize:15,fontWeight:600,boxShadow:"0 6px 20px rgba(88,86,214,0.25)"}}>
-            <span style=${{display:"flex",alignItems:"center",justifyContent:"center",gap:6}}><${Ic} name="mic" size=${18} color="#FFF"/>Mulai Rapat</span>
-          </button>` : null}
-
-          ${isRec ? h`<button onClick=${stopRec} style=${{flex:1,padding:"14px",borderRadius:14,background:"#FF453A",color:"#FFF",border:"none",fontSize:15,fontWeight:600}}>
-            <span style=${{display:"flex",alignItems:"center",justifyContent:"center",gap:6}}><${Ic} name="stop" size=${18} color="#FFF"/>Akhiri Rapat</span>
-          </button>` : null}
-
-          ${!isRec && time>0 && !saved ? h`<button onClick=${saveMeeting} style=${{flex:1,padding:"14px",borderRadius:14,background:"#32D74B",color:"#FFF",border:"none",fontSize:15,fontWeight:600}}>
-            <span style=${{display:"flex",alignItems:"center",justifyContent:"center",gap:6}}><${Ic} name="check" size=${18} color="#FFF"/>Simpan</span>
-          </button>` : null}
-
-          ${!isRec && time>0 ? h`<button onClick=${resetAll} style=${{padding:"14px 18px",borderRadius:14,background:"rgba(0,0,0,0.04)",color:"#8E8E93",border:"1px solid rgba(0,0,0,0.06)",fontSize:15,fontWeight:600}}>
-            Baru
-          </button>` : null}
+          ${!isRec&&time===0?h`<button onClick=${startRec} style=${{flex:1,padding:"14px",borderRadius:14,background:"linear-gradient(135deg,#5856D6,#7B79E8)",color:"#FFF",border:"none",fontSize:15,fontWeight:600,boxShadow:"0 6px 20px rgba(88,86,214,0.25)"}}>
+            <span style=${{display:"flex",alignItems:"center",justifyContent:"center",gap:6}}><${Ic} name="mic" size=${18} color="#FFF"/>Mulai Rapat</span></button>`:null}
+          ${isRec?h`<button onClick=${stopRec} style=${{flex:1,padding:"14px",borderRadius:14,background:"#FF453A",color:"#FFF",border:"none",fontSize:15,fontWeight:600}}>
+            <span style=${{display:"flex",alignItems:"center",justifyContent:"center",gap:6}}><${Ic} name="stop" size=${18} color="#FFF"/>Akhiri Rapat</span></button>`:null}
+          ${!isRec&&time>0&&!saved?h`<button onClick=${saveMeeting} style=${{flex:1,padding:"14px",borderRadius:14,background:"#32D74B",color:"#FFF",border:"none",fontSize:15,fontWeight:600}}>
+            <span style=${{display:"flex",alignItems:"center",justifyContent:"center",gap:6}}><${Ic} name="check" size=${18} color="#FFF"/>Simpan</span></button>`:null}
+          ${!isRec&&time>0?h`<button onClick=${resetAll} style=${{padding:"14px 18px",borderRadius:14,background:"rgba(0,0,0,0.04)",color:"#8E8E93",border:"1px solid rgba(0,0,0,0.06)",fontSize:15,fontWeight:600}}>Baru</button>`:null}
         </div>
       </div>
 
-      <!-- QUICK SETTINGS (idle only) -->
-      ${!isRec && time===0 ? h`<div className="gl" style=${{padding:16,marginBottom:14}}>
+      <!-- QUICK SETTINGS -->
+      ${!isRec&&time===0?h`<div class="gl" style=${{padding:16,marginBottom:14}}>
         <div style=${{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
           <div style=${{width:28,height:28,borderRadius:8,background:"rgba(88,86,214,0.1)",display:"flex",alignItems:"center",justifyContent:"center",color:"#5856D6"}}><${Ic} name="settings" size=${15}/></div>
-          <span style=${{fontWeight:600,fontSize:13}}>Pengaturan Cepat</span>
-        </div>
+          <span style=${{fontWeight:600,fontSize:13}}>Pengaturan Cepat</span></div>
         <div style=${{display:"flex",gap:8}}>
           <div style=${{flex:1}}>
             <div style=${{fontSize:10,fontWeight:600,color:"#8E8E93",marginBottom:4}}>Bahasa</div>
             <div style=${{display:"flex",gap:4}}>
-              ${[["id-ID","ID"],["en-US","EN"]].map(function(l){
-                var on=set.lang===l[0];
-                return h`<button key=${l[0]} onClick=${function(){updSet("lang",l[0])}} style=${{flex:1,padding:"8px",borderRadius:8,border:"1px solid "+(on?"rgba(88,86,214,0.3)":"rgba(0,0,0,0.08)"),background:on?"rgba(88,86,214,0.08)":"rgba(255,255,255,0.5)",fontSize:12,fontWeight:600,color:on?"#5856D6":"#8E8E93",fontFamily:"inherit"}}>${l[1]}</button>`;
-              })}
-            </div>
-          </div>
+              ${[["id-ID","ID"],["en-US","EN"]].map(function(l){var on=set.lang===l[0];
+                return h`<button key=${l[0]} class=${"sbtn"+(on?" on":"")} onClick=${function(){updSet("lang",l[0])}}>${l[1]}</button>`})}</div></div>
           <div style=${{flex:1}}>
             <div style=${{fontSize:10,fontWeight:600,color:"#8E8E93",marginBottom:4}}>Interval AI</div>
             <div style=${{display:"flex",gap:4}}>
-              ${[[1,"1m"],[2,"2m"],[5,"5m"]].map(function(v){
-                var on=set.interval===v[0];
-                return h`<button key=${v[0]} onClick=${function(){updSet("interval",v[0])}} style=${{flex:1,padding:"8px",borderRadius:8,border:"1px solid "+(on?"rgba(88,86,214,0.3)":"rgba(0,0,0,0.08)"),background:on?"rgba(88,86,214,0.08)":"rgba(255,255,255,0.5)",fontSize:12,fontWeight:600,color:on?"#5856D6":"#8E8E93",fontFamily:"inherit"}}>${v[1]}</button>`;
-              })}
-            </div>
-          </div>
-        </div>
-      </div>` : null}
+              ${[[1,"1m"],[2,"2m"],[5,"5m"]].map(function(v){var on=set.interval===v[0];
+                return h`<button key=${v[0]} class=${"sbtn"+(on?" on":"")} onClick=${function(){updSet("interval",v[0])}}>${v[1]}</button>`})}</div></div>
+        </div></div>`:null}
 
       <!-- LIVE TRANSCRIPT -->
-      ${(fin || int) ? h`<div style=${{marginBottom:14}}>
+      ${(fin||interim)?h`<div style=${{marginBottom:14}}>
         <div style=${{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
-          <div className="pill" style=${{background:"rgba(88,86,214,0.1)",color:"#5856D6"}}>
-            <${Ic} name="text" size=${11} color="#5856D6"/>Transkrip Live
-          </div>
+          <div class="pill" style=${{background:"rgba(88,86,214,0.1)",color:"#5856D6"}}><${Ic} name="text" size=${11} color="#5856D6"/>Transkrip Live</div>
           <div style=${{display:"flex",alignItems:"center",gap:8}}>
-            ${aiLd ? h`<div style=${{fontSize:11,color:"#BF5AF2",display:"flex",alignItems:"center",gap:4}}>
-              <div style=${{width:5,height:5,borderRadius:3,background:"#BF5AF2",animation:"pulse 1s infinite"}}/>AI Merangkum...
-            </div>` : null}
-            ${!isRec && fin ? h`<button onClick=${copyAll} style=${{display:"flex",alignItems:"center",gap:3,padding:"4px 10px",borderRadius:8,border:"1px solid rgba(0,0,0,0.08)",background:"transparent",fontSize:10,fontWeight:600,color:"#5856D6",fontFamily:"inherit"}}>
-              <${Ic} name="copy" size=${11} color="#5856D6"/>Salin
-            </button>` : null}
-          </div>
-        </div>
-        <div ref=${scrollRef} className="gl" style=${{padding:16,maxHeight:200,overflowY:"auto",background:"rgba(255,255,255,0.9)"}}>
+            ${aiLd?h`<div style=${{fontSize:11,color:"#BF5AF2",display:"flex",alignItems:"center",gap:4}}><div style=${{width:5,height:5,borderRadius:3,background:"#BF5AF2",animation:"pulse 1s infinite"}}/>AI Merangkum...</div>`:null}
+            ${!isRec&&fin?h`<button onClick=${copyAll} style=${{display:"flex",alignItems:"center",gap:3,padding:"4px 10px",borderRadius:8,border:"1px solid rgba(0,0,0,0.08)",background:"transparent",fontSize:10,fontWeight:600,color:"#5856D6",fontFamily:"inherit"}}><${Ic} name="copy" size=${11} color="#5856D6"/>Salin</button>`:null}
+          </div></div>
+        <div ref=${scrollRef} class="gl" style=${{padding:16,maxHeight:200,overflowY:"auto",background:"rgba(255,255,255,0.9)"}}>
           <span style=${{fontSize:14,lineHeight:1.6,color:"#1C1C1E"}}>${fin}</span>
-          <span style=${{fontSize:14,lineHeight:1.6,color:"#8E8E93",fontStyle:"italic"}}>${int ? " " + int : ""}</span>
-        </div>
-      </div>` : null}
+          <span style=${{fontSize:14,lineHeight:1.6,color:"#8E8E93",fontStyle:"italic"}}>${interim?" "+interim:""}</span>
+        </div></div>`:null}
 
       <!-- MANUAL TRIGGER -->
-      ${isRec && fin.length > 50 ? h`<button onClick=${triggerAI} disabled=${aiLd} style=${{width:"100%",padding:"10px",borderRadius:12,border:"1px solid rgba(191,90,242,0.15)",background:"rgba(191,90,242,0.06)",color:aiLd?"#8E8E93":"#BF5AF2",fontSize:12,fontWeight:600,marginBottom:12,display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
-        <${Ic} name="zap" size=${14} color=${aiLd?"#8E8E93":"#BF5AF2"}/>${aiLd?"Merangkum...":"Rangkum Sekarang"}
-      </button>` : null}
+      ${isRec&&fin.length>50?h`<button onClick=${triggerAI} disabled=${aiLd} style=${{width:"100%",padding:"10px",borderRadius:12,border:"1px solid rgba(191,90,242,0.15)",background:"rgba(191,90,242,0.06)",color:aiLd?"#8E8E93":"#BF5AF2",fontSize:12,fontWeight:600,marginBottom:12,display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
+        <${Ic} name="zap" size=${14} color=${aiLd?"#8E8E93":"#BF5AF2"}/>${aiLd?"Merangkum...":"Rangkum Sekarang"}</button>`:null}
 
       <!-- AI NOTES -->
-      ${notes.length > 0 ? h`<div>
-        <div className="pill" style=${{background:"rgba(191,90,242,0.1)",color:"#BF5AF2",marginBottom:10}}>
-          <${Ic} name="sparkle" size=${11} color="#BF5AF2"/>Poin Notulen AI
-        </div>
-        ${notes.map(function(n){
-          return h`<div key=${n.id} className="card-note">
-            <div style=${{fontSize:11,color:"#8E8E93",marginBottom:6,display:"flex",alignItems:"center",gap:4}}>
-              <${Ic} name="sparkle" size=${12} color="#BF5AF2"/>Menit ${Math.floor(n.time/60)}
-            </div>
-            <div style=${{fontSize:13,lineHeight:1.6,color:"#1C1C1E",whiteSpace:"pre-wrap"}}>${n.text}</div>
-          </div>`;
-        })}
-      </div>` : null}
+      ${notes.length>0?h`<div>
+        <div class="pill" style=${{background:"rgba(191,90,242,0.1)",color:"#BF5AF2",marginBottom:10}}><${Ic} name="sparkle" size=${11} color="#BF5AF2"/>Poin Notulen AI</div>
+        ${notes.map(function(n){return h`<div key=${n.id} class="card-note">
+          <div style=${{fontSize:11,color:"#8E8E93",marginBottom:6,display:"flex",alignItems:"center",gap:4}}><${Ic} name="sparkle" size=${12} color="#BF5AF2"/>Menit ${Math.floor(n.time/60)}</div>
+          <div style=${{fontSize:13,lineHeight:1.6,whiteSpace:"pre-wrap"}}>${n.text}</div></div>`})}</div>`:null}
 
-      <!-- NO API KEY WARNING -->
-      ${!window.__AK && !isRec && time===0 ? h`<div className="gl" style=${{padding:14,marginTop:6,background:"rgba(255,159,10,0.05)",border:"1px solid rgba(255,159,10,0.12)"}}>
+      <!-- NO KEY WARNING -->
+      ${!window.__AK&&!isRec&&time===0?h`<div class="gl" style=${{padding:14,marginTop:6,background:"rgba(255,159,10,0.05)",border:"1px solid rgba(255,159,10,0.12)"}}>
         <div style=${{display:"flex",alignItems:"center",gap:8}}>
           <${Ic} name="alert" size=${16} color="#FF9F0A"/>
-          <div>
-            <div style=${{fontSize:12,fontWeight:600,color:"#FF9F0A"}}>API Key Groq belum diatur</div>
-            <div style=${{fontSize:11,color:"#8E8E93",marginTop:1}}>Buka tab Pengaturan untuk memasukkan API Key.</div>
-          </div>
-        </div>
-      </div>` : null}
+          <div><div style=${{fontSize:12,fontWeight:600,color:"#FF9F0A"}}>API Key Groq belum diatur</div>
+          <div style=${{fontSize:11,color:"#8E8E93",marginTop:1}}>Tab Pengaturan → masukkan API Key.</div></div></div></div>`:null}
 
-      <!-- REQUIREMENTS -->
-      ${!isRec && time===0 ? h`<div style=${{marginTop:10,padding:12,borderRadius:14,background:"rgba(0,0,0,0.02)",border:"1px solid rgba(0,0,0,0.04)"}}>
+      <!-- INFO -->
+      ${!isRec&&time===0?h`<div style=${{marginTop:10,padding:12,borderRadius:14,background:"rgba(0,0,0,0.02)",border:"1px solid rgba(0,0,0,0.04)"}}>
         <div style=${{fontSize:10,fontWeight:600,color:"#8E8E93",marginBottom:4}}>Persyaratan</div>
-        <div style=${{fontSize:11,color:"#636366",lineHeight:1.8}}>
-          • Chrome atau Edge (desktop/mobile)
-          • Koneksi internet (SR via server Google)
-          • Izinkan akses mikrofon saat diminta
-          • API Key Groq (gratis) untuk ringkasan AI
-        </div>
-        <div style=${{fontSize:10,color:"#C7C7CC",marginTop:8,lineHeight:1.6}}>
-          Jika izin mikrofon ditolak: klik ikon gembok di address bar → Site settings → Microphone → Allow → refresh.
-        </div>
-      </div>` : null}
-    </div>
-  </div>`;
+        <div style=${{fontSize:11,color:"#636366",lineHeight:1.8}}>• Chrome atau Edge • Koneksi internet • Izinkan mikrofon • API Key Groq (gratis)</div></div>`:null}
+
+    </div></div>`;
 }
 
-/* ═══════════════════════
-   TAB: RIWAYAT
-   ═══════════════════════ */
+/* ═══ HISTORY TAB ═══ */
 function HistTab(){
-  var _h=us(DB.get().history), hist=_h[0], setH=_h[1];
-  var _open=us(null), openId=_open[0], setOpen=_open[1];
-
-  function refresh(){setH(DB.get().history)}
-  function del(id){if(confirm("Hapus notulen ini?")){DB.delHist(id);refresh()}}
-  function copyItem(item){
-    var text="NOTULEN RAPAT\n"+(item.title||"Rapat")+"\n"+
-      new Date(item.date).toLocaleDateString("id-ID",{weekday:"long",day:"numeric",month:"long",year:"numeric"})+
-      "\nDurasi: "+fmt(item.duration)+"\n\n=== RINGKASAN ===\n\n"+
-      item.notes.map(function(n){return n.text}).join("\n\n")+
-      "\n\n=== TRANSKRIP ===\n\n"+item.transcript;
-    navigator.clipboard.writeText(text).then(function(){alert("Tersalin!")});
+  var _h=us(DB.get().history),hist=_h[0],setH=_h[1];
+  var _o=us(null),oid=_o[0],setO=_o[1];
+  function ref(){setH(DB.get().history)}
+  function del(id){if(confirm("Hapus?")){DB.delH(id);ref()}}
+  function cp(it){
+    var t="NOTULEN\n"+(it.title||"Rapat")+"\n"+new Date(it.date).toLocaleDateString("id-ID",{weekday:"long",day:"numeric",month:"long",year:"numeric"})+"\nDurasi: "+fmt(it.duration)+"\n\n=== RINGKASAN ===\n\n"+it.notes.map(function(n){return n.text}).join("\n\n")+"\n\n=== TRANSKRIP ===\n\n"+it.transcript;
+    navigator.clipboard.writeText(t).then(function(){alert("Tersalin!")});
   }
-
-  if(!hist.length) return h`<div style=${{padding:"60px 20px",textAlign:"center"}}>
-    <${Ic} name="file" size=${48} color="#C7C7CC" sw=${1}/>
-    <div style=${{fontSize:16,fontWeight:600,color:"#8E8E93",marginTop:16}}>Belum ada notulen</div>
-    <div style=${{fontSize:13,color:"#C7C7CC",marginTop:4}}>Rapat yang disimpan muncul di sini.</div>
-  </div>`;
-
-  return h`<div style=${{padding:"16px"}}>
-    <h2 style=${{fontSize:20,fontWeight:800,marginBottom:14}}>Riwayat Rapat</h2>
-    ${hist.map(function(item){
-      var isOpen = openId===item.id;
-      return h`<div key=${item.id} className="gl" style=${{marginBottom:10,overflow:"hidden",background:"#FFF"}}>
-        <div onClick=${function(){setOpen(isOpen?null:item.id)}} style=${{padding:"14px 16px",cursor:"pointer",display:"flex",alignItems:"center",gap:10}}>
-          <div style=${{width:38,height:38,borderRadius:10,background:"rgba(88,86,214,0.08)",display:"flex",alignItems:"center",justifyContent:"center",color:"#5856D6",flexShrink:0}}><${Ic} name="file" size=${18}/></div>
-          <div style=${{flex:1,minWidth:0}}>
-            <div style=${{fontWeight:600,fontSize:14,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>${item.title||"Rapat"}</div>
-            <div style=${{fontSize:11,color:"#8E8E93",marginTop:1}}>
-              ${new Date(item.date).toLocaleDateString("id-ID",{day:"numeric",month:"short",year:"numeric"})} · ${fmt(item.duration)} · ${item.notes.length} poin
-            </div>
-          </div>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C7C7CC" strokeWidth="2" style=${{transform:isOpen?"rotate(90deg)":"none",transition:"0.2s"}}><path d="M9 18l6-6-6-6"/></svg>
-        </div>
-
-        ${isOpen ? h`<div style=${{padding:"0 16px 16px",animation:"fadeIn .2s"}}>
-          <div style=${{display:"flex",gap:4,marginBottom:12,flexWrap:"wrap"}}>
-            <button onClick=${function(e){e.stopPropagation();copyItem(item)}} style=${{display:"inline-flex",alignItems:"center",gap:4,padding:"6px 12px",borderRadius:8,border:"1px solid rgba(0,0,0,0.08)",background:"rgba(88,86,214,0.04)",color:"#5856D6",fontSize:11,fontWeight:600,fontFamily:"inherit"}}>
-              <${Ic} name="copy" size=${12} color="#5856D6"/>Salin Semua
-            </button>
-            <button onClick=${function(e){e.stopPropagation();del(item.id)}} style=${{display:"inline-flex",alignItems:"center",gap:4,padding:"6px 12px",borderRadius:8,border:"1px solid rgba(255,69,58,0.12)",background:"rgba(255,69,58,0.04)",color:"#FF453A",fontSize:11,fontWeight:600,fontFamily:"inherit"}}>
-              <${Ic} name="trash" size=${12} color="#FF453A"/>Hapus
-            </button>
-          </div>
-
-          ${item.notes.length>0 ? h`<div style=${{marginBottom:12}}>
-            <div style=${{fontSize:10,fontWeight:700,color:"#BF5AF2",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:6,display:"flex",alignItems:"center",gap:4}}>
-              <${Ic} name="sparkle" size=${12} color="#BF5AF2"/>Ringkasan AI
-            </div>
-            ${item.notes.map(function(n,i){
-              return h`<div key=${i} className="card-note">
-                <div style=${{fontSize:11,color:"#8E8E93",marginBottom:4}}>Menit ${Math.floor(n.time/60)}</div>
-                <div style=${{fontSize:13,lineHeight:1.6,whiteSpace:"pre-wrap"}}>${n.text}</div>
-              </div>`;
-            })}
-          </div>` : null}
-
-          <div>
-            <div style=${{fontSize:10,fontWeight:700,color:"#8E8E93",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:4}}>Transkrip</div>
-            <div style=${{maxHeight:250,overflowY:"auto",background:"rgba(0,0,0,0.02)",borderRadius:12,padding:12,fontSize:13,lineHeight:1.5,color:"#48484A"}}>
-              ${item.transcript || "(kosong)"}
-            </div>
-          </div>
-        </div>` : null}
-      </div>`;
-    })}
-  </div>`;
+  if(!hist.length) return h`<div style=${{padding:"60px 20px",textAlign:"center"}}><${Ic} name="file" size=${48} color="#C7C7CC" sw=${1}/><div style=${{fontSize:16,fontWeight:600,color:"#8E8E93",marginTop:16}}>Belum ada notulen</div></div>`;
+  return h`<div style=${{padding:"16px"}}><div style=${{fontWeight:700,fontSize:17,marginBottom:14}}>Riwayat Rapat</div>
+    ${hist.map(function(it){var io=oid===it.id;return h`<div key=${it.id} class="gl" style=${{marginBottom:10,overflow:"hidden",background:"#FFF"}}>
+      <div onClick=${function(){setO(io?null:it.id)}} style=${{padding:"14px 16px",cursor:"pointer",display:"flex",alignItems:"center",gap:10}}>
+        <div style=${{width:38,height:38,borderRadius:10,background:"rgba(88,86,214,0.08)",display:"flex",alignItems:"center",justifyContent:"center",color:"#5856D6",flexShrink:0}}><${Ic} name="file" size=${18}/></div>
+        <div style=${{flex:1,minWidth:0}}><div style=${{fontWeight:600,fontSize:14,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>${it.title||"Rapat"}</div>
+        <div style=${{fontSize:11,color:"#8E8E93",marginTop:1}}>${new Date(it.date).toLocaleDateString("id-ID",{day:"numeric",month:"short",year:"numeric"})} · ${fmt(it.duration)} · ${it.notes.length} poin</div></div>
+        <${Ic} name="chevR" size=${14} color="#C7C7CC"/></div>
+      ${io?h`<div style=${{padding:"0 16px 16px",animation:"fadeIn .2s"}}>
+        <div style=${{display:"flex",gap:4,marginBottom:12}}>
+          <button onClick=${function(e){e.stopPropagation();cp(it)}} style=${{display:"inline-flex",alignItems:"center",gap:4,padding:"6px 12px",borderRadius:8,border:"1px solid rgba(0,0,0,0.08)",background:"rgba(88,86,214,0.04)",color:"#5856D6",fontSize:11,fontWeight:600,fontFamily:"inherit"}}><${Ic} name="copy" size=${12} color="#5856D6"/>Salin</button>
+          <button onClick=${function(e){e.stopPropagation();del(it.id)}} style=${{display:"inline-flex",alignItems:"center",gap:4,padding:"6px 12px",borderRadius:8,border:"1px solid rgba(255,69,58,0.12)",background:"rgba(255,69,58,0.04)",color:"#FF453A",fontSize:11,fontWeight:600,fontFamily:"inherit"}}><${Ic} name="trash" size=${12} color="#FF453A"/>Hapus</button></div>
+        ${it.notes.length>0?h`<div style=${{marginBottom:12}}>
+          <div style=${{fontSize:10,fontWeight:700,color:"#BF5AF2",marginBottom:6,display:"flex",alignItems:"center",gap:4}}><${Ic} name="sparkle" size=${12} color="#BF5AF2"/>RINGKASAN AI</div>
+          ${it.notes.map(function(n,i){return h`<div key=${i} class="card-note"><div style=${{fontSize:13,lineHeight:1.6,whiteSpace:"pre-wrap"}}>${n.text}</div></div>`})}</div>`:null}
+        <div><div style=${{fontSize:10,fontWeight:700,color:"#8E8E93",marginBottom:4}}>TRANSKRIP</div>
+          <div style=${{maxHeight:250,overflowY:"auto",background:"rgba(0,0,0,0.02)",borderRadius:12,padding:12,fontSize:13,lineHeight:1.5,color:"#48484A"}}>${it.transcript||"(kosong)"}</div></div></div>`:null}
+    </div>`})}</div>`;
 }
 
-/* ═══════════════════════
-   TAB: PENGATURAN
-   ═══════════════════════ */
-function SegBtn(p){
-  var on=p.on;
-  return h`<button onClick=${p.onClick} style=${{flex:p.flex||1,padding:p.pad||"10px 4px",borderRadius:10,border:"1px solid "+(on?"rgba(88,86,214,0.3)":"rgba(0,0,0,0.08)"),background:on?"rgba(88,86,214,0.08)":"rgba(255,255,255,0.5)",fontSize:p.fs||12,fontWeight:600,color:on?"#5856D6":"#8E8E93",fontFamily:"inherit",display:"flex",alignItems:"center",justifyContent:"center",gap:4}}>${p.children}</button>`;
-}
-
+/* ═══ SETTINGS TAB ═══ */
 function SetTab(p){
-  var set=p.set, updSet=p.updSet;
-  var _sk=us(false), sk=_sk[0], sSk=_sk[1];
+  var set=p.set,updSet=p.updSet;
+  var _sk=us(false),sk=_sk[0],sSk=_sk[1];
+  return h`<div style=${{padding:"16px"}}><div style=${{fontWeight:700,fontSize:17,marginBottom:12}}>Pengaturan</div>
 
-  return h`<div style=${{padding:"16px"}}>
-    <div style=${{fontWeight:700,fontSize:17,marginBottom:12}}>Pengaturan</div>
-
-    <!-- API KEY -->
-    <div className="gl" style=${{padding:16,marginBottom:12}}>
+    <div class="gl" style=${{padding:16,marginBottom:12}}>
       <div style=${{display:"flex",alignItems:"center",gap:8,marginBottom:12}}>
         <div style=${{width:28,height:28,borderRadius:8,background:"rgba(88,86,214,0.1)",display:"flex",alignItems:"center",justifyContent:"center",color:"#5856D6"}}><${Ic} name="key" size=${15}/></div>
-        <span style=${{fontWeight:600,fontSize:14}}>API Key</span>
-      </div>
-
-      <div style=${{marginBottom:10}}>
-        <div style=${{fontSize:10,fontWeight:600,color:"#8E8E93",marginBottom:4}}>Provider</div>
-        <div style=${{display:"flex",gap:4}}>
-          ${[["groq","Groq (gratis)"],["anthropic","Anthropic"]].map(function(pr){
-            var on=set.provider===pr[0];
-            return h`<${SegBtn} key=${pr[0]} on=${on} onClick=${function(){updSet("provider",pr[0])}}>${pr[1]}<//>`;
-          })}
-        </div>
-      </div>
-
-      <div>
-        <div style=${{fontSize:10,fontWeight:600,color:"#8E8E93",marginBottom:3}}>${set.provider==="groq"?"Groq API Key":"Anthropic API Key"}</div>
-        <div style=${{position:"relative"}}>
-          <input class="fi" type=${sk?"text":"password"} placeholder=${set.provider==="groq"?"gsk_...":"sk-ant-..."} value=${set.key} onInput=${function(e){updSet("key",e.target.value)}} style=${{paddingRight:40}}/>
-          <button onClick=${function(){sSk(!sk)}} style=${{position:"absolute",right:6,top:"50%",transform:"translateY(-50%)",border:"none",background:"transparent",padding:4}}>
-            <${Ic} name="eye" size=${14} color="#C7C7CC"/>
-          </button>
-        </div>
-        ${set.key ? h`<div style=${{fontSize:10,color:"#32D74B",marginTop:4,display:"flex",alignItems:"center",gap:3}}>
-          <${Ic} name="check" size=${10} color="#32D74B"/>Key tersimpan
-        </div>` : null}
-        <div style=${{fontSize:11,color:"#C7C7CC",marginTop:6}}>Daftar gratis di console.groq.com</div>
-      </div>
+        <span style=${{fontWeight:600,fontSize:14}}>API Key Groq</span></div>
+      <p style=${{fontSize:12,color:"#8E8E93",marginBottom:10}}>Daftar gratis di console.groq.com</p>
+      <div style=${{position:"relative"}}>
+        <input class="fi" type=${sk?"text":"password"} placeholder="gsk_..." value=${set.key} onInput=${function(e){updSet("key",e.target.value)}} style=${{paddingRight:40}}/>
+        <button onClick=${function(){sSk(!sk)}} style=${{position:"absolute",right:6,top:"50%",transform:"translateY(-50%)",border:"none",background:"transparent",padding:4}}><${Ic} name="eye" size=${14} color="#C7C7CC"/></button></div>
+      ${set.key?h`<div style=${{fontSize:10,color:"#32D74B",marginTop:4,display:"flex",alignItems:"center",gap:3}}><${Ic} name="check" size=${10} color="#32D74B"/>Tersimpan</div>`:null}
     </div>
 
-    <!-- BAHASA -->
-    <div className="gl" style=${{padding:16,marginBottom:12}}>
+    <div class="gl" style=${{padding:16,marginBottom:12}}>
       <div style=${{display:"flex",alignItems:"center",gap:8,marginBottom:12}}>
         <div style=${{width:28,height:28,borderRadius:8,background:"rgba(48,176,199,0.1)",display:"flex",alignItems:"center",justifyContent:"center",color:"#30B0C7"}}><${Ic} name="globe" size=${15}/></div>
-        <span style=${{fontWeight:600,fontSize:14}}>Bahasa Transkripsi</span>
-      </div>
+        <span style=${{fontWeight:600,fontSize:14}}>Bahasa Transkripsi</span></div>
       <div style=${{display:"flex",flexDirection:"column",gap:4}}>
-        ${[["id-ID","Bahasa Indonesia"],["en-US","English (US)"],["en-GB","English (UK)"]].map(function(l){
-          var on=set.lang===l[0];
+        ${[["id-ID","Bahasa Indonesia"],["en-US","English (US)"],["en-GB","English (UK)"]].map(function(l){var on=set.lang===l[0];
           return h`<button key=${l[0]} onClick=${function(){updSet("lang",l[0])}} style=${{padding:"10px 12px",borderRadius:12,border:"1px solid "+(on?"rgba(48,176,199,0.3)":"rgba(0,0,0,0.06)"),background:on?"rgba(48,176,199,0.06)":"rgba(255,255,255,0.5)",fontSize:13,fontWeight:on?600:400,color:on?"#30B0C7":"#48484A",textAlign:"left",display:"flex",alignItems:"center",justifyContent:"space-between",fontFamily:"inherit"}}>
-            ${l[1]}${on?h`<${Ic} name="check" size=${14} color="#30B0C7"/>`:null}
-          </button>`;
-        })}
-      </div>
-    </div>
+            ${l[1]}${on?h`<${Ic} name="check" size=${14} color="#30B0C7"/>`:null}</button>`})}</div></div>
 
-    <!-- INTERVAL -->
-    <div className="gl" style=${{padding:16,marginBottom:12}}>
+    <div class="gl" style=${{padding:16,marginBottom:12}}>
       <div style=${{display:"flex",alignItems:"center",gap:8,marginBottom:12}}>
         <div style=${{width:28,height:28,borderRadius:8,background:"rgba(255,159,10,0.1)",display:"flex",alignItems:"center",justifyContent:"center",color:"#FF9F0A"}}><${Ic} name="clock" size=${15}/></div>
-        <span style=${{fontWeight:600,fontSize:14}}>Interval Ringkasan AI</span>
-      </div>
+        <span style=${{fontWeight:600,fontSize:14}}>Interval Ringkasan AI</span></div>
       <div style=${{fontSize:11,color:"#8E8E93",marginBottom:8}}>AI otomatis meringkas percakapan setiap interval ini.</div>
       <div style=${{display:"flex",gap:4}}>
-        ${[[1,"1 menit"],[2,"2 menit"],[3,"3 menit"],[5,"5 menit"]].map(function(v){
-          var on=set.interval===v[0];
-          return h`<button key=${v[0]} onClick=${function(){updSet("interval",v[0])}} style=${{flex:1,padding:"10px 4px",borderRadius:10,border:"1px solid "+(on?"rgba(255,159,10,0.3)":"rgba(0,0,0,0.08)"),background:on?"rgba(255,159,10,0.06)":"rgba(255,255,255,0.5)",fontSize:12,fontWeight:600,color:on?"#FF9F0A":"#8E8E93",fontFamily:"inherit"}}>${v[1]}</button>`;
-        })}
-      </div>
-    </div>
+        ${[[1,"1 menit"],[2,"2 menit"],[3,"3 menit"],[5,"5 menit"]].map(function(v){var on=set.interval===v[0];
+          return h`<button key=${v[0]} onClick=${function(){updSet("interval",v[0])}} style=${{flex:1,padding:"10px 4px",borderRadius:10,border:"1px solid "+(on?"rgba(255,159,10,0.3)":"rgba(0,0,0,0.08)"),background:on?"rgba(255,159,10,0.06)":"rgba(255,255,255,0.5)",fontSize:12,fontWeight:600,color:on?"#FF9F0A":"#8E8E93",fontFamily:"inherit"}}>${v[1]}</button>`})}</div></div>
 
-    <!-- TENTANG -->
-    <div className="gl" style=${{padding:16}}>
-      <div style=${{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
-        <div style=${{width:28,height:28,borderRadius:8,background:"rgba(88,86,214,0.1)",display:"flex",alignItems:"center",justifyContent:"center",color:"#5856D6"}}><${Ic} name="bot" size=${15}/></div>
-        <span style=${{fontWeight:600,fontSize:14}}>Tentang</span>
-      </div>
-      <div style=${{fontSize:12,color:"#636366",lineHeight:1.6}}>Notulen AI mentranskripsi percakapan real-time (Web Speech API) dan meringkas poin penting menggunakan AI (Groq/Anthropic).</div>
-      <div style=${{marginTop:8,fontSize:11,color:"#8E8E93"}}>v4.1 · Self-Healing Speech Recognition</div>
-      <div style=${{marginTop:6,padding:"8px 10px",borderRadius:8,background:"rgba(255,69,58,0.04)",border:"1px solid rgba(255,69,58,0.08)",fontSize:11,color:"#FF453A"}}>Data tersimpan di perangkat (localStorage). Bukan pengganti notulen resmi.</div>
-    </div>
+    <div class="gl" style=${{padding:16}}>
+      <div style=${{fontSize:12,color:"#636366",lineHeight:1.6}}>Notulen AI v5 · Speech Recognition + LLM</div>
+      <div style=${{marginTop:6,padding:"8px 10px",borderRadius:8,background:"rgba(255,69,58,0.04)",border:"1px solid rgba(255,69,58,0.08)",fontSize:11,color:"#FF453A"}}>Data di localStorage. Bukan pengganti notulen resmi.</div></div>
   </div>`;
 }
 
-/* ═══════════════════════
-   MAIN APP
-   ═══════════════════════ */
+/* ═══ APP ═══ */
 function App(){
-  var _tab=us("rec"), tab=_tab[0], setTab=_tab[1];
-  var _set=us(DB.getSet()), settings=_set[0], setSettings=_set[1];
-
-  ue(function(){ window.__AK = settings.key; }, [settings.key]);
-
-  function updSet(k,v){
-    DB.updSet(k,v);
-    setSettings(DB.getSet());
-  }
-
+  var _t=us("rec"),tab=_t[0],setTab=_t[1];
+  var _s=us(DB.gS()),set=_s[0],setS=_s[1];
+  ue(function(){window.__AK=set.key},[set.key]);
+  function updSet(k,v){DB.uS(k,v);setS(DB.gS())}
   return h`<div>
     <div style=${{paddingTop:10}}>
-      ${tab==="rec" ? h`<${RecTab} set=${settings} updSet=${updSet}/>` : null}
-      ${tab==="hist" ? h`<${HistTab}/>` : null}
-      ${tab==="set" ? h`<${SetTab} set=${settings} updSet=${updSet}/>` : null}
-    </div>
-
-    <div className="btab">
+      ${tab==="rec"?h`<${RecTab} set=${set} updSet=${updSet}/>`:null}
+      ${tab==="hist"?h`<${HistTab}/>`:null}
+      ${tab==="set"?h`<${SetTab} set=${set} updSet=${updSet}/>`:null}</div>
+    <div class="btab">
       ${[["rec","mic","Rekam"],["hist","file","Riwayat"],["set","settings","Pengaturan"]].map(function(t){
-        return h`<button key=${t[0]} className=${tab===t[0]?"on":""} onClick=${function(){setTab(t[0])}}>
-          <${Ic} name=${t[1]} size=${20} color=${tab===t[0]?"#5856D6":"#8E8E93"}/>${t[2]}
-        </button>`;
-      })}
-    </div>
-  </div>`;
+        return h`<button key=${t[0]} class=${tab===t[0]?"on":""} onClick=${function(){setTab(t[0])}}>
+          <${Ic} name=${t[1]} size=${20} color=${tab===t[0]?"#5856D6":"#8E8E93"}/>${t[2]}</button>`})}</div></div>`;
 }
-
 ReactDOM.createRoot(document.getElementById("root")).render(h`<${App}/>`);
 </script>
 </body>
