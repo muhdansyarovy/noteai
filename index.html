@@ -25,8 +25,7 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none}
 .fi{font-family:inherit;font-size:14px;padding:12px 14px;border-radius:12px;border:1px solid rgba(0,0,0,0.08);background:rgba(0,0,0,0.02);outline:none;width:100%;transition:border-color .2s}
 .fi:focus{border-color:rgba(88,86,214,0.5);background:#FFF}
 .card-note{background:#FFF;border-radius:14px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,0.03);margin-bottom:10px;animation:slideUp .3s ease-out;border:1px solid rgba(0,0,0,0.04)}
-/* Loader spinner */
-.spinner {border: 3px solid rgba(88,86,214,0.2); border-top: 3px solid #5856D6; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite;}
+.spinner {border: 3px solid rgba(88,86,214,0.2); border-top: 3px solid #5856D6; border-radius: 50%; width: 16px; height: 16px; animation: spin 1s linear infinite; display: inline-block;}
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
@@ -40,9 +39,9 @@ var h=htm.bind(React.createElement),us=React.useState,ur=React.useRef,ue=React.u
 
 /* ═══ STORAGE ═══ */
 var DB={
-  get:function(){try{return JSON.parse(localStorage.getItem("notulen_v5")||"null")||this.def()}catch(e){return this.def()}},
+  get:function(){try{return JSON.parse(localStorage.getItem("notulen_v6")||"null")||this.def()}catch(e){return this.def()}},
   def:function(){return{history:[],set:{lang:"id-ID",key:"",provider:"groq"}}},
-  save:function(d){localStorage.setItem("notulen_v5",JSON.stringify(d))},
+  save:function(d){localStorage.setItem("notulen_v6",JSON.stringify(d))},
   addHist:function(r){var d=this.get();d.history.unshift(r);if(d.history.length>50)d.history.length=50;this.save(d)},
   delHist:function(id){var d=this.get();d.history=d.history.filter(function(x){return x.id!==id});this.save(d)},
   getSet:function(){return this.get().set},
@@ -75,8 +74,7 @@ function Ic(p){
 function transcribeAudio(audioBlob, lang, key){
   return new Promise(function(resolve, reject){
     var fd = new FormData();
-    // Menggunakan ekstensi umum agar kompatibel
-    fd.append("file", audioBlob, "recording.m4a");
+    fd.append("file", audioBlob, "chunk.webm");
     fd.append("model", "whisper-large-v3-turbo");
     fd.append("response_format", "json");
     fd.append("language", lang === "id-ID" ? "id" : "en");
@@ -92,20 +90,20 @@ function transcribeAudio(audioBlob, lang, key){
   });
 }
 
-function aiSummarize(text, lang, key){
+function aiSummarizeChunk(text, lang, key){
   return new Promise(function(resolve, reject){
     var prompt = lang==="id-ID"
-      ? "Ekstrak poin-poin notulen penting dari transkrip rapat ini. Singkat, padat, profesional. Format sebagai list poin bernomor (tanpa pembukaan/penutup). Transkrip:\n\n" + text
-      : "Extract key meeting notes from this transcript. Professional concise numbered points. No intro/outro. Transcript:\n\n" + text;
+      ? "Buat ringkasan super singkat (1-3 poin utama) dari kutipan rapat 30 detik ini. Langsung berikan poinnya tanpa pembukaan.\n\nKutipan:\n" + text
+      : "Extract key bullet points from this 30-second meeting chunk. Concise only, no intro.\n\nTranscript:\n" + text;
 
     fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {"Content-Type":"application/json","Authorization":"Bearer "+key},
       body: JSON.stringify({
         model: "llama-3.3-70b-versatile",
-        messages: [{role:"system",content:"You write clean, concise meeting minutes."},{role:"user",content:prompt}],
+        messages: [{role:"system",content:"You write concise bullet points."},{role:"user",content:prompt}],
         temperature: 0.3,
-        max_tokens: 1000
+        max_tokens: 300
       })
     }).then(function(r){return r.json()}).then(function(d){
       if(d.error) throw new Error(d.error.message);
@@ -114,7 +112,6 @@ function aiSummarize(text, lang, key){
   });
 }
 
-/* ═══ HELPERS ═══ */
 function fmt(s){return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")}
 
 /* ═══ LEVEL METER ═══ */
@@ -147,61 +144,128 @@ function LevelMeter(p){
 }
 
 /* ═══════════════════════════════════════
-   TAB: REKAM — VOICE MEMO ARCHITECTURE
+   TAB: REKAM — LIVE CHUNKING & AUTO-SAVE
    ═══════════════════════════════════════ */
 function RecTab(p){
-  var set = p.set, updSet = p.updSet;
+  var set = p.set, updSet = p.updSet, onSaveComplete = p.onSaveComplete;
   
-  var _rec=us(false), isRec=_rec[0], setRec=_rec[1];
+  var _isRec=us(false), isRec=_isRec[0], setRec=_isRec[1];
   var _time=us(0), time=_time[0], setTime=_time[1];
   var _title=us(""), title=_title[0], setTitle=_title[1];
   var _an=us(null), analyser=_an[0], setAn=_an[1];
   
-  // States untuk hasil & loading
-  var _ldMsg=us(""), ldMsg=_ldMsg[0], setLdMsg=_ldMsg[1];
-  var _fin=us(""), fin=_fin[0], setFin=_fin[1];
-  var _notes=us(""), notes=_notes[0], setNotes=_notes[1];
-  var _saved=us(false), saved=_saved[0], setSaved=_saved[1];
+  // Data Array untuk daftar hasil real-time
+  var _fin=us([]), fin=_fin[0], setFin=_fin[1];
+  var _notes=us([]), notes=_notes[0], setNotes=_notes[1];
+  var _saving=us(false), saving=_saving[0], setSaving=_saving[1];
 
-  var mrRef = ur(null); // MediaRecorder Ref
-  var chunksRef = ur([]);
-  var tmRef = ur(null);
+  // Refs untuk sinkronisasi tanpa rendering
+  var isRecRef = ur(false);
+  var timeRef = ur(0);
   var streamRef = ur(null);
   var acRef = ur(null);
+  var mrRef = ur(null);
+  var loopIntervalRef = ur(null);
+  var clockIntervalRef = ur(null);
+  var pendingReqs = ur(0); // Antrean proses API
 
-  /* ── Mulai Rekam Audio ── */
+  // Ref data final untuk fungsi Auto-Save
+  var finRef = ur([]);
+  var notesRef = ur([]);
+  var titleRef = ur("");
+
+  // Setter custom untuk menjaga Ref & State selalu sinkron
+  function addFin(data){ setFin(function(p){ var n=p.concat([data]); finRef.current=n; return n; }); }
+  function addNote(data){ setNotes(function(p){ var n=p.concat([data]); notesRef.current=n; return n; }); }
+
+  /* ── Auto-Save Logic ── */
+  function autoSaveIfDone() {
+    if (!isRecRef.current && pendingReqs.current === 0) {
+      if (finRef.current.length === 0 && notesRef.current.length === 0) {
+        setSaving(false); return; // Kosong, abaikan
+      }
+      
+      var finalRaw = finRef.current.map(function(x){return "[Menit "+fmt(x.time)+"] "+x.text}).join("\n\n");
+      var finalSum = notesRef.current.map(function(x){return "[Menit "+fmt(x.time)+"]\n"+x.text}).join("\n\n");
+
+      DB.addHist({
+        id: Date.now().toString(),
+        date: new Date().toISOString(),
+        duration: timeRef.current,
+        title: titleRef.current || ("Rapat " + new Date().toLocaleDateString("id-ID",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})),
+        transcript: finalRaw,
+        notes: finalSum
+      });
+      
+      setSaving(false);
+      onSaveComplete(); // Beritahu App.js untuk pindah ke tab Riwayat
+      alert("Rekaman selesai dan otomatis tersimpan di Riwayat!");
+      resetAll();
+    }
+  }
+
+  /* ── Proses Chunking (per 30 detik) ── */
+  function processChunk(blob, startTime){
+    pendingReqs.current++;
+    
+    transcribeAudio(blob, set.lang, window.__AK)
+      .then(function(text){
+        if(!text || text.trim().length < 5) return; // Abaikan jika cuma hening/noise
+        var cleanedText = text.trim();
+        addFin({time: startTime, text: cleanedText, id: Date.now()});
+        
+        // Teruskan teks yang sukses ditranskrip ke AI Rangkuman
+        pendingReqs.current++;
+        aiSummarizeChunk(cleanedText, set.lang, window.__AK)
+          .then(function(summary){
+            addNote({time: startTime, text: summary, id: Date.now()});
+          })
+          .catch(function(err){ console.log("AI Sum Error:", err); })
+          .finally(function(){
+            pendingReqs.current--;
+            autoSaveIfDone();
+          });
+      })
+      .catch(function(err){ console.log("Whisper Error:", err); })
+      .finally(function(){
+        pendingReqs.current--;
+        autoSaveIfDone();
+      });
+  }
+
+  /* ── Siklus MediaRecorder ── */
+  function startRecordingCycle(stream) {
+    if(!isRecRef.current) return;
+    var mr = new MediaRecorder(stream);
+    var localChunks = [];
+    var startTime = timeRef.current; // Catat waktu mulainya chunk ini
+
+    mr.ondataavailable = function(e){ if(e.data.size > 0) localChunks.push(e.data); };
+    mr.onstop = function(){
+      if(localChunks.length > 0) {
+        var blob = new Blob(localChunks, {type: 'audio/webm'});
+        processChunk(blob, startTime);
+      }
+    };
+
+    mr.start();
+    mrRef.current = mr;
+  }
+
+  /* ── Mulai Rekam Utama ── */
   function startRec(){
-    if(!window.__AK){
-      alert("Silakan isi API Key Groq di tab Pengaturan terlebih dahulu."); return;
-    }
-    if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
-      alert("Browser tidak mendukung perekaman mikrofon."); return;
-    }
+    if(!window.__AK){ alert("Isi API Key Groq di Pengaturan."); return; }
+    if(!navigator.mediaDevices){ alert("Browser tidak mendukung mic."); return; }
 
-    setFin(""); setNotes(""); setTime(0); setSaved(false); setLdMsg("");
-    chunksRef.current = [];
+    resetAll();
+    isRecRef.current = true;
+    setRec(true);
+    titleRef.current = title;
 
     navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
       streamRef.current = stream;
       
-      // Setup MediaRecorder
-      var mr = new MediaRecorder(stream);
-      mr.ondataavailable = function(e){
-        if(e.data.size > 0) chunksRef.current.push(e.data);
-      };
-      
-      mr.onstop = function(){
-        processAudioRecording();
-      };
-
-      mr.start(1000); // Kumpulkan chunk per 1 detik
-      mrRef.current = mr;
-      setRec(true);
-
-      // Timer
-      tmRef.current = setInterval(function(){ setTime(function(t){ return t+1; }); }, 1000);
-
-      // Visualizer
+      // Setup Visualizer
       var ac = new (window.AudioContext||window.webkitAudioContext)();
       acRef.current = ac;
       var src = ac.createMediaStreamSource(stream);
@@ -210,85 +274,70 @@ function RecTab(p){
       src.connect(an);
       setAn(an);
 
+      // Mulai Rekaman Siklus Pertama
+      startRecordingCycle(stream);
+
+      // Jam Utama
+      clockIntervalRef.current = setInterval(function(){
+        timeRef.current++;
+        setTime(timeRef.current);
+      }, 1000);
+
+      // Trigger Potong (Chunking) setiap 30 detik
+      loopIntervalRef.current = setInterval(function(){
+        if(isRecRef.current && mrRef.current && mrRef.current.state === "recording"){
+          mrRef.current.stop(); // Berhenti, trigger processChunk
+          setTimeout(function(){ startRecordingCycle(streamRef.current); }, 50); // Langsung rekam lagi
+        }
+      }, 30000);
+
     }).catch(function(e){
-      alert("Gagal mengakses mikrofon: " + e.message);
+      alert("Gagal mic: " + e.message);
+      resetAll();
     });
   }
 
-  /* ── Hentikan Rekaman ── */
+  /* ── Akhiri Rekam Utama ── */
   function stopRec(){
-    if(mrRef.current && isRec) {
-      mrRef.current.stop(); // Ini akan memicu mr.onstop di atas
-    }
+    isRecRef.current = false;
     setRec(false);
-    clearInterval(tmRef.current);
-    
+    setSaving(true); // Memunculkan loading UI
+
+    clearInterval(clockIntervalRef.current);
+    clearInterval(loopIntervalRef.current);
+
+    // Stop recorder terakhir (akan memicu onstop -> processChunk terakhir)
+    if(mrRef.current && mrRef.current.state === "recording") {
+      mrRef.current.stop(); 
+    }
+
     // Matikan mic
     if(streamRef.current){streamRef.current.getTracks().forEach(function(t){t.stop()}); streamRef.current=null;}
     if(acRef.current&&acRef.current.state!=="closed"){acRef.current.close();}
     setAn(null);
+
+    // Panggil autoSave jaga-jaga jika pendingReqs sudah 0 (misal di-stop terlalu cepat sebelum 30 dtk)
+    setTimeout(autoSaveIfDone, 500);
   }
 
-  /* ── Proses API Groq (Transkrip + AI) ── */
-  function processAudioRecording(){
-    if(chunksRef.current.length === 0) return;
-    
-    setLdMsg("Mentranskripsi audio (Whisper)...");
-    
-    // Konversi chunks menjadi Blob audio
-    var audioBlob = new Blob(chunksRef.current);
-    var transkripTeks = "";
-
-    transcribeAudio(audioBlob, set.lang, window.__AK)
-      .then(function(text){
-        if(!text.trim()) throw new Error("Suara tidak terdeteksi atau terlalu hening.");
-        transkripTeks = text;
-        setFin(text);
-        setLdMsg("Merangkum poin penting...");
-        return aiSummarize(text, set.lang, window.__AK);
-      })
-      .then(function(summary){
-        setNotes(summary);
-        setLdMsg(""); // Selesai
-      })
-      .catch(function(err){
-        alert("Gagal memproses AI: " + err.message);
-        setLdMsg("");
-      });
-  }
-
-  /* ── Save to History ── */
-  function saveMeeting(){
-    if(!fin && !notes) return;
-    DB.addHist({
-      id: Date.now().toString(),
-      date: new Date().toISOString(),
-      duration: time,
-      title: title || ("Rapat " + new Date().toLocaleDateString("id-ID",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"})),
-      transcript: fin,
-      notes: notes
-    });
-    setSaved(true);
-    alert("Notulen berhasil disimpan!");
-  }
-
-  /* ── Reset ── */
   function resetAll(){
-    setFin(""); setNotes(""); setTime(0); setTitle(""); setSaved(false); setLdMsg("");
-    chunksRef.current = [];
+    setFin([]); setNotes([]); setTime(0); setTitle(""); setSaving(false);
+    finRef.current = []; notesRef.current = []; timeRef.current = 0; titleRef.current = "";
+    pendingReqs.current = 0; isRecRef.current = false; setRec(false);
   }
 
   return h`<div>
     <div style=${{textAlign:"center",padding:"32px 16px 8px"}}>
       <div className="pill" style=${{background:"rgba(88,86,214,0.1)",color:"#5856D6",marginBottom:10}}>
-        <${Ic} name="bot" size=${12} color="#5856D6"/>VOICE MEMO AI
+        <${Ic} name="bot" size=${12} color="#5856D6"/>LIVE CHUNKING AI
       </div>
       <h1 style=${{fontWeight:800,fontSize:24,letterSpacing:"-0.5px",lineHeight:1.1}}>Smart Meeting Notes</h1>
-      <p style=${{fontSize:12,color:"#8E8E93",marginTop:5}}>Rekam Rapat → Transkripsi → Ringkas</p>
+      <p style=${{fontSize:12,color:"#8E8E93",marginTop:5}}>Proses Otomatis Setiap 30 Detik</p>
     </div>
 
     <div style=${{maxWidth:480,margin:"0 auto",padding:"0 16px 16px"}}>
 
+      <!-- STATUS CARD -->
       <div className="gl" style=${{padding:20,textAlign:"center",marginBottom:14}}>
         <div style=${{display:"inline-flex",justifyContent:"center",alignItems:"center",width:80,height:80,borderRadius:40,background:isRec?"rgba(255,69,58,0.1)":"rgba(88,86,214,0.1)",color:isRec?"#FF453A":"#5856D6",animation:isRec?"ripple 2s infinite":"none",marginBottom:12}}>
           <${Ic} name=${isRec?"mic":"play"} size=${36}/>
@@ -303,67 +352,62 @@ function RecTab(p){
           Merekam Rapat...
         </div>`}
 
+        ${saving && h`<div className="pill" style=${{background:"rgba(255,159,10,0.1)",color:"#FF9F0A",marginBottom:8}}>
+          <div className="spinner"></div> Sedang menyelesaikan simpan otomatis...
+        </div>`}
+
         ${isRec && analyser ? h`<div style=${{marginBottom:10,padding:"0 4px"}}><${LevelMeter} an=${analyser}/></div>` : null}
 
-        ${!isRec && time===0 && h`<div style=${{marginBottom:10}}>
+        ${!isRec && time===0 && !saving && h`<div style=${{marginBottom:10}}>
           <div style=${{fontSize:10,fontWeight:600,color:"#8E8E93",marginBottom:4}}>Judul Rapat (opsional)</div>
           <input class="fi" value=${title} onInput=${function(e){setTitle(e.target.value)}} placeholder="Cth: Weekly Standup" style=${{textAlign:"center"}}/>
         </div>`}
 
         <div style=${{display:"flex",gap:8}}>
-          ${!isRec && time===0 ? h`<button onClick=${startRec} style=${{flex:1,padding:"14px",borderRadius:14,background:"linear-gradient(135deg,#5856D6,#7B79E8)",color:"#FFF",border:"none",fontSize:15,fontWeight:600,boxShadow:"0 6px 20px rgba(88,86,214,0.25)"}}>
-            <span style=${{display:"flex",alignItems:"center",justifyContent:"center",gap:6}}><${Ic} name="mic" size=${18} color="#FFF"/>Mulai Rekam</span>
+          ${!isRec && time===0 && !saving ? h`<button onClick=${startRec} style=${{flex:1,padding:"14px",borderRadius:14,background:"linear-gradient(135deg,#5856D6,#7B79E8)",color:"#FFF",border:"none",fontSize:15,fontWeight:600,boxShadow:"0 6px 20px rgba(88,86,214,0.25)"}}>
+            <span style=${{display:"flex",alignItems:"center",justifyContent:"center",gap:6}}><${Ic} name="mic" size=${18} color="#FFF"/>Mulai Rapat</span>
           </button>` : null}
 
           ${isRec ? h`<button onClick=${stopRec} style=${{flex:1,padding:"14px",borderRadius:14,background:"#FF453A",color:"#FFF",border:"none",fontSize:15,fontWeight:600}}>
-            <span style=${{display:"flex",alignItems:"center",justifyContent:"center",gap:6}}><${Ic} name="stop" size=${18} color="#FFF"/>Selesai & Proses Teks</span>
+            <span style=${{display:"flex",alignItems:"center",justifyContent:"center",gap:6}}><${Ic} name="stop" size=${18} color="#FFF"/>Selesai Rapat</span>
           </button>` : null}
-
-          ${!isRec && time>0 && !saved && !ldMsg ? h`<button onClick=${saveMeeting} style=${{flex:1,padding:"14px",borderRadius:14,background:"#32D74B",color:"#FFF",border:"none",fontSize:15,fontWeight:600}}>
-            <span style=${{display:"flex",alignItems:"center",justifyContent:"center",gap:6}}><${Ic} name="check" size=${18} color="#FFF"/>Simpan Notulen</span>
-          </button>` : null}
-
-          ${!isRec && time>0 && !ldMsg ? h`<button onClick=${resetAll} style=${{padding:"14px 18px",borderRadius:14,background:"rgba(0,0,0,0.04)",color:"#8E8E93",border:"1px solid rgba(0,0,0,0.06)",fontSize:15,fontWeight:600}}>Baru</button>` : null}
         </div>
       </div>
 
-      ${ldMsg ? h`<div className="gl" style=${{padding:20,marginBottom:14,textAlign:"center",display:"flex",flexDirection:"column",alignItems:"center"}}>
-        <div className="spinner" style=${{marginBottom:12}}></div>
-        <div style=${{fontWeight:600,fontSize:14,color:"#5856D6"}}>${ldMsg}</div>
-        <div style=${{fontSize:11,color:"#8E8E93",marginTop:4}}>Proses ini membutuhkan waktu tergantung durasi rekaman...</div>
-      </div>` : null}
+      <!-- LIVE FEED: NOTES & TRANSCRIPT -->
+      ${(notes.length > 0 || fin.length > 0) ? h`<div>
+        <div style=${{display:"flex",gap:10}}>
+           
+           <!-- Kolom Rangkuman -->
+           <div style=${{flex:1}}>
+             <div className="pill" style=${{background:"rgba(191,90,242,0.1)",color:"#BF5AF2",marginBottom:10}}>
+               <${Ic} name="sparkle" size=${11} color="#BF5AF2"/>AI Notes
+             </div>
+             ${notes.map(function(n){
+               return h`<div key=${n.id} className="card-note" style=${{padding:12}}>
+                 <div style=${{fontSize:10,color:"#BF5AF2",fontWeight:700,marginBottom:4}}>Menit ${fmt(n.time)}</div>
+                 <div style=${{fontSize:12,lineHeight:1.6,color:"#1C1C1E",whiteSpace:"pre-wrap"}}>${n.text}</div>
+               </div>`
+             })}
+           </div>
 
-      ${notes && !ldMsg ? h`<div>
-        <div className="pill" style=${{background:"rgba(191,90,242,0.1)",color:"#BF5AF2",marginBottom:10}}>
-          <${Ic} name="sparkle" size=${11} color="#BF5AF2"/>Poin Notulen AI
-        </div>
-        <div className="card-note">
-           <div style=${{fontSize:14,lineHeight:1.6,color:"#1C1C1E",whiteSpace:"pre-wrap"}}>${notes}</div>
-        </div>
-      </div>` : null}
+           <!-- Kolom Transkrip Raw -->
+           <div style=${{flex:1}}>
+             <div className="pill" style=${{background:"rgba(88,86,214,0.1)",color:"#5856D6",marginBottom:10}}>
+               <${Ic} name="text" size=${11} color="#5856D6"/>Raw Audio
+             </div>
+             ${fin.map(function(f){
+               return h`<div key=${f.id} className="card-note" style=${{padding:12,background:"rgba(0,0,0,0.01)",boxShadow:"none",border:"1px solid rgba(0,0,0,0.06)"}}>
+                 <div style=${{fontSize:10,color:"#5856D6",fontWeight:700,marginBottom:4}}>Menit ${fmt(f.time)}</div>
+                 <div style=${{fontSize:12,lineHeight:1.6,color:"#48484A"}}>${f.text}</div>
+               </div>`
+             })}
+           </div>
 
-      ${fin && !ldMsg ? h`<div style=${{marginBottom:14,marginTop:10}}>
-        <div className="pill" style=${{background:"rgba(88,86,214,0.1)",color:"#5856D6",marginBottom:10}}>
-          <${Ic} name="text" size=${11} color="#5856D6"/>Transkrip Penuh (Whisper)
-        </div>
-        <div className="gl" style=${{padding:16,maxHeight:250,overflowY:"auto",background:"rgba(255,255,255,0.9)"}}>
-          <span style=${{fontSize:14,lineHeight:1.6,color:"#1C1C1E"}}>${fin}</span>
-        </div>
-      </div>` : null}
-
-      ${!isRec && time===0 ? h`<div className="gl" style=${{padding:16,marginBottom:14}}>
-        <div style=${{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
-          <div style=${{width:28,height:28,borderRadius:8,background:"rgba(88,86,214,0.1)",display:"flex",alignItems:"center",justifyContent:"center",color:"#5856D6"}}><${Ic} name="settings" size=${15}/></div>
-          <span style=${{fontWeight:600,fontSize:13}}>Pengaturan Bahasa</span>
-        </div>
-        <div style=${{display:"flex",gap:8}}>
-           ${[["id-ID","Indonesia"],["en-US","English"]].map(function(l){
-             var on=set.lang===l[0];
-             return h`<button key=${l[0]} onClick=${function(){updSet("lang",l[0])}} style=${{flex:1,padding:"8px",borderRadius:8,border:"1px solid "+(on?"rgba(88,86,214,0.3)":"rgba(0,0,0,0.08)"),background:on?"rgba(88,86,214,0.08)":"rgba(255,255,255,0.5)",fontSize:12,fontWeight:600,color:on?"#5856D6":"#8E8E93",fontFamily:"inherit"}}>${l[1]}</button>`;
-           })}
         </div>
       </div>` : null}
 
+      <!-- WARNING NO API KEY -->
       ${!window.__AK && !isRec && time===0 ? h`<div className="gl" style=${{padding:14,marginTop:6,background:"rgba(255,159,10,0.05)",border:"1px solid rgba(255,159,10,0.12)"}}>
         <div style=${{display:"flex",alignItems:"center",gap:8}}>
           <${Ic} name="alert" size=${16} color="#FF9F0A"/>
@@ -385,16 +429,18 @@ function HistTab(){
   var _h=us(DB.get().history), hist=_h[0], setH=_h[1];
   var _open=us(null), openId=_open[0], setOpen=_open[1];
 
+  ue(function(){ setH(DB.get().history); }, []);
+
   function refresh(){setH(DB.get().history)}
   function del(id){if(confirm("Hapus notulen ini?")){DB.delHist(id);refresh()}}
   
   if(!hist.length) return h`<div style=${{padding:"60px 20px",textAlign:"center"}}>
     <${Ic} name="file" size=${48} color="#C7C7CC" sw=${1}/>
     <div style=${{fontSize:16,fontWeight:600,color:"#8E8E93",marginTop:16}}>Belum ada notulen</div>
-    <div style=${{fontSize:13,color:"#C7C7CC",marginTop:4}}>Rapat yang disimpan muncul di sini.</div>
+    <div style=${{fontSize:13,color:"#C7C7CC",marginTop:4}}>Rapat yang otomatis disimpan akan muncul di sini.</div>
   </div>`;
 
-  return h`<div style=${{padding:"16px"}}>
+  return h`<div style=${{padding:"16px", paddingBottom:"80px"}}>
     <h2 style=${{fontSize:20,fontWeight:800,marginBottom:14}}>Riwayat Rapat</h2>
     ${hist.map(function(item){
       var isOpen = openId===item.id;
@@ -419,7 +465,7 @@ function HistTab(){
 
           ${item.notes ? h`<div style=${{marginBottom:12}}>
             <div style=${{fontSize:10,fontWeight:700,color:"#BF5AF2",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:6,display:"flex",alignItems:"center",gap:4}}>
-              <${Ic} name="sparkle" size=${12} color="#BF5AF2"/>Ringkasan AI
+              <${Ic} name="sparkle" size=${12} color="#BF5AF2"/>Ringkasan AI (Timeline)
             </div>
             <div className="card-note">
               <div style=${{fontSize:13,lineHeight:1.6,whiteSpace:"pre-wrap"}}>${item.notes}</div>
@@ -427,8 +473,8 @@ function HistTab(){
           </div>` : null}
 
           <div>
-            <div style=${{fontSize:10,fontWeight:700,color:"#8E8E93",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:4}}>Transkrip Penuh</div>
-            <div style=${{maxHeight:250,overflowY:"auto",background:"rgba(0,0,0,0.02)",borderRadius:12,padding:12,fontSize:13,lineHeight:1.5,color:"#48484A"}}>
+            <div style=${{fontSize:10,fontWeight:700,color:"#8E8E93",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:4}}>Transkrip Mentah</div>
+            <div style=${{maxHeight:250,overflowY:"auto",background:"rgba(0,0,0,0.02)",borderRadius:12,padding:12,fontSize:13,lineHeight:1.5,color:"#48484A",whiteSpace:"pre-wrap"}}>
               ${item.transcript || "(kosong)"}
             </div>
           </div>
@@ -453,49 +499,54 @@ function SetTab(p){
         <div style=${{width:28,height:28,borderRadius:8,background:"rgba(88,86,214,0.1)",display:"flex",alignItems:"center",justifyContent:"center",color:"#5856D6"}}><${Ic} name="key" size=${15}/></div>
         <span style=${{fontWeight:600,fontSize:14}}>API Key</span>
       </div>
-
       <div>
         <div style=${{fontSize:10,fontWeight:600,color:"#8E8E93",marginBottom:3}}>Groq API Key</div>
         <div style=${{position:"relative"}}>
           <input class="fi" type=${sk?"text":"password"} placeholder="gsk_..." value=${set.key} onInput=${function(e){updSet("key",e.target.value)}} style=${{paddingRight:40}}/>
-          <button onClick=${function(){sSk(!sk)}} style=${{position:"absolute",right:6,top:"50%",transform:"translateY(-50%)",border:"none",background:"transparent",padding:4}}>
-            <${Ic} name="eye" size=${14} color="#C7C7CC"/>
-          </button>
+          <button onClick=${function(){sSk(!sk)}} style=${{position:"absolute",right:6,top:"50%",transform:"translateY(-50%)",border:"none",background:"transparent",padding:4}}><${Ic} name="eye" size=${14} color="#C7C7CC"/></button>
         </div>
-        ${set.key ? h`<div style=${{fontSize:10,color:"#32D74B",marginTop:4,display:"flex",alignItems:"center",gap:3}}>
-          <${Ic} name="check" size=${10} color="#32D74B"/>Key tersimpan
-        </div>` : null}
-        <div style=${{fontSize:11,color:"#C7C7CC",marginTop:6}}>Daftar gratis di console.groq.com</div>
       </div>
     </div>
 
-    <div className="gl" style=${{padding:16}}>
+    <div className="gl" style=${{padding:16,marginBottom:12}}>
       <div style=${{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
-        <div style=${{width:28,height:28,borderRadius:8,background:"rgba(88,86,214,0.1)",display:"flex",alignItems:"center",justifyContent:"center",color:"#5856D6"}}><${Ic} name="bot" size=${15}/></div>
-        <span style=${{fontWeight:600,fontSize:14}}>Tentang</span>
+        <div style=${{width:28,height:28,borderRadius:8,background:"rgba(88,86,214,0.1)",display:"flex",alignItems:"center",justifyContent:"center",color:"#5856D6"}}><${Ic} name="settings" size=${15}/></div>
+        <span style=${{fontWeight:600,fontSize:13}}>Pengaturan Bahasa</span>
       </div>
-      <div style=${{fontSize:12,color:"#636366",lineHeight:1.6}}>Notulen AI merekam suara (MediaRecorder), mentranskripsinya dengan Groq Whisper, dan meringkas poin penting menggunakan LLM (Llama).</div>
-      <div style=${{marginTop:8,fontSize:11,color:"#8E8E93"}}>v5.0 · Voice Memo Mode (iOS Safe)</div>
+      <div style=${{display:"flex",gap:8}}>
+          ${[["id-ID","Indonesia"],["en-US","English"]].map(function(l){
+            var on=set.lang===l[0];
+            return h`<button key=${l[0]} onClick=${function(){updSet("lang",l[0])}} style=${{flex:1,padding:"8px",borderRadius:8,border:"1px solid "+(on?"rgba(88,86,214,0.3)":"rgba(0,0,0,0.08)"),background:on?"rgba(88,86,214,0.08)":"rgba(255,255,255,0.5)",fontSize:12,fontWeight:600,color:on?"#5856D6":"#8E8E93",fontFamily:"inherit"}}>${l[1]}</button>`;
+          })}
+      </div>
     </div>
+
   </div>`;
 }
 
 /* ═══════════════════════
-   MAIN APP
+   MAIN APP (TAB BACKGROUNDING)
    ═══════════════════════ */
 function App(){
   var _tab=us("rec"), tab=_tab[0], setTab=_tab[1];
   var _set=us(DB.getSet()), settings=_set[0], setSettings=_set[1];
 
   ue(function(){ window.__AK = settings.key; }, [settings.key]);
-
   function updSet(k,v){ DB.updSet(k,v); setSettings(DB.getSet()); }
 
+  // Alih-alih merender ulang komponen (yang menghancurkan state rekaman),
+  // kita render semuanya secara bersamaan, namun disembunyikan menggunakan CSS (display: none).
   return h`<div>
     <div style=${{paddingTop:10}}>
-      ${tab==="rec" ? h`<${RecTab} set=${settings} updSet=${updSet}/>` : null}
-      ${tab==="hist" ? h`<${HistTab}/>` : null}
-      ${tab==="set" ? h`<${SetTab} set=${settings} updSet=${updSet}/>` : null}
+      <div style=${{display: tab==="rec" ? "block" : "none"}}>
+        <${RecTab} set=${settings} updSet=${updSet} onSaveComplete=${function(){setTab("hist")}}/>
+      </div>
+      <div style=${{display: tab==="hist" ? "block" : "none"}}>
+        <${HistTab}/>
+      </div>
+      <div style=${{display: tab==="set" ? "block" : "none"}}>
+        <${SetTab} set=${settings} updSet=${updSet}/>
+      </div>
     </div>
 
     <div className="btab">
