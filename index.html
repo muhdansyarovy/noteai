@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Notulen AI — Modern iOS Notes</title>
 
-<!-- ICON FIX: Custom Wave + Sparkle Icon (Base64 SVG) -->
-<link rel="apple-touch-icon" sizes="180x180" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImJnIiB4MT0iMCIgeTE9IjAiIHgyPSIwIiB5Mj0iMSI+PHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iIzMzMyIvPjxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iIzExMSIvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSJ1cmwoI2JnKSIgcng9IjIyIi8+PHBhdGggZD0iTTMwLDUwIGEzLDMgMCAwLDEgNiwwIHYxMiBhMywzIDAgMCwxIC02LDAgeiBNNDQsNDAgYTMsMyAwIDAsMSA2LDAgdjMyIGEzLDMgMCAwLDEgLTYsMCB6IE01OCw2MiBhMywzIDAgMCwxIDYsMCB2MTAgYTMsMyAwIDAsMSAtNiwwIHoiIGZpbGw9IiNmZmYiLz48cGF0aCBkPSJNNzAsMzAgQzcwLDM1IDY1LDQwIDYwLDQwIEM2NSw0MCA3MCw0NSA3MCw1MCBDNzAsNDUgNzUsNDAgODAsNDAgQzc1LDQwIDcwLDM1IDcwLDMwIFoiIGZpbGw9IiNmZmYiLz48L3N2Zz4=">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImJnIiB4MT0iMCIgeTE9IjAiIHgyPSIwIiB5Mj0iMSI+PHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iIzMzMyIvPjxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iIzExMSIvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSJ1cmwoI2JnKSIgcng9IjIyIi8+PHBhdGggZD0iTTMwLDUwIGEzLDMgMCAwLDEgNiwwIHYxMiBhMywzIDAgMCwxIC02LDAgeiBNNDQsNDAgYTMsMyAwIDAsMSA2LDAgdjMyIGEzLDMgMCAwLDEgLTYsMCB6IE01OCw2MiBhMywzIDAgMCwxIDYsMCB2MTAgYTMsMyAwIDAsMSAtNiwwIHoiIGZpbGw9IiNmZmYiLz48cGF0aCBkPSJNNzAsMzAgQzcwLDM1IDY1LDQwIDYwLDQwIEM2NSw0MCA3MCw0NSA3MCw1MCBDNzAsNDUgNzUsNDAgODAsNDAgQzc1LDQwIDcwLDM1IDcwLDMwIFoiIGZpbGw9IiNmZmYiLz48L3N2Zz4=">
+<!-- ICON FIX: Memanggil file PNG fisik agar Safari Mac/iOS mau membacanya -->
+<link rel="apple-touch-icon" sizes="512x512" href="icon.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon.png">
 
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -83,11 +83,11 @@ button:disabled { opacity: .5; cursor: not-allowed; transform: none; }
 <script>
 var h=htm.bind(React.createElement),us=React.useState,ur=React.useRef,ue=React.useEffect;
 
-/* ═══ STORAGE (v19) ═══ */
+/* ═══ STORAGE (v20) ═══ */
 var DB={
-  get:function(){try{return JSON.parse(localStorage.getItem("notulen_v19")||localStorage.getItem("notulen_v18")||"null")||this.def()}catch(e){return this.def()}},
+  get:function(){try{return JSON.parse(localStorage.getItem("notulen_v20")||localStorage.getItem("notulen_v19")||"null")||this.def()}catch(e){return this.def()}},
   def:function(){return{history:[],set:{lang:"id-ID",key:"",provider:"groq", chunk: 30}}},
-  save:function(d){localStorage.setItem("notulen_v19",JSON.stringify(d))},
+  save:function(d){localStorage.setItem("notulen_v20",JSON.stringify(d))},
   addHist:function(r){var d=this.get();d.history.unshift(r);if(d.history.length>50)d.history.length=50;this.save(d)},
   delHist:function(id){var d=this.get();d.history=d.history.filter(function(x){return x.id!==id});this.save(d)},
   getSet:function(){return this.get().set},
@@ -140,7 +140,8 @@ function Ic(p){
     seal: "M12 2l2.4 2.4.6-.2 2.6 2.6-.2.6 2.4 2.4-2.4 2.4.2.6-2.6 2.6-.6-.2L12 22l-2.4-2.4-.6.2-2.6-2.6.2-.6-2.4-2.4 2.4-2.4-.2-.6 2.6-2.6.6.2L12 2zm0 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6z M11.5 10h1v4h-1z",
     bulb: "M9 18h6a1 1 0 0 0 1-1v-2a4 4 0 0 0-4-4h-4a4 4 0 0 0-4 4v2a1 1 0 0 0 1 1zm0-3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1 M10.5 7h3 M12 5V2",
     speechdots: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10z M8 9h.01M12 9h.01M16 9h.01",
-    download: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M7 10l5 5 5-5 M12 15V3"
+    download: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M7 10l5 5 5-5 M12 15V3",
+    image: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M15 10l-4 4-2-2-4 4 M15 6h.01 M3 21h18"
   };
   return h`<svg width=${s} height=${s} viewBox="0 0 24 24" fill="none" stroke=${c} strokeWidth=${p.sw||2.5} strokeLinecap="round" strokeLinejoin="round"><path d=${paths[p.name]||"M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z"}/></svg>`;
 }
@@ -213,19 +214,16 @@ function LevelMeter(p){
       for(var i=0;i<bs;i++){
         var dist = Math.abs(i - center);
         var maxDist = center;
-        var weight = Math.max(0, 1 - (dist / maxDist)); // Bobot tertinggi (1) di tengah, mengecil ke ujung
+        var weight = Math.max(0, 1 - (dist / maxDist)); 
 
-        // Ambil sampel data frekuensi berdasarkan jarak dari tengah
         var dataIdx = Math.floor((dist / maxDist) * (da.length * 0.25));
         var val = da[dataIdx] / 255;
 
-        // Hitung tinggi gelombang (dikali bobot agar bentuknya selalu cembung di tengah)
         var ht = Math.max(4, val * weight * H * 0.9);
         var xx = i*(bw+gp);
         var yy = (H-ht)/2;
 
         if(ht > 5){
-          // Warna merah di tengah, ungu ke pinggir
           x.fillStyle = weight > 0.6 ? "rgba(255,69,58,0.9)" : "rgba(191,90,242,0.8)";
         } else {
           x.fillStyle = "rgba(0,0,0,0.06)";
@@ -685,6 +683,25 @@ function SetTab(p){
   var set=p.set, updSet=p.updSet;
   var _sk=us(false), sk=_sk[0], sSk=_sk[1];
 
+  function downloadIcon() {
+    var svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="512" height="512"><defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#333"/><stop offset="100%" stop-color="#111"/></linearGradient></defs><rect width="100" height="100" fill="url(#bg)" rx="22"/><path d="M30,50 a3,3 0 0,1 6,0 v12 a3,3 0 0,1 -6,0 z M44,40 a3,3 0 0,1 6,0 v32 a3,3 0 0,1 -6,0 z M58,62 a3,3 0 0,1 6,0 v10 a3,3 0 0,1 -6,0 z" fill="#fff"/><path d="M70,30 C70,35 65,40 60,40 C65,40 70,45 70,50 C70,45 75,40 80,40 C75,40 70,35 70,30 Z" fill="#fff"/></svg>`;
+    var blob = new Blob([svg], {type: 'image/svg+xml;charset=utf-8'});
+    var url = URL.createObjectURL(blob);
+    var img = new Image();
+    img.onload = function() {
+      var canvas = document.createElement('canvas');
+      canvas.width = 512; canvas.height = 512;
+      var ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      var a = document.createElement('a');
+      a.download = 'icon.png';
+      a.href = canvas.toDataURL('image/png');
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+    img.src = url;
+  }
+
   return h`<div className="tab-content" style=${{maxWidth:500, margin:"0 auto", padding:"32px 16px"}}>
     <h2 style=${{fontSize:26,fontWeight:800,marginBottom:24,letterSpacing:"-0.5px",textAlign:"center"}}>Sistem & Pengaturan</h2>
 
@@ -731,8 +748,23 @@ function SetTab(p){
             </div>
          </div>
       </div>
+      
+      <div style=${{height:1, background:"rgba(0,0,0,0.06)", margin:"24px -24px 24px -24px"}}></div>
+
+      <!-- UTILITY: UNDUH IKON PNG -->
+      <div style=${{display:"flex",alignItems:"center",gap:12,marginBottom:16}}>
+        <div style=${{width:36,height:36,borderRadius:12,background:"rgba(255,159,10,0.1)",display:"flex",alignItems:"center",justifyContent:"center",color:"#FF9F0A"}}><${Ic} name="image" size=${18}/></div>
+        <span style=${{fontWeight:800,fontSize:17}}>Perbaikan Ikon Safari</span>
+      </div>
+      <div style=${{marginBottom:16, fontSize:13, color:"#8E8E93", lineHeight:1.5}}>
+        Safari (Mac/iOS) menolak ikon berupa kode. Anda harus mengunduh file gambar asli ini lalu mengunggahnya ke GitHub.
+      </div>
+      <button onClick=${downloadIcon} style=${{width:"100%", padding:"16px", borderRadius:16, background:"#1C1C1E", color:"#FFF", fontWeight:700, fontSize:14, border:"none", display:"flex", alignItems:"center", justifyContent:"center", gap:8}}>
+        <${Ic} name="download" size=${18} color="#FFF"/> Unduh icon.png
+      </button>
+
       <div style=${{marginTop:24,paddingTop:16,borderTop:"1px solid rgba(0,0,0,0.06)",fontSize:11,color:"#C7C7CC",textAlign:"center",letterSpacing:"0.5px",fontWeight:600}}>
-        v19.0 · Custom PWA Wave Icon Build
+        v20.0 · Full Resolution PNG Support Build
       </div>
     </div>
   </div>`;
