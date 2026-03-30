@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Notulen AI — Modern iOS Notes</title>
 
-<!-- ICON FIX UNTUK iOS HOME SCREEN & MAC DOCK -->
-<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="512x512" href="apple-touch-icon.png">
+<!-- ICON FIX: URL PNG murni untuk memaksa Safari iOS membacanya -->
+<link rel="apple-touch-icon" sizes="512x512" href="https://ui-avatars.com/api/?name=AI&background=BF5AF2&color=fff&size=512&rounded=true&bold=true&font-size=0.4">
+<link rel="icon" type="image/png" sizes="512x512" href="https://ui-avatars.com/api/?name=AI&background=BF5AF2&color=fff&size=512&rounded=true&bold=true&font-size=0.4">
 
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -83,11 +83,11 @@ button:disabled { opacity: .5; cursor: not-allowed; transform: none; }
 <script>
 var h=htm.bind(React.createElement),us=React.useState,ur=React.useRef,ue=React.useEffect;
 
-/* ═══ STORAGE (v17) ═══ */
+/* ═══ STORAGE (v18) ═══ */
 var DB={
-  get:function(){try{return JSON.parse(localStorage.getItem("notulen_v17")||localStorage.getItem("notulen_v16")||"null")||this.def()}catch(e){return this.def()}},
+  get:function(){try{return JSON.parse(localStorage.getItem("notulen_v18")||localStorage.getItem("notulen_v17")||"null")||this.def()}catch(e){return this.def()}},
   def:function(){return{history:[],set:{lang:"id-ID",key:"",provider:"groq", chunk: 30}}},
-  save:function(d){localStorage.setItem("notulen_v17",JSON.stringify(d))},
+  save:function(d){localStorage.setItem("notulen_v18",JSON.stringify(d))},
   addHist:function(r){var d=this.get();d.history.unshift(r);if(d.history.length>50)d.history.length=50;this.save(d)},
   delHist:function(id){var d=this.get();d.history=d.history.filter(function(x){return x.id!==id});this.save(d)},
   getSet:function(){return this.get().set},
@@ -131,7 +131,7 @@ function Ic(p){
     mic:"M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z M19 10v2a7 7 0 0 1-14 0v-2 M12 19v4 M8 23h8",
     stop:"M6 6h12v12H6z", play:"M5 3l14 9-14 9V3z", check:"M20 6L9 17l-5-5",
     file:"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M14 2v6h6 M16 13H8 M16 17H8 M10 9H8",
-    settings:"M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z",
+    settings:"M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z",
     trash:"M3 6h18 M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2 M10 11v6 M14 11v6",
     sparkle:"M12 2l3 6 6 3-6 3-3 6-3-6-6-3 6-3z",
     clock:"M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z M12 6v6l4 2", layers:"M12 2L2 7l10 5 10-5-10-5z M2 12l10 5 10-5 M2 17l10 5 10-5",
@@ -196,7 +196,7 @@ function aiSummarizeOverall(text, lang, key, formatType){
 
 function fmt(s){return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")}
 
-/* ═══ LEVEL METER (Center-Out Waveform) ═══ */
+/* ═══ LEVEL METER (Center-Out Symmetric Waveform) ═══ */
 function LevelMeter(p){
   var cv=ur(null),rf=ur(null);
   ue(function(){
@@ -207,34 +207,29 @@ function LevelMeter(p){
       var dp=devicePixelRatio||1,rc=c.getBoundingClientRect(); c.width=rc.width*dp; c.height=rc.height*dp; x.scale(dp,dp);
       var W=rc.width,H=rc.height; x.clearRect(0,0,W,H);
       
-      var sm=0;for(var i=0;i<da.length;i++)sm+=da[i];
-      var avg=sm/da.length/255;
-      
-      var bs=33, gp=4, bw=(W-(bs-1)*gp)/bs;
-      var center=Math.floor(bs/2);
+      var bs=41, gp=3, bw=(W-(bs-1)*gp)/bs;
+      var center = Math.floor(bs/2);
 
-      for(var i=0; i<bs; i++){
+      for(var i=0;i<bs;i++){
         var dist = Math.abs(i - center);
-        var normDist = dist / center; 
-        
-        var binIdx = Math.floor(normDist * (da.length * 0.2));
-        var val = da[binIdx]/255;
-        
-        var combined = (val * 0.8) + (avg * 1.2);
-        var attenuation = 1 - Math.pow(normDist, 1.3);
-        var ht = Math.max(4, combined * attenuation * H * 0.95);
-        
+        var maxDist = center;
+        var weight = Math.max(0, 1 - (dist / maxDist)); // Bobot tertinggi (1) di tengah, mengecil ke ujung
+
+        // Ambil sampel data frekuensi berdasarkan jarak dari tengah
+        var dataIdx = Math.floor((dist / maxDist) * (da.length * 0.25));
+        var val = da[dataIdx] / 255;
+
+        // Hitung tinggi gelombang (dikali bobot agar bentuknya selalu cembung di tengah)
+        var ht = Math.max(4, val * weight * H * 0.9);
         var xx = i*(bw+gp);
         var yy = (H-ht)/2;
-        
+
         if(ht > 5){
-           if(normDist < 0.3) x.fillStyle = "rgba(255,69,58,0.9)";
-           else if(normDist < 0.7) x.fillStyle = "rgba(191,90,242,0.8)";
-           else x.fillStyle = "rgba(88,86,214,0.7)";
+          // Warna merah di tengah, ungu ke pinggir
+          x.fillStyle = weight > 0.6 ? "rgba(255,69,58,0.9)" : "rgba(191,90,242,0.8)";
         } else {
-           x.fillStyle = "rgba(0,0,0,0.06)";
+          x.fillStyle = "rgba(0,0,0,0.06)";
         }
-        
         x.beginPath(); x.roundRect(xx,yy,bw,ht,bw/2); x.fill();
       }
     }
@@ -631,7 +626,7 @@ function HistTab(p){
             </button>
             <div style=${{flex:1}}></div>
             <button onClick=${function(e){e.stopPropagation();del(item.id)}} style=${{display:"inline-flex",alignItems:"center",gap:6,padding:"8px 14px",borderRadius:12,background:"rgba(255,69,58,0.08)",color:"#FF453A",fontSize:12,fontWeight:700,border:"none"}}>
-              <${Ic} name="trash" size=${14} color="#FF453A"/>
+              <${Ic} name="trash" size=${14} color="#FF453A"/>Hapus
             </button>
           </div>
 
@@ -738,7 +733,7 @@ function SetTab(p){
          </div>
       </div>
       <div style=${{marginTop:24,paddingTop:16,borderTop:"1px solid rgba(0,0,0,0.06)",fontSize:11,color:"#C7C7CC",textAlign:"center",letterSpacing:"0.5px",fontWeight:600}}>
-        v17.0 · Waveform & Base64 PWA Icon Build
+        v18.0 · Center Waveform & API Icon Build
       </div>
     </div>
   </div>`;
@@ -761,6 +756,7 @@ function App(){
       <div style=${{display: tab==="set" ? "block" : "none"}}><${SetTab} set=${settings} updSet=${updSet}/></div>
     </div>
 
+    <!-- DYNAMIC ISLAND NAVIGATION -->
     <div className="btab-container">
       <div className="btab" style=${{maxWidth: 320, width: "100%"}}>
         ${[["rec","mic","Rekam"],["hist","file","Riwayat"],["set","settings","Sistem"]].map(function(t){
