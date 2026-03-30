@@ -5,8 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Notulen AI — Modern iOS Notes</title>
 
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='a' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23BF5AF2'/%3E%3Cstop offset='100%25' stop-color='%235856D6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='50' fill='url(%23a)'/%3E%3Cpath d='M40 30h20v20H40V30zm25 35h-30v10h30v-10z' fill='%23FFF'/%3E%3Ccircle cx='35' cy='75' r='8' fill='%23FFF'/%3E%3Ccircle cx='65' cy='75' r='8' fill='%23FFF'/%3E%3Ccircle cx='50' cy='20' r='10' fill='%23FFF'/%3E%3C/svg%3E">
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='a' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23BF5AF2'/%3E%3Cstop offset='100%25' stop-color='%235856D6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='50' fill='url(%23a)'/%3E%3Cpath d='M40 30h20v20H40V30zm25 35h-30v10h30v-10z' fill='%23FFF'/%3E%3Ccircle cx='35' cy='75' r='8' fill='%23FFF'/%3E%3Ccircle cx='65' cy='75' r='8' fill='%23FFF'/%3E%3Ccircle cx='50' cy='20' r='10' fill='%23FFF'/%3E%3C/svg%3E">
+<!-- ICON FIX: Base64 Encoded SVG agar dibaca oleh macOS Safari Dock & iOS Homescreen -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImEiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiNCRjVBRjIiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiM1ODU2RDYiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgcng9IjIyIiBmaWxsPSJ1cmwoI2EpIi8+PHBhdGggZD0iTTQwIDMwaDIwdjIwSDQwVjMwem0yNSAzNWgtMzB2MTBoMzB2LTEweiIgZmlsbD0iI0ZGRiIvPjxjaXJjbGUgY3g9IjM1IiBjeT0iNzUiIHI9IjgiIGZpbGw9IiNGRkYiLz48Y2lyY2xlIGN4PSI2NSIgY3k9Ijc1IiByPSI4IiBmaWxsPSIjRkZGIi8+PGNpcmNsZSBjeD0iNTAiIGN5PSIyMCIgcj0iMTAiIGZpbGw9IiNGRkYiLz48L3N2Zz4=">
+<link rel="apple-touch-icon" sizes="180x180" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImEiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiNCRjVBRjIiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiM1ODU2RDYiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgcng9IjIyIiBmaWxsPSJ1cmwoI2EpIi8+PHBhdGggZD0iTTQwIDMwaDIwdjIwSDQwVjMwem0yNSAzNWgtMzB2MTBoMzB2LTEweiIgZmlsbD0iI0ZGRiIvPjxjaXJjbGUgY3g9IjM1IiBjeT0iNzUiIHI9IjgiIGZpbGw9IiNGRkYiLz48Y2lyY2xlIGN4PSI2NSIgY3k9Ijc1IiByPSI4IiBmaWxsPSIjRkZGIi8+PGNpcmNsZSBjeD0iNTAiIGN5PSIyMCIgcj0iMTAiIGZpbGw9IiNGRkYiLz48L3N2Zz4=">
 
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -73,6 +74,8 @@ button:disabled { opacity: .5; cursor: not-allowed; transform: none; }
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/htm@3.1.1/dist/htm.js"></script>
+<!-- LIBRARY GENERATE PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.2/html2pdf.bundle.min.js"></script>
 </head>
 <body>
 <div class="mesh-bg"></div>
@@ -80,11 +83,11 @@ button:disabled { opacity: .5; cursor: not-allowed; transform: none; }
 <script>
 var h=htm.bind(React.createElement),us=React.useState,ur=React.useRef,ue=React.useEffect;
 
-/* ═══ STORAGE (v15 - Auto Migrate Data from v14) ═══ */
+/* ═══ STORAGE (v16) ═══ */
 var DB={
-  get:function(){try{return JSON.parse(localStorage.getItem("notulen_v15")||localStorage.getItem("notulen_v14")||"null")||this.def()}catch(e){return this.def()}},
+  get:function(){try{return JSON.parse(localStorage.getItem("notulen_v16")||localStorage.getItem("notulen_v15")||"null")||this.def()}catch(e){return this.def()}},
   def:function(){return{history:[],set:{lang:"id-ID",key:"",provider:"groq", chunk: 30}}},
-  save:function(d){localStorage.setItem("notulen_v15",JSON.stringify(d))},
+  save:function(d){localStorage.setItem("notulen_v16",JSON.stringify(d))},
   addHist:function(r){var d=this.get();d.history.unshift(r);if(d.history.length>50)d.history.length=50;this.save(d)},
   delHist:function(id){var d=this.get();d.history=d.history.filter(function(x){return x.id!==id});this.save(d)},
   getSet:function(){return this.get().set},
@@ -143,7 +146,8 @@ function Ic(p){
     listcheck: "M3 12h.01M3 6h.01M3 18h.01M10 6h11M10 12h11M10 18h11M7 6l1.2 1.2M7 12l1.2 1.2M7 18l1.2 1.2",
     seal: "M12 2l2.4 2.4.6-.2 2.6 2.6-.2.6 2.4 2.4-2.4 2.4.2.6-2.6 2.6-.6-.2L12 22l-2.4-2.4-.6.2-2.6-2.6.2-.6-2.4-2.4 2.4-2.4-.2-.6 2.6-2.6.6.2L12 2zm0 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6z M11.5 10h1v4h-1z",
     bulb: "M9 18h6a1 1 0 0 0 1-1v-2a4 4 0 0 0-4-4h-4a4 4 0 0 0-4 4v2a1 1 0 0 0 1 1zm0-3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1 M10.5 7h3 M12 5V2",
-    speechdots: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10z M8 9h.01M12 9h.01M16 9h.01"
+    speechdots: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10z M8 9h.01M12 9h.01M16 9h.01",
+    download: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M7 10l5 5 5-5 M12 15V3"
   };
   return h`<svg width=${s} height=${s} viewBox="0 0 24 24" fill="none" stroke=${c} strokeWidth=${p.sw||2.5} strokeLinecap="round" strokeLinejoin="round"><path d=${paths[p.name]||"M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z"}/></svg>`;
 }
@@ -268,7 +272,6 @@ function RecTab(p){
             transcript: finalRaw, notes: cleanMD(finalSumChunk), overall: cleanMD(overallSum), formatType: "executive", formatName: "Ringkasan Eksekutif"
           });
           
-          // Animasi Sukses
           setSuccess(true);
           setStatusMsg("Tersimpan ke Riwayat!");
           setTimeout(function(){
@@ -356,7 +359,6 @@ function RecTab(p){
       <p style=${{fontSize:13,color:"#8E8E93",marginTop:8,fontWeight:500}}>Transkripsi Real-time & Multi Format</p>
     </div>
 
-    <!-- STATUS CARD -->
     <div className="gl" style=${{padding:24,textAlign:"center",marginBottom:24,position:"relative"}}>
       <div style=${{display:"inline-flex",justifyContent:"center",alignItems:"center",width:88,height:88,borderRadius:44,background:isRec?"rgba(255,69,58,0.12)":"rgba(88,86,214,0.1)",color:isRec?"#FF453A":"#5856D6",animation:isRec?"ripple 2s infinite":"none",marginBottom:16,boxShadow:isRec?"0 0 20px rgba(255,69,58,0.2)":""}}>
         <${Ic} name=${isRec?"mic":"play"} size=${40}/>
@@ -392,7 +394,6 @@ function RecTab(p){
       </div>
     </div>
 
-    <!-- QUICK SETTINGS -->
     ${!isRec && time===0 && !saving ? h`<div className="gl" style=${{padding:16,marginBottom:24}}>
       <div style=${{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
          <div style=${{display:"flex",alignItems:"center",gap:8}}>
@@ -426,7 +427,6 @@ function RecTab(p){
       </div>
     </div>` : null}
 
-    <!-- LIVE TIMELINE UI -->
     ${(notes.length > 0 || fin.length > 0) ? h`<div>
       <div style=${{fontSize:13,fontWeight:800,color:"#1C1C1E",marginBottom:16,display:"flex",alignItems:"center",gap:6,letterSpacing:"0.5px",textTransform:"uppercase", borderBottom:"1px solid rgba(0,0,0,0.06)", paddingBottom:12}}><${Ic} name="sparkle" size=${16} color="#BF5AF2"/> Live Timeline</div>
       
@@ -455,19 +455,15 @@ function RecTab(p){
 }
 
 /* ═══════════════════════
-   TAB: RIWAYAT & GANTI FORMAT
+   TAB: RIWAYAT & EXPORT
    ═══════════════════════ */
 function HistTab(p){
   var _h=us(DB.get().history), hist=_h[0], setH=_h[1];
   var _open=us(null), openId=_open[0], setOpen=_open[1];
   var _regen=us(null), regenId=_regen[0], setRegen=_regen[1];
 
-  // FORCE REFRESH: Setiap kali pengguna berpindah ke tab Riwayat (p.isActive == true)
-  ue(function(){
-     if(p.isActive) {
-        setH(DB.get().history);
-     }
-  }, [p.isActive]);
+  // FORCE REFRESH
+  ue(function(){ if(p.isActive) setH(DB.get().history); }, [p.isActive]);
 
   var formatOptions = [
     { id:"executive", icon:"briefcase", label:"Eksekutif" },
@@ -490,12 +486,102 @@ function HistTab(p){
           d.history[idx].overall = cleanMD(newSum);
           d.history[idx].formatType = formatType;
           d.history[idx].formatName = formatLabel;
-          DB.save(d);
-          setH(d.history);
+          DB.save(d); setH(d.history);
         }
       })
       .catch(function(e){ alert("Gagal merubah format: "+e.message); })
       .finally(function(){ setRegen(null); });
+  }
+
+  /* ── FUNGSI EXPORT WORD ── */
+  function exportWord(item) {
+    var html = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Notulen</title></head><body>";
+    html += "<h1 style='text-align:center; font-family:Arial, sans-serif;'>" + (item.title||"Notulen Rapat") + "</h1>";
+    html += "<p style='text-align:center; font-family:Arial, sans-serif;'><strong>Tanggal:</strong> " + new Date(item.date).toLocaleString("id-ID") + " | <strong>Durasi:</strong> " + fmt(item.duration) + "</p>";
+    html += "<hr>";
+
+    if(item.overall) {
+      html += "<h2 style='color:#6a1b9a; font-family:Arial, sans-serif;'>" + (item.formatName || "Ringkasan Eksekutif") + "</h2>";
+      var lines = item.overall.split('\n').filter(function(x){return x.trim().length>0});
+      var inList = false;
+      lines.forEach(function(l){
+          var str = l.trim();
+          var isList = str.startsWith('•') || str.startsWith('-') || /^\d+\./.test(str);
+          if(isList) {
+              if(!inList) { html += "<ul>"; inList = true; }
+              html += "<li>" + str.replace(/^([•-]|\d+\.)/, '').trim() + "</li>";
+          } else {
+              if(inList) { html += "</ul>"; inList = false; }
+              html += "<p style='font-family:Arial, sans-serif; font-weight:bold;'>" + str + "</p>";
+          }
+      });
+      if(inList) html += "</ul>";
+    }
+    
+    if(item.transcript) {
+      html += "<h2 style='color:#283593; font-family:Arial, sans-serif; margin-top:20px;'>Transkrip Mentah</h2>";
+      html += "<p style='font-family:Arial, sans-serif;'>" + item.transcript.replace(/\n/g, '<br>') + "</p>";
+    }
+    
+    html += "</body></html>";
+    
+    var blob = new Blob(['\ufeff', html], { type: 'application/msword' });
+    var url = URL.createObjectURL(blob);
+    var link = document.createElement('A');
+    link.href = url; link.download = (item.title||"Notulen") + '.doc';
+    document.body.appendChild(link); link.click(); document.body.removeChild(link);
+  }
+
+  /* ── FUNGSI EXPORT PDF ── */
+  function exportPDF(item) {
+     var element = document.createElement('div');
+     element.style.padding = '20px';
+     element.style.fontFamily = 'Helvetica, Arial, sans-serif';
+     element.style.color = '#333';
+     
+     var html = "<h1 style='text-align:center; color:#1C1C1E; font-size:22px;'>" + (item.title||"Notulen Rapat") + "</h1>";
+     html += "<p style='text-align:center; color:#8E8E93; font-size:11px;'>Tanggal: " + new Date(item.date).toLocaleString("id-ID") + " | Durasi: " + fmt(item.duration) + "</p>";
+     html += "<hr style='border:0; border-top:1px solid #E5E5EA; margin: 15px 0;'>";
+
+     if(item.overall) {
+       html += "<h2 style='color:#BF5AF2; font-size:16px; margin-bottom:8px;'>" + (item.formatName || "Ringkasan Eksekutif") + "</h2>";
+       var lines = item.overall.split('\n').filter(function(x){return x.trim().length>0});
+       var inList = false;
+       lines.forEach(function(l){
+           var str = l.trim();
+           var isList = str.startsWith('•') || str.startsWith('-') || /^\d+\./.test(str);
+           if(isList) {
+               if(!inList) { html += "<ul style='margin-bottom:10px; padding-left:18px; font-size:12px;'>"; inList = true; }
+               html += "<li style='margin-bottom:4px; line-height:1.5;'>" + str.replace(/^([•-]|\d+\.)/, '').trim() + "</li>";
+           } else {
+               if(inList) { html += "</ul>"; inList = false; }
+               html += "<p style='font-weight:bold; margin-top:12px; margin-bottom:4px; line-height:1.5; font-size:12px;'>" + str + "</p>";
+           }
+       });
+       if(inList) html += "</ul>";
+     }
+
+     if(item.transcript) {
+       html += "<h2 style='color:#5856D6; font-size:16px; margin-top:20px; margin-bottom:8px;'>Transkrip Mentah</h2>";
+       html += "<div style='font-size:11px; line-height:1.5; color:#48484A; white-space:pre-wrap;'>" + item.transcript + "</div>";
+     }
+     
+     element.innerHTML = html;
+     var opt = {
+       margin:       15,
+       filename:     (item.title||"Notulen") + '.pdf',
+       image:        { type: 'jpeg', quality: 0.98 },
+       html2canvas:  { scale: 2 },
+       jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+     };
+     
+     // Cek apakah Html2Pdf sudah load
+     if(typeof html2pdf !== 'undefined') {
+        alert("Menyiapkan file PDF, mohon tunggu sebentar...");
+        html2pdf().set(opt).from(element).save();
+     } else {
+        alert("Modul PDF belum selesai dimuat, pastikan ada koneksi internet.");
+     }
   }
   
   if(!hist.length) return h`<div className="tab-content" style=${{padding:"80px 20px",textAlign:"center"}}>
@@ -523,9 +609,18 @@ function HistTab(p){
         </div>
 
         ${isOpen ? h`<div style=${{padding:"0 16px 20px",animation:"fadeIn .3s"}}>
-          <div style=${{display:"flex",gap:8,marginBottom:20}}>
-            <button onClick=${function(e){e.stopPropagation();del(item.id)}} style=${{display:"inline-flex",alignItems:"center",gap:6,padding:"8px 16px",borderRadius:12,background:"rgba(255,69,58,0.08)",color:"#FF453A",fontSize:12,fontWeight:700,border:"none"}}>
-              <${Ic} name="trash" size=${14} color="#FF453A"/>Hapus
+          
+          <!-- TOMBOL AKSI: EXPORT & HAPUS -->
+          <div style=${{display:"flex",gap:8,marginBottom:20,flexWrap:"wrap"}}>
+            <button onClick=${function(e){e.stopPropagation();exportWord(item)}} style=${{display:"inline-flex",alignItems:"center",gap:6,padding:"8px 14px",borderRadius:12,background:"rgba(10,132,255,0.1)",color:"#0A84FF",fontSize:12,fontWeight:700,border:"none"}}>
+              <${Ic} name="download" size=${14} color="#0A84FF"/> Word
+            </button>
+            <button onClick=${function(e){e.stopPropagation();exportPDF(item)}} style=${{display:"inline-flex",alignItems:"center",gap:6,padding:"8px 14px",borderRadius:12,background:"rgba(255,159,10,0.1)",color:"#FF9F0A",fontSize:12,fontWeight:700,border:"none"}}>
+              <${Ic} name="download" size=${14} color="#FF9F0A"/> PDF
+            </button>
+            <div style=${{flex:1}}></div>
+            <button onClick=${function(e){e.stopPropagation();del(item.id)}} style=${{display:"inline-flex",alignItems:"center",gap:6,padding:"8px 14px",borderRadius:12,background:"rgba(255,69,58,0.08)",color:"#FF453A",fontSize:12,fontWeight:700,border:"none"}}>
+              <${Ic} name="trash" size=${14} color="#FF453A"/>
             </button>
           </div>
 
@@ -630,13 +725,13 @@ function SetTab(p){
          <div style=${{display:"flex",gap:14}}>
             <div style=${{width:28,height:28,borderRadius:14,background:"linear-gradient(135deg,#BF5AF2,#5856D6)",color:"#FFF",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:800,flexShrink:0}}>3</div>
             <div>
-               <div style=${{fontSize:14,fontWeight:800,color:"#BF5AF2",marginBottom:4}}>Dynamic Formatting</div>
-               <div style=${{fontSize:13,color:"#8E8E93",lineHeight:1.5}}>Buka tab Riwayat untuk merubah gaya ringkasan menjadi Action Items, Q&A, atau Format Santai.</div>
+               <div style=${{fontSize:14,fontWeight:800,color:"#BF5AF2",marginBottom:4}}>Dynamic Formatting & Export</div>
+               <div style=${{fontSize:13,color:"#8E8E93",lineHeight:1.5}}>Ubah gaya ringkasan di tab Riwayat dan unduh hasil rapat (PDF/Word) dalam satu klik.</div>
             </div>
          </div>
       </div>
       <div style=${{marginTop:24,paddingTop:16,borderTop:"1px solid rgba(0,0,0,0.06)",fontSize:11,color:"#C7C7CC",textAlign:"center",letterSpacing:"0.5px",fontWeight:600}}>
-        v15.0 · Auto-Refresh & Animations
+        v16.0 · Export to PDF & Word Build
       </div>
     </div>
   </div>`;
@@ -659,6 +754,7 @@ function App(){
       <div style=${{display: tab==="set" ? "block" : "none"}}><${SetTab} set=${settings} updSet=${updSet}/></div>
     </div>
 
+    <!-- DYNAMIC ISLAND NAVIGATION -->
     <div className="btab-container">
       <div className="btab" style=${{maxWidth: 320, width: "100%"}}>
         ${[["rec","mic","Rekam"],["hist","file","Riwayat"],["set","settings","Sistem"]].map(function(t){
